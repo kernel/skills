@@ -1,12 +1,3 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/onkernel/kernel-images/main/static/images/Kernel-Wordmark_Accent.svg" alt="Kernel Logo" width="55%">
-</p>
-
-<p align="center">
-  <strong>Skills for AI Coding Agents</strong>
-</p>
-
-
 # Kernel Skills
 
 Official AI agent skills from the Kernel for installing useful skills for our CLI and SDKs that you can load into popular coding agents.
@@ -27,13 +18,13 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 
 ```bash
 # Using add-skill
-bunx add-skill onkernel/skills
+bunx add-skill kernel/skills
 ```
 
 ### Manual Installation
 
 ```bash
-git clone https://github.com/onkernel/skills.git
+git clone https://github.com/kernel/skills.git
 cp -r skills/plugins/kernel-cli ~/.claude/skills/
 ```
 
@@ -45,7 +36,7 @@ Before using these skills, ensure you have:
 
 1. **Kernel CLI installed**:
    ```bash
-   brew install onkernel/tap/kernel
+   brew install kernel/tap/kernel
    ```
 
 2. **Authenticated with Kernel**:
@@ -100,7 +91,7 @@ Each sub-skill is loaded contextually based on your prompts, minimizing token us
 ## Support
 
 - [Discord Community](https://discord.gg/FBrveQRcud)
-- [GitHub Issues](https://github.com/onkernel/skills/issues)
+- [GitHub Issues](https://github.com/kernel/skills/issues)
 
 ## License
 MIT

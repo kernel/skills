@@ -1,0 +1,19 @@
+{
+  "$schema": "https://plugins.claude.ai/schema/marketplace.json",
+  "name": "kernel-skills",
+  "description": "Automate web browsers in the cloud with Kernel. Create browsers, execute Playwright code, deploy web agents, and control browser instances via CLI. Use when building browser automations or web scraping workflows.",
+  "owner": {
+    "name": "Kernel",
+    "url": "https://kernel.sh"
+  },
+  "plugins": [
+    {
+      "name": "kernel-cli",
+      "author": {
+        "name": "Kernel"
+      },
+      "description": "CLI commands for managing browsers, deploying apps, and controlling browser instances. Use when working with the kernel command-line tool.",
+      "source": "./plugins/kernel-cli"
+    }
+  ]
+}
