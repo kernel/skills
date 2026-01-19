@@ -6,6 +6,6 @@
     "name": "Kernel",
     "url": "https://kernel.sh"
   },
-  "repository": "https://github.com/onkernel/skills",
+  "repository": "https://github.com/kernel/skills",
   "license": "MIT"
 }
