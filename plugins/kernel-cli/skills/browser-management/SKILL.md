@@ -1,7 +1,7 @@
 ---
 name: kernel-browser-management
 description: Create, list, view, and delete Kernel browser sessions with various configuration options
-allowed_tools: create_browser, get_browser, list_browsers, delete_browser, execute_playwright_code, take_screenshot
+allowed-tools: create_browser, get_browser, list_browsers, delete_browser, execute_playwright_code, take_screenshot
 ---
 
 # Browser Management
