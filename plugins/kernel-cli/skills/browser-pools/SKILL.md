@@ -95,7 +95,7 @@ for i in {1..100}; do
 
   # Use the browser
   kernel browsers playwright execute $SESSION "
-    await page.goto('https://example.com/page-$i');
+    await page.goto('https://example.com/page-${i}');
     return await page.content();
   "
 
