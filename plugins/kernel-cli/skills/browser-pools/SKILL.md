@@ -1,7 +1,6 @@
 ---
 name: kernel-browser-pools
 description: Manage pre-warmed browser pools for fast acquisition and release of browser instances
-allowed_tools: create_browser
 ---
 
 # Browser Pools
@@ -21,6 +20,10 @@ Browser pools are ideal when you need to:
 - **Parallel scraping** of many pages with identical browser settings
 
 For one-off or long-running browser sessions, creating browsers directly with `kernel browsers create` may be simpler.
+
+## Prerequisites
+
+See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
 
 ## Create Pool
 

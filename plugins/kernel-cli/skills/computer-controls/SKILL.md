@@ -24,6 +24,11 @@ Computer controls provide **OS-level** interaction with the browser VM, operatin
 - When you need to access page content or execute JavaScript - use Playwright execution
 - For headless browsers - computer controls require a GUI environment
 
+
+## Prerequisites
+
+See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+
 ## Screenshots
 
 ### Full Screenshot
