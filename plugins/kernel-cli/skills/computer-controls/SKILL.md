@@ -112,3 +112,5 @@ kernel browsers computer screenshot $SESSION --to kernel-homepage.png
 # Cleanup
 kernel browsers delete $SESSION --yes
 ```
+
+**MCP Tool:** Use `kernel:execute_playwright_code` and `kernel:take_screenshot` for playwright execution and screenshots.
