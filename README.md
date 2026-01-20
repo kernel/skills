@@ -14,13 +14,6 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 /plugin install kernel-cli
 ```
 
-### Any Agent (using bunx)
-
-```bash
-# Using add-skill
-bunx add-skill kernel/skills
-```
-
 ### Manual Installation
 
 ```bash
