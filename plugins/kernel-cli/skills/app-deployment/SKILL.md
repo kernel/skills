@@ -1,10 +1,7 @@
 ---
 name: kernel-app-deployment
 description: Deploy TypeScript/Python apps, invoke actions, and monitor logs in Kernel environment
-allowed-tools:
-  - invoke_action
-  - get_deployment
-  - search_docs
+allowed-tools: invoke_action, get_deployment, search_docs
 ---
 
 # App Deployment and Invocation
@@ -22,7 +19,6 @@ Use app-deployment when you need to:
 
 **Don't use this when:**
 - You need one-off browser automation → Use `browser-management` directly
-- You need to test code locally → Run locally first, then deploy
 
 ## Prerequisites
 

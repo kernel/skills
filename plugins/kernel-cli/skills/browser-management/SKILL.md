@@ -1,39 +1,43 @@
 ---
 name: kernel-browser-management
 description: Create, list, view, and delete Kernel browser sessions with various configuration options
-allowed_tools:
-  - create_browser
-  - get_browser
-  - list_browsers
-  - delete_browser
-  - execute_playwright_code
-  - take_screenshot
+allowed_tools: create_browser, get_browser, list_browsers, delete_browser, execute_playwright_code, take_screenshot
 ---
 
 # Browser Management
 
 Create and manage sandboxed Chrome browser instances in the cloud.
 
+## When to Use This Skill
+
+Use browser-management skill when you need to:
+
+- **Create browser sessions** - Launch new Chrome browser instances with custom configurations (stealth mode, headless, profiles, proxies)
+- **List and monitor browsers** - View all active browser sessions and their details
+- **Get live view URLs** - Access remote browser sessions for monitoring and control
+- **Execute automation** - Run Playwright/TypeScript code against browser sessions
+- **Capture screenshots** - Take screenshots of browser pages or specific regions
+- **Manage browser lifecycle** - Delete browser sessions when done to free resources
+- **Work with browser profiles** - Load saved authentication data and cookies into sessions
+
 ## Create a Browser
 
 ```bash
-# Basic browser creation (returns session info)
-kernel browsers create -o json
+# Basic browser creation
+kernel browsers create
 
 # With options
 kernel browsers create --stealth --headless -o json
-kernel browsers create --timeout 3600 -o json          # 1 hour timeout
-kernel browsers create --profile-name my-profile -o json
-
-# From a browser pool
-kernel browsers create --pool-name my-pool -o json
+kernel browsers create --profile-name my-profile
 ```
 
 Output contains `session_id`, `cdp_ws_url`, and `browser_live_view_url`.
 
-**MCP Tool:** Use `create_browser` with parameters like `headless`, `stealth`, `timeout_seconds`, `profile_name`, or `profile_id`.
+**MCP Tool:** Use `create_browser` with parameters like `headless`, `stealth`, or `profile_name`.
 
 ## List and Get Browsers
+
+<Info>Unless otherwise noted, `id` arguments refer to the browser session ID, not invocation IDs returned by Kernel commands.</Info>
 
 ```bash
 kernel browsers list -o json
@@ -41,9 +45,7 @@ kernel browsers get <session_id> -o json
 kernel browsers view <session_id> -o json    # Get live view URL
 ```
 
-**MCP Tools:**
-- `list_browsers` - List all active browser sessions
-- `get_browser` - Get detailed info for a specific session
+**MCP Tools:** Use `list_browsers`, `get_browser`.
 
 ## Delete a Browser
 
