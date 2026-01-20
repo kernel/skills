@@ -1,7 +1,6 @@
 ---
 name: kernel-app-deployment
 description: Deploy TypeScript/Python apps, invoke actions, and monitor logs in Kernel environment
-allowed-tools: invoke_action, get_deployment, search_docs
 ---
 
 # App Deployment and Invocation
@@ -22,11 +21,13 @@ Use app-deployment when you need to:
 
 ## Prerequisites
 
-- Kernel CLI installed: `brew install kernel/tap/kernel`
-- Authenticated: `kernel login`
+### General
+See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+
+### App Deployment Specific
 - Valid TypeScript (.ts) or Python (.py) entry file
+- `package.json` (JS/TS) or `pyproject.toml` (Python) must be present next to the entrypoint
 - Node.js/Bun or Python runtime (for local testing)
-- **Important:** `package.json` (JS/TS) or `pyproject.toml` (Python) must be present next to the entrypoint
 
 ## Deploy Apps
 
@@ -59,7 +60,7 @@ kernel deploy index.ts --env API_KEY=secret --env DB_URL=postgres://... -o json
 kernel deploy index.ts --env-file .env -o json
 ```
 
-**MCP Tool:** Use `get_deployment` with `deployment_id` to check deployment status.
+**MCP Tool:** Use `kernel:get_deployment` with `deployment_id` to check deployment status.
 
 ## Invoke Apps
 
@@ -70,7 +71,7 @@ kernel deploy index.ts --env-file .env -o json
 kernel invoke my-app scrape -o json
 ```
 
-**MCP Tool:** Use `invoke_action` with `app_name`, `action_name`, and optional `payload`.
+**MCP Tool:** Use `kernel:invoke_action` with `app_name`, `action_name`, and optional `payload`.
 
 ### With Payload
 

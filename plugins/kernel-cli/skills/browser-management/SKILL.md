@@ -1,7 +1,6 @@
 ---
 name: kernel-browser-management
 description: Create, list, view, and delete Kernel browser sessions with various configuration options
-allowed-tools: create_browser, get_browser, list_browsers, delete_browser, execute_playwright_code, take_screenshot
 ---
 
 # Browser Management
@@ -20,6 +19,11 @@ Use browser-management skill when you need to:
 - **Manage browser lifecycle** - Delete browser sessions when done to free resources
 - **Work with browser profiles** - Load saved authentication data and cookies into sessions
 
+## Prerequisites
+
+### General
+See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+
 ## Create a Browser
 
 ```bash
@@ -33,7 +37,7 @@ kernel browsers create --profile-name my-profile
 
 Output contains `session_id`, `cdp_ws_url`, and `browser_live_view_url`.
 
-**MCP Tool:** Use `create_browser` with parameters like `headless`, `stealth`, or `profile_name`.
+**MCP Tool:** Use `kernel:create_browser` with parameters like `headless`, `stealth`, or `profile_name`.
 
 ## List and Get Browsers
 
@@ -45,7 +49,7 @@ kernel browsers get <session_id> -o json
 kernel browsers view <session_id> -o json    # Get live view URL
 ```
 
-**MCP Tools:** Use `list_browsers`, `get_browser`.
+**MCP Tools:** Use `kernel:list_browsers`, `kernel:get_browser`.
 
 ## Delete a Browser
 
@@ -53,7 +57,7 @@ kernel browsers view <session_id> -o json    # Get live view URL
 kernel browsers delete <session_id> --yes
 ```
 
-**MCP Tool:** Use `delete_browser` with the `session_id`.
+**MCP Tool:** Use `kernel:delete_browser` with the `session_id`.
 
 ## Browser Automation
 
@@ -65,7 +69,7 @@ Run Playwright/TypeScript code against a browser session:
 kernel browsers playwright execute <session_id> 'await page.goto("https://example.com")'
 ```
 
-**MCP Tool:** Use `execute_playwright_code` to run automation scripts. If no `session_id` is provided, a new browser is created and cleaned up automatically.
+**MCP Tool:** Use `kernel:execute_playwright_code` to run automation scripts. If no `session_id` is provided, a new browser is created and cleaned up automatically.
 
 ### Take Screenshots
 
@@ -75,7 +79,7 @@ Capture screenshots of browser pages:
 kernel browsers computer screenshot <session_id> --to screenshot.png
 ```
 
-**MCP Tool:** Use `take_screenshot` with `session_id`. Optionally specify region with `x`, `y`, `width`, `height`.
+**MCP Tool:** Use `kernel:take_screenshot` with `session_id`. Optionally specify region with `x`, `y`, `width`, `height`.
 
 ## Common Pattern: Create, Use, Delete
 
