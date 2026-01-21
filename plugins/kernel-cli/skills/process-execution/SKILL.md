@@ -42,26 +42,6 @@ kernel browsers process exec <session_id> --cwd /tmp -- pwd
 kernel browsers process exec <session_id> --as-user chromium -- whoami
 ```
 
-### Output Format
-
-The `exec` command displays:
-- **Exit Code** - The command's exit status
-- **Duration (ms)** - How long the command took to execute
-- **stdout** - Standard output from the command
-- **stderr** - Standard error from the command
-
-Example output:
-```
-Property     | Value
-Exit Code    | 0
-Duration (ms)| 125
-
-stdout:
-total 8
-drwxrwxrwt 2 root root 4096 Jan 21 10:30 .
-drwxr-xr-x 1 root root 4096 Jan 21 10:29 ..
-```
-
 ## Spawn Background Process (Asynchronous)
 
 ```bash
@@ -74,23 +54,6 @@ kernel browsers process spawn <session_id> --timeout 300 -- background-task
 # Start web server
 kernel browsers process spawn <session_id> -- python3 -m http.server 8080
 ```
-
-### Output Format
-
-The `spawn` command returns:
-- **Process ID** - Unique identifier for the spawned process
-- **PID** - System process ID
-- **Started At** - Timestamp when the process started
-
-Example output:
-```
-Property   | Value
-Process ID | proc_abc123xyz
-PID        | 1234
-Started At | 2026-01-21 10:30:15
-```
-
-Use the Process ID with other commands to manage the process.
 
 ## Additional Process Commands
 

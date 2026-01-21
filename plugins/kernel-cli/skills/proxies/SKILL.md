@@ -20,8 +20,6 @@ Kernel supports four types of proxies:
 3. **Residential** - Traffic routed through real residential IP addresses (least detectable)
 4. **Custom** - Your own proxy servers
 
-Datacenter has the fastest speed, while residential is least detectable. ISP is a balance between the two options, with less-flexible geotargeting. Kernel recommends to use the first option in the list that works for your use case.
-
 ## Prerequisites
 
 See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
