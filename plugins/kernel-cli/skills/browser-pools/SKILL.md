@@ -23,7 +23,7 @@ For one-off or long-running browser sessions, creating browsers directly with `k
 
 ## Prerequisites
 
-See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Create Pool
 

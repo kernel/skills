@@ -58,7 +58,6 @@ The kernel-cli skill is organized into focused sub-skills:
 | Skill | Description |
 |-------|-------------|
 | **browser-management** | Browser creation, listing, deletion |
-| **playwright-execution** | Playwright code execution |
 | **computer-controls** | Mouse, keyboard, screenshots |
 | **app-deployment** | Deploy and invoke apps |
 | **browser-pools** | Pre-warmed browser pools |

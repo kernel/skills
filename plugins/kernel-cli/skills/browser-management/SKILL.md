@@ -21,8 +21,7 @@ Use browser-management skill when you need to:
 
 ## Prerequisites
 
-### General
-See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Create a Browser
 
