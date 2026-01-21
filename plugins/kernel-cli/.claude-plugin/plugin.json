@@ -1,0 +1,11 @@
+{
+  "name": "kernel-cli",
+  "version": "1.0.0",
+  "description": "CLI commands for managing browsers, deploying apps, and controlling browser instances with Kernel",
+  "author": {
+    "name": "Kernel",
+    "url": "www.kernel.sh"
+  },
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT"
+}
