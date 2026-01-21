@@ -21,6 +21,8 @@ Use this skill when you need to:
 
 See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
 
+> **Note**: When using `--path` or `--src` flags in the commands below, these flags are required and must be provided with a value.
+
 ## Directory Operations
 
 ### Create Directory
@@ -124,6 +126,7 @@ kernel browsers fs upload <session_id> --dest-dir /tmp --paths "file1.txt,file2.
 # Upload and extract a zip file
 kernel browsers fs upload-zip <session_id> --zip archive.zip --dest-dir /tmp/extracted
 ```
+> **Note**: When using `--zip` or `--dest-dir` are required and must be provided with a value.
 
 ### Download Directory as ZIP
 

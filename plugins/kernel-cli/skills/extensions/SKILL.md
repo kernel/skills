@@ -113,4 +113,3 @@ kernel browsers playwright execute $SESSION 'await page.goto("https://example.co
 - **Authentication**: Use auto-login extensions
 - **Testing**: Test browser extension functionality
 - **Custom automation**: Deploy custom extensions
-- **Bot detection bypass**: Use Web Bot Auth for RFC 9421 signatures
