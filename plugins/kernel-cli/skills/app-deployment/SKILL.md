@@ -77,14 +77,14 @@ kernel invoke my-app scrape -o json
 
 **Command:**
 ```bash
-# Inline JSON payload (max 64 KB)
+# Inline JSON payload (max 4.5 MB)
 kernel invoke my-app scrape --payload '{"url": "https://example.com"}' -o json
 
 # From file
 kernel invoke my-app scrape --payload-file payload.json -o json
 ```
 
-**Note:** JSON payloads are limited to 64 KB maximum.
+**Note:** JSON payloads are limited to 4.5 MB maximum.
 
 ### Synchronous Invocation
 
@@ -96,7 +96,7 @@ kernel invoke my-app scrape --payload '{"url": "https://example.com"}' --sync -o
 
 **Note:**
 - Synchronous invocations timeout after 60 seconds
-- JSON payloads are limited to 64 KB maximum
+- JSON payloads are limited to 4.5 MB maximum
 - Press `Ctrl+C` to cancel an in-flight invocation (associated browser sessions are cleaned up automatically)
 
 ## View Logs
