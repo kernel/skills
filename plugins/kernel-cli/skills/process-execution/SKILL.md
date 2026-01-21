@@ -127,5 +127,4 @@ Base64 payload to write is required.
 kernel browsers process kill <session_id> <process-id>
 kernel browsers process kill <session_id> <process-id> --signal TERM
 ```
-
 Available signals: (TERM, KILL, INT, HUP; default: TERM).
