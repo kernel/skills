@@ -77,12 +77,6 @@ This returns a browser session from the pool instantly.
 kernel browser-pools release my-pool --session-id <id>
 ```
 
-### Create Browser from Pool
-
-```bash
-kernel browsers create --pool-name my-pool -o json
-```
-
 ## Use Case: High-Volume Scraping
 
 ```bash
