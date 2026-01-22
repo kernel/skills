@@ -11,6 +11,10 @@ Route browser traffic through proxies for geo-location, privacy, or testing.
 
 Kernel proxies enable you to route browser traffic through different types of proxy servers, providing enhanced privacy, flexibility, and bot detection avoidance. Proxies can be created once and reused across multiple browser sessions.
 
+## Prerequisites
+
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
+
 ## Proxy Types
 
 1. **Datacenter** - Traffic routed through commercial data centers (fastest speed)
@@ -18,10 +22,6 @@ Kernel proxies enable you to route browser traffic through different types of pr
 3. **Residential** - Traffic routed through real residential IP addresses (least detectable)
 4. **Mobile** - Traffic routed through mobile carrier networks
 5. **Custom** - Your own proxy servers
-
-## Prerequisites
-
-See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
 
 ## Create Proxies
 

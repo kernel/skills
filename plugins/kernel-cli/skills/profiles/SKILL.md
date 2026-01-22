@@ -19,7 +19,7 @@ Use profiles for:
 
 ## Prerequisites
 
-See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Create Profile
 

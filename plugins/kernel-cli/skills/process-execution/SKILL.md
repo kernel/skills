@@ -21,7 +21,7 @@ Use process execution for:
 
 ## Prerequisites
 
-See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Execute Command (Synchronous)
 
