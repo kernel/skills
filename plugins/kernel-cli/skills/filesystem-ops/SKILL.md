@@ -105,7 +105,7 @@ kernel browsers fs set-permissions <session_id> --path /tmp/file.txt --mode 0755
 kernel browsers fs set-permissions <session_id> --path /tmp/file.txt --mode 0755 --owner user --group group
 ```
 
-## Operations
+## Bulk Operations
 
 ### Upload Files
 
@@ -131,7 +131,7 @@ kernel browsers fs upload-zip <session_id> --zip archive.zip --dest-dir /tmp/ext
 ### Download Directory as ZIP
 
 ```bash
-kernel browsers fs download-dir-zip <session_id> --path /tmp/data --o data.zip
+kernel browsers fs download-dir-zip <session_id> --path /tmp/data -o data.zip
 ```
 
 ## Use Cases

@@ -57,6 +57,7 @@ Download and unpack an extension directly from the Chrome Web Store:
 kernel extensions download-web-store "https://chromewebstore.google.com/detail/extension-id" --to ./my-extension
 
 # Specify target OS (mac, win, or linux)
+# If uploading to a kernel browser, the target OS should be linux
 kernel extensions download-web-store "https://chromewebstore.google.com/detail/extension-id" --to ./my-extension --os mac
 ```
 
@@ -80,16 +81,20 @@ kernel extensions delete my-ext
 kernel extensions delete my-ext --yes
 ```
 
-## Example: Download and Upload AdBlock Extension
-
+## Example: Download and Upload AdGuard Extension
 ```bash
-# Download extension from Chrome Web Store
-kernel extensions download-web-store "https://chromewebstore.google.com/detail/adblock-extension-id" --to ./adblock
+# 1. Download AdGuard from Chrome Web Store
+kernel extensions download-web-store \
+  "https://chromewebstore.google.com/detail/adguard-adblocker/bgnkhhnnamicmpeenaelnjfhikgbkllg" \
+  --to ./extensions/adguard
 
-# Upload to Kernel
-kernel extensions upload ./adblock --name adblock
+# 2. Upload to Kernel
+kernel extensions upload ./extensions/adguard --name adguard
 
-# Verify upload
+# 3. Create a browser with the extension
+kernel browsers create --extension adguard
+
+# 4. Verify upload
 kernel extensions list
 ```
 
