@@ -13,12 +13,11 @@ Kernel proxies enable you to route browser traffic through different types of pr
 
 ## Proxy Types
 
-Kernel supports four types of proxies:
-
 1. **Datacenter** - Traffic routed through commercial data centers (fastest speed)
 2. **ISP** - Traffic routed through data centers, using residential IP addresses leased from ISPs (balance between speed and detection)
 3. **Residential** - Traffic routed through real residential IP addresses (least detectable)
-4. **Custom** - Your own proxy servers
+4. **Mobile** - Traffic routed through mobile carrier networks
+5. **Custom** - Your own proxy servers
 
 ## Prerequisites
 
@@ -67,6 +66,21 @@ kernel proxies create --type residential --country US --os windows
 ```
 
 **Available OS values**: `windows`, `macos`, `android`
+
+### Mobile Proxy
+
+Useful for bot detection avoidance since they use real mobile network IPs
+
+```bash
+# Basic mobile proxy
+kernel proxies create --type mobile --country US --name "US Mobile"
+
+# With carrier targeting
+kernel proxies create --type mobile --country US --carrier "T-Mobile"
+
+# With city targeting (requires country)
+kernel proxies create --type mobile --country US --city sanfrancisco
+```
 
 ### Custom Proxy
 
