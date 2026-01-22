@@ -12,6 +12,9 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 
 # Install the CLI skill
 /plugin install kernel-cli
+
+# Install the SDK skills (TypeScript & Python)
+/plugin install kernel-sdks
 ```
 
 ### Manual Installation
@@ -19,6 +22,7 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 ```bash
 git clone https://github.com/kernel/skills.git
 cp -r skills/plugins/kernel-cli ~/.claude/skills/
+cp -r skills/plugins/kernel-sdks ~/.claude/skills/
 ```
 
 ## Usage Examples
@@ -34,26 +38,15 @@ Before using these skills, ensure you have:
 
 2. **Authenticated with Kernel**:
    ```bash
+   export KERNEL_API_KEY=<api-key> or
    kernel login
    ```
 
-Once installed, your coding agent will automatically know how to use Kernel. Try prompts like:
+## Available Skills
 
-### CLI Usage
+### kernel-cli
 
-> "Spin up a browser and take a screenshot of kernel.sh"
-
-Your agent will respond with:
-
-```bash
-kernel browsers create -o json
-# Extract session_id from output
-kernel browsers computer screenshot <session_id> --to screenshot.png
-```
-
-## Skill Structure
-
-The kernel-cli skill is organized into focused sub-skills:
+Command-line interface skills for using Kernel CLI commands.
 
 | Skill | Description |
 |-------|-------------|
@@ -73,6 +66,15 @@ The kernel-cli skill is organized into focused sub-skills:
 - `commands.md` - Complete CLI reference
 
 Each sub-skill is loaded contextually based on your prompts, minimizing token usage while providing comprehensive Kernel knowledge.
+
+### kernel-sdks
+
+SDK skills for building browser automation with TypeScript and Python.
+
+| Skill | Description |
+|-------|-------------|
+| **typescript-sdk** | Build automation with Kernel's Typescript SDK |
+| **python-sdk** | Build automation with kernel's Python SDK |
 
 ## Documentation
 
