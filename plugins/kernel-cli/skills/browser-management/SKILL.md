@@ -21,7 +21,7 @@ Use browser-management skill when you need to:
 
 ## Prerequisites
 
-Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Create a Browser
 

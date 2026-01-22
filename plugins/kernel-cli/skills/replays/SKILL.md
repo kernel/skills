@@ -17,7 +17,7 @@ Replays give you full control over recording start/stop times and support multip
 
 ## Prerequisites
 
-Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## List Replays
 

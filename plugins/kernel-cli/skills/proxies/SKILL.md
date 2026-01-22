@@ -13,7 +13,7 @@ Kernel proxies enable you to route browser traffic through different types of pr
 
 ## Prerequisites
 
-Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Proxy Types
 

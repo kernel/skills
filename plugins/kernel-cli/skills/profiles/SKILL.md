@@ -19,7 +19,7 @@ Use profiles for:
 
 ## Prerequisites
 
-Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Create Profile
 

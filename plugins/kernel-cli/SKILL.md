@@ -9,7 +9,7 @@ The Kernel CLI provides command-line access to Kernel's cloud browser platform.
 
 ## Installation
 
-- Homebrew: `brew install kernel/tap/kernel`(>=v0.13.4)
+- Homebrew: `brew install kernel/tap/kernel` (>=v0.13.4)
 - npm: `npm install -g @onkernel/cli` (>=v0.13.4)
 
 ## Authentication
@@ -19,12 +19,14 @@ The Kernel CLI provides command-line access to Kernel's cloud browser platform.
 
 ## Available Commands
 
-- **Browser Management** - Create, list, delete browser sessions
-- **App Deployment** - Deploy and invoke serverless apps
-- **Computer Controls** - Mouse, keyboard, screenshots
-- **Process Execution** - Run commands in browser VMs
-- **Profiles** - Persistent browser profiles
-- **Proxies** - Proxy configuration
-- **Browser Pools** - Pre-warmed browser pools
-- **Extensions** - Chrome extension management
-- **Replays** - Video recording
+| Command Area | Skill Name | Description |
+|--------------|------------|-------------|
+| **Browser Management** | `kernel-browser-management` | Create, list, delete browser sessions |
+| **App Deployment** | `kernel-app-deployment` | Deploy and invoke serverless apps |
+| **Computer Controls** | `kernel-computer-controls` | Mouse, keyboard, screenshots |
+| **Process Execution** | `kernel-process-execution` | Run commands in browser VMs |
+| **Profiles** | `kernel-profiles` | Persistent browser profiles |
+| **Proxies** | `kernel-proxies` | Proxy configuration |
+| **Browser Pools** | `kernel-browser-pools` | Pre-warmed browser pools |
+| **Extensions** | `kernel-extensions` | Chrome extension management |
+| **Replays** | `kernel-replays` | Video recording |

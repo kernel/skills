@@ -21,7 +21,7 @@ Use process execution for:
 
 ## Prerequisites
 
-Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Execute Command (Synchronous)
 

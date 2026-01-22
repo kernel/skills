@@ -26,7 +26,7 @@ Computer controls provide **OS-level** interaction with the browser VM, operatin
 
 ## Prerequisites
 
-Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Screenshots
 

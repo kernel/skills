@@ -21,7 +21,7 @@ Use app-deployment when you need to:
 
 ## Prerequisites
 
-Load the `/kernel-cli` skill for Kernel CLI installation and authentication.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ### App Deployment Specific
 - Valid TypeScript (.ts) or Python (.py) entry file
