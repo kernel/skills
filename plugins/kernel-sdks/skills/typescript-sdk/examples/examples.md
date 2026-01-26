@@ -347,5 +347,3 @@ app.action<Input, Output>("get-title", async (ctx: KernelContext, payload?: Inpu
 ```
 
 ---
-
-See the full templates at: `kernel create --list`

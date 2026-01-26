@@ -79,4 +79,4 @@ const buffer = Buffer.from(await blob.arrayBuffer());
 - **Quickstart Guide**: https://www.kernel.sh/docs/quickstart
 - **Templates**: https://www.kernel.sh/docs/reference/cli/create#available-templates
 - **TypeScript Types**: Available in `@onkernel/sdk` package
-- **Examples**: ./examples/examples.md
+- **Examples**: [examples](./examples/examples.md)

@@ -104,4 +104,4 @@ if response.success and response.result:
 - **API Reference**: https://www.kernel.sh/docs/api-reference/
 - **Templates**: https://www.kernel.sh/docs/reference/cli/create#available-templates
 - **Quickstart Guide**: https://www.kernel.sh/docs/quickstart
-- **Examples**: ./examples/examples.md
+- **Examples**: [examples](./examples/examples.md)

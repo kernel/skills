@@ -232,10 +232,3 @@ server = create_sdk_mcp_server(
 ```
 
 ---
-
-## Additional Patterns
-
-For more patterns including:
-- Basic server-side execution with retry logic
-- Action handler pattern for Kernel deployments
-- Binary data handling (screenshots, PDFs)
