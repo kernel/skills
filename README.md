@@ -4,6 +4,24 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 
 ## Installation
 
+### Any Agent
+
+Install to all available coding agents:
+
+```bash
+curl -fsSL https://www.kernel.sh/skills | bash
+```
+
+### Local Development
+
+For development with symlinks:
+
+```bash
+git clone https://github.com/kernel/skills.git
+cd skills
+./scripts/install.sh --symlink
+```
+
 ### Claude Code
 
 ```bash
@@ -12,13 +30,6 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 
 # Install the CLI skill
 /plugin install kernel-cli
-```
-
-### Manual Installation
-
-```bash
-git clone https://github.com/kernel/skills.git
-cp -r skills/plugins/kernel-cli ~/.claude/skills/
 ```
 
 ## Usage Examples
