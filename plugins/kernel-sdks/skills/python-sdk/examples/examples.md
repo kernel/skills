@@ -9,6 +9,7 @@ Concise patterns extracted from production templates showing how to integrate th
 Connect the `browser-use` library to Kernel browsers for AI-powered browser automation.
 
 ```python
+import kernel
 from browser_use import Agent, Browser
 from browser_use.llm import ChatOpenAI
 from kernel import Kernel
@@ -45,6 +46,7 @@ finally:
 Create a reusable context manager for browser lifecycle with optional replay recording.
 
 ```python
+import kernel
 from dataclasses import dataclass, field
 from typing import Optional
 from kernel import Kernel
@@ -121,6 +123,7 @@ async with KernelBrowserSession(record_replay=True) as session:
 Use CDP connection with stealth mode to leverage Kernel's automatic CAPTCHA solving.
 
 ```python
+import kernel
 from playwright.async_api import async_playwright
 from kernel import Kernel
 
@@ -163,6 +166,7 @@ finally:
 Wrap `playwright.execute` as a callable tool for LLM agent frameworks.
 
 ```python
+import kernel
 import json
 from kernel import Kernel
 

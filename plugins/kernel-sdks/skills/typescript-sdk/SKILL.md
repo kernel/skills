@@ -50,7 +50,7 @@ The SDK is organized into resource-based modules:
 
 **SDK Initialization**
 ```typescript
-import Kernel from '@onkernel/sdk';
+import { Kernel } from "@onkernel/sdk";
 const kernel = new Kernel();  // Reads KERNEL_API_KEY from environment
 ```
 

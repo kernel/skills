@@ -17,6 +17,11 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 /plugin install kernel-sdks
 ```
 
+### Any Agent
+```bash
+npx skills add kernel/skills
+```
+
 ### Manual Installation
 
 ```bash

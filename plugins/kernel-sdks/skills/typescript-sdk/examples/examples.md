@@ -10,7 +10,7 @@ Connect Stagehand to Kernel browsers for AI-powered browser automation with `act
 
 ```typescript
 import { Stagehand } from "@browserbasehq/stagehand";
-import Kernel from "@onkernel/sdk";
+import { Kernel } from "@onkernel/sdk";
 import { z } from "zod";
 
 const kernel = new Kernel();
@@ -135,7 +135,7 @@ try {
 Connect local Playwright to a Kernel browser via CDP WebSocket.
 
 ```typescript
-import Kernel from "@onkernel/sdk";
+import { Kernel } from "@onkernel/sdk";
 import { chromium } from "playwright-core";
 
 const kernel = new Kernel();
@@ -165,7 +165,7 @@ try {
 Use stealth mode to leverage Kernel's automatic CAPTCHA solving.
 
 ```typescript
-import Kernel from "@onkernel/sdk";
+import { Kernel } from "@onkernel/sdk";
 import { chromium } from "playwright-core";
 
 const kernel = new Kernel();
@@ -196,7 +196,7 @@ try {
 Wrap `playwright.execute` as a callable tool for LLM agent frameworks.
 
 ```typescript
-import Kernel from "@onkernel/sdk";
+import { Kernel } from "@onkernel/sdk";
 
 const kernel = new Kernel();
 
@@ -230,28 +230,6 @@ function createPlaywrightTool(sessionId: string) {
 }
 ```
 
-**Usage with MCP server:**
-
-```typescript
-import { createSdkMcpServer, tool } from "@anthropic-ai/claude-agent-sdk";
-import { z } from "zod";
-
-const browser = await kernel.browsers.create({ stealth: true });
-const executeTool = createPlaywrightTool(browser.session_id);
-
-const server = createSdkMcpServer({
-  name: "kernel-playwright",
-  tools: [
-    tool(
-      "execute_playwright",
-      "Execute Playwright code. Use page, context, browser objects. Return values with 'return'.",
-      { code: z.string(), timeout_sec: z.number().optional() },
-      async (args) => executeTool(args.code, args.timeout_sec)
-    ),
-  ],
-});
-```
-
 ---
 
 ## Magnitude Library Integration
@@ -259,7 +237,7 @@ const server = createSdkMcpServer({
 Connect Magnitude's browser agent to Kernel for AI-driven automation.
 
 ```typescript
-import Kernel from "@onkernel/sdk";
+import { Kernel } from "@onkernel/sdk";
 import { startBrowserAgent } from "magnitude-core";
 import { z } from "zod";
 
@@ -345,5 +323,3 @@ app.action<Input, Output>("get-title", async (ctx: KernelContext, payload?: Inpu
 // Deploy: kernel deploy index.ts
 // Invoke: kernel invoke my-app get-title -p '{"url": "https://example.com"}'
 ```
-
----
