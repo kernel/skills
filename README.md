@@ -48,7 +48,7 @@ Your agent will respond with:
 ```bash
 kernel browsers create -o json
 # Extract session_id from output
-kernel browsers computer screenshot --to screenshot.png
+kernel browsers computer screenshot <session_id> --to screenshot.png
 ```
 
 ## Skill Structure
@@ -57,7 +57,7 @@ The kernel-cli skill is organized into focused sub-skills:
 
 | Skill | Description |
 |-------|-------------|
-| **agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
+| **kernel-agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
 | **browser-management** | Browser creation, listing, deletion |
 | **computer-controls** | Mouse, keyboard, screenshots |
 | **app-deployment** | Deploy and invoke apps |
