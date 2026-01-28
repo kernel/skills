@@ -14,6 +14,11 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 /plugin install kernel-cli
 ```
 
+### Any Agent
+```bash
+npx skills add kernel/skills
+```
+
 ### Manual Installation
 
 ```bash
@@ -37,42 +42,14 @@ Before using these skills, ensure you have:
    kernel login
    ```
 
-Once installed, your coding agent will automatically know how to use Kernel. Try prompts like:
-
-### CLI Usage
-
-> "Spin up a browser and take a screenshot of kernel.sh"
-
-Your agent will respond with:
-
-```bash
-kernel browsers create -o json
-# Extract session_id from output
-kernel browsers computer screenshot <session_id> --to screenshot.png
-```
+Once installed, your coding agent will automatically know how to use Kernel.
 
 ## Skill Structure
 
-The kernel-cli skill is organized into focused sub-skills:
-
 | Skill | Description |
 |-------|-------------|
+| **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
 | **kernel-agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
-| **browser-management** | Browser creation, listing, deletion |
-| **computer-controls** | Mouse, keyboard, screenshots |
-| **app-deployment** | Deploy and invoke apps |
-| **browser-pools** | Pre-warmed browser pools |
-| **profiles** | Persistent browser state |
-| **extensions** | Chrome extension management |
-| **proxies** | Proxy configuration |
-| **process-execution** | VM process execution |
-| **filesystem-ops** | File operations |
-| **replays** | Video recording |
-
-**Reference Documentation:**
-- `commands.md` - Complete CLI reference
-
-Each sub-skill is loaded contextually based on your prompts, minimizing token usage while providing comprehensive Kernel knowledge.
 
 ## Documentation
 

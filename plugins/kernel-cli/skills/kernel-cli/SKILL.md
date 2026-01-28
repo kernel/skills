@@ -1,11 +1,11 @@
 ---
 name: kernel-cli
-description: Kernel CLI installation, authentication, and core setup
+description: Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management
 ---
 
 # Kernel CLI
 
-The Kernel CLI provides command-line access to Kernel's cloud browser platform.
+The Kernel CLI provides command-line access to Kernel's cloud browser platform for browser automation, serverless app deployment, and infrastructure management.
 
 ## Installation
 
@@ -17,16 +17,34 @@ The Kernel CLI provides command-line access to Kernel's cloud browser platform.
 - **Preferred:** Set `KERNEL_API_KEY` environment variable
 - **Fallback:** Run `kernel login` for interactive OAuth
 
-## Available Commands
+## Quick Start
 
-| Command Area | Skill Name | Description |
-|--------------|------------|-------------|
-| **Browser Management** | `kernel-browser-management` | Create, list, delete browser sessions |
-| **App Deployment** | `kernel-app-deployment` | Deploy and invoke serverless apps |
-| **Computer Controls** | `kernel-computer-controls` | Mouse, keyboard, screenshots |
-| **Process Execution** | `kernel-process-execution` | Run commands in browser VMs |
-| **Profiles** | `kernel-profiles` | Persistent browser profiles |
-| **Proxies** | `kernel-proxies` | Proxy configuration |
-| **Browser Pools** | `kernel-browser-pools` | Pre-warmed browser pools |
-| **Extensions** | `kernel-extensions` | Chrome extension management |
-| **Replays** | `kernel-replays` | Video recording |
+```bash
+# Authenticate
+export KERNEL_API_KEY=your_api_key
+
+# Create a browser session
+kernel browsers create
+
+# Run Playwright automation
+kernel browsers playwright execute <session_id> 'await page.goto("https://example.com")'
+
+# Take a screenshot
+kernel browsers computer screenshot <session_id> --to screenshot.png
+
+# Cleanup
+kernel browsers delete <session_id> --yes
+```
+
+## References
+
+- [Browser Management](./references/browser-management.md) - Create, list, view, and delete browser sessions
+- [App Deployment](./references/app-deployment.md) - Deploy TypeScript/Python apps and invoke actions
+- [Computer Controls](./references/computer-controls.md) - OS-level mouse, keyboard, and screenshot capabilities
+- [Process Execution](./references/process-execution.md) - Execute and manage processes in browser VMs
+- [Profiles](./references/profiles.md) - Manage persistent browser profiles
+- [Proxies](./references/proxies.md) - Create and manage datacenter, ISP, residential, and mobile proxies
+- [Browser Pools](./references/browser-pools.md) - Manage pre-warmed browser pools
+- [Extensions](./references/extensions.md) - Upload and manage Chrome extensions
+- [Replays](./references/replays.md) - Record and download video replays
+- [Filesystem Operations](./references/filesystem-ops.md) - Read, write, upload, and download files
