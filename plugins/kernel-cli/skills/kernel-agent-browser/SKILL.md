@@ -21,7 +21,7 @@ Use this skill when you need to:
 
 ## References
 
-- [Creating Site-Specific Skills](references/create-site-skill.md) - Guide for building automation skills for specific websites
+- [Creating Site-Specific Skills](references/create-site-specific-skill.md) - Guide for building automation skills for specific websites
 
 ## Prerequisites
 
