@@ -17,6 +17,11 @@ Use this skill when you need to:
 - **Work with iframes** including cross-origin payment forms
 - **Get live view URLs** for debugging or manual intervention
 - **Find the underlying Kernel session ID** for advanced Playwright scripting
+- **Create site-specific automation skills** for new websites
+
+## References
+
+- [Creating Site-Specific Skills](references/create-site-skill.md) - Guide for building automation skills for specific websites
 
 ## Prerequisites
 
