@@ -53,25 +53,9 @@ kernel browsers computer screenshot <session_id> --to screenshot.png
 
 ## Skill Structure
 
-The kernel-cli skill is organized into focused sub-skills:
-
 | Skill | Description |
 |-------|-------------|
-| **browser-management** | Browser creation, listing, deletion |
-| **computer-controls** | Mouse, keyboard, screenshots |
-| **app-deployment** | Deploy and invoke apps |
-| **browser-pools** | Pre-warmed browser pools |
-| **profiles** | Persistent browser state |
-| **extensions** | Chrome extension management |
-| **proxies** | Proxy configuration |
-| **process-execution** | VM process execution |
-| **filesystem-ops** | File operations |
-| **replays** | Video recording |
-
-**Reference Documentation:**
-- `commands.md` - Complete CLI reference
-
-Each sub-skill is loaded contextually based on your prompts, minimizing token usage while providing comprehensive Kernel knowledge.
+| **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
 
 ## Documentation
 
