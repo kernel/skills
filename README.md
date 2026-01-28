@@ -14,6 +14,11 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 /plugin install kernel-cli
 ```
 
+### Any Agent
+```bash
+npx skills add kernel/skills
+```
+
 ### Manual Installation
 
 ```bash
@@ -37,19 +42,7 @@ Before using these skills, ensure you have:
    kernel login
    ```
 
-Once installed, your coding agent will automatically know how to use Kernel. Try prompts like:
-
-### CLI Usage
-
-> "Spin up a browser and take a screenshot of kernel.sh"
-
-Your agent will respond with:
-
-```bash
-kernel browsers create -o json
-# Extract session_id from output
-kernel browsers computer screenshot <session_id> --to screenshot.png
-```
+Once installed, your coding agent will automatically know how to use Kernel.
 
 ## Skill Structure
 
