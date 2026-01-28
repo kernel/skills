@@ -30,8 +30,6 @@ cp -r skills/plugins/kernel-cli ~/.claude/skills/
 cp -r skills/plugins/kernel-sdks ~/.claude/skills/
 ```
 
-## Usage Examples
-
 ## Prerequisites
 
 Before using these skills, ensure you have:
@@ -47,6 +45,8 @@ Before using these skills, ensure you have:
    kernel login
    ```
 
+Once installed, your coding agent will automatically know how to use Kernel.
+
 ## Available Skills
 
 ### kernel-cli
@@ -55,22 +55,7 @@ Command-line interface skills for using Kernel CLI commands.
 
 | Skill | Description |
 |-------|-------------|
-| **browser-management** | Browser creation, listing, deletion |
-| **playwright-execution** | Playwright code execution |
-| **computer-controls** | Mouse, keyboard, screenshots |
-| **app-deployment** | Deploy and invoke apps |
-| **browser-pools** | Pre-warmed browser pools |
-| **profiles** | Persistent browser state |
-| **extensions** | Chrome extension management |
-| **proxies** | Proxy configuration |
-| **process-execution** | VM process execution |
-| **filesystem-ops** | File operations |
-| **replays** | Video recording |
-
-**Reference Documentation:**
-- `commands.md` - Complete CLI reference
-
-Each sub-skill is loaded contextually based on your prompts, minimizing token usage while providing comprehensive Kernel knowledge.
+| **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
 
 ### kernel-sdks
 

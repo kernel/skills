@@ -24,10 +24,9 @@ Computer controls provide **OS-level** interaction with the browser VM, operatin
 - When you need to access page content or execute JavaScript - use Playwright execution
 - For headless browsers - computer controls require a GUI environment
 
-
 ## Prerequisites
 
-See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Screenshots
 
@@ -87,15 +86,17 @@ kernel browsers computer type <session_id> --text "Slow typing" --delay 100
 
 ### Press Keys
 
+Key names follow [X11 keysym definitions](https://www.cl.cam.ac.uk/~mgk25/ucs/keysymdef.h). Common keys include: `Return`, `Tab`, `Escape`, `BackSpace`, `Delete`, `Home`, `End`, `Page_Up`, `Page_Down`, `Up`, `Down`, `Left`, `Right`, `Shift_L`, `Control_L`, `Alt_L`, etc.
+
 ```bash
 # Single key
-kernel browsers computer press-key <session_id> --key Enter
+kernel browsers computer press-key <session_id> --key Return
 
 # Key combination
-kernel browsers computer press-key <session_id> --key Ctrl+t
+kernel browsers computer press-key <session_id> --key Control_L+t
 
 # Complex combination with held keys
-kernel browsers computer press-key <session_id> --key Ctrl+Shift+Tab --hold-key Alt
+kernel browsers computer press-key <session_id> --key Control_L+Shift_L+Tab --hold-key Alt_L
 ```
 
 ## Common Pattern: Navigate and Screenshot

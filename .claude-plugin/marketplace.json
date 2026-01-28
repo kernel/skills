@@ -1,6 +1,6 @@
 {
   "$schema": "https://plugins.claude.ai/schema/marketplace.json",
-  "name": "kernel-skills",
+  "name": "kernel",
   "description": "Automate web browsers in the cloud with Kernel. Create browsers, execute Playwright code, deploy web agents, and control browser instances via CLI. Use when building browser automations or web scraping workflows.",
   "owner": {
     "name": "Kernel",
