@@ -49,6 +49,7 @@ Once installed, your coding agent will automatically know how to use Kernel.
 | Skill | Description |
 |-------|-------------|
 | **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
+| **kernel-agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
 
 ## Documentation
 
