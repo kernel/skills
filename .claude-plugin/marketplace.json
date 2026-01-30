@@ -14,6 +14,14 @@
       },
       "description": "CLI commands for managing browsers, deploying apps, and controlling browser instances. Use when working with the kernel command-line tool.",
       "source": "./plugins/kernel-cli"
+    },
+    {
+      "name": "kernel-sdks",
+      "author": {
+        "name": "Kernel"
+      },
+      "description": "TypeScript and Python SDK skills for building browser automation with Kernel's Typescript and Python SDKs. Use when writing code to control browsers programmatically.",
+      "source": "./plugins/kernel-sdks"
     }
   ]
 }
