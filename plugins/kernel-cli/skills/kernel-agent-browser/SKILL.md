@@ -69,6 +69,47 @@ agent-browser -p kernel close             # Close browser and save profile
 
 Always use the `-p kernel` flag with each command.
 
+## Semantic Selectors (Recommended)
+
+Instead of ephemeral `@e` refs that change on every page load, use **semantic selectors** via the `find` command for more stable, readable automation:
+
+```bash
+# By ARIA role + accessible name (most stable)
+agent-browser -p kernel find role button click --name "Log In"
+agent-browser -p kernel find role textbox fill "user@email.com" --name "Email"
+
+# By visible text content
+agent-browser -p kernel find text "View Menus" click
+agent-browser -p kernel find text "Submit Order" click
+
+# By form label (great for inputs)
+agent-browser -p kernel find label "Username" fill "myuser"
+agent-browser -p kernel find label "Password" fill "secret123"
+
+# By placeholder text
+agent-browser -p kernel find placeholder "Search..." type "query"
+
+# By data-testid (if the site uses them)
+agent-browser -p kernel find testid "submit-btn" click
+
+# By position (when needed)
+agent-browser -p kernel find first "li.item" click
+agent-browser -p kernel find nth 2 ".card" hover
+```
+
+### When to Use Which Selector
+
+| Selector Type | Best For | Stability |
+|---------------|----------|-----------|
+| `find role --name` | Buttons, links, navigation | ⭐⭐⭐ Most stable |
+| `find label` | Form inputs with labels | ⭐⭐⭐ Most stable |
+| `find text` | Clickable text elements | ⭐⭐ Stable |
+| `find testid` | Sites with test attributes | ⭐⭐⭐ Most stable |
+| `find placeholder` | Search boxes, inputs | ⭐⭐ Stable |
+| `@e` refs | Unknown sites, quick iteration | ⭐ Ephemeral |
+
+**Recommendation**: Use `find` for production automation. Use `@e` refs for exploration and quick prototyping, then convert to semantic selectors.
+
 ## Finding Session ID and Live View URL
 
 agent-browser creates a Kernel browser session under the hood. To get the session ID or live view URL:
@@ -174,22 +215,36 @@ See the kernel-cli skill for more details on executing Playwright code.
 
 ## Waiting Strategies
 
-Prefer smart waits over fixed timeouts:
+**Smart waits are critical for fast, reliable automation.** Using condition-based waits instead of fixed timeouts can reduce execution time by 50%+ while improving reliability.
+
+### Smart Waits (Recommended)
 
 ```bash
-# Wait for network to settle (best for page loads)
-agent-browser -p kernel wait --load networkidle
+# Wait for page load states
+agent-browser -p kernel wait --load domcontentloaded  # DOM ready
+agent-browser -p kernel wait --load networkidle       # Network settled
 
-# Wait for specific URL pattern
+# Wait for specific URL pattern (great for redirects after login)
 agent-browser -p kernel wait --url "**/dashboard"
+agent-browser -p kernel wait --url "**/order-confirmation"
 
-# Wait for text to appear
-agent-browser -p kernel wait --text "Success"
+# Wait for text to appear (great for dynamic content)
+agent-browser -p kernel wait --text "Password"        # Field appeared
+agent-browser -p kernel wait --text "Order confirmed" # Success message
 
-# Wait for element
-agent-browser -p kernel wait @e1
+# Wait for JavaScript condition
+agent-browser -p kernel wait --fn "window.appReady === true"
+agent-browser -p kernel wait --fn "document.querySelector('.spinner') === null"
 
-# Fixed wait (last resort, in milliseconds)
+# Wait for element by CSS selector
+agent-browser -p kernel wait "#login-form"
+agent-browser -p kernel wait ".results-loaded"
+```
+
+### Fixed Waits (Last Resort)
+
+```bash
+# Only when no condition is available
 agent-browser -p kernel wait 2000
 ```
 
@@ -220,34 +275,62 @@ agent-browser -p kernel snapshot -s "#main-content" -i
 
 ## Login Patterns
 
-### Single-Page Form
+### Single-Page Form (Optimized)
 
 Username and password on the same page:
 
 ```bash
 agent-browser -p kernel open https://example.com/login
-agent-browser -p kernel wait 2000
-agent-browser -p kernel snapshot -i
-agent-browser -p kernel fill @e2 "username"
-agent-browser -p kernel fill @e3 "password"
-agent-browser -p kernel click @e7   # Submit button
-agent-browser -p kernel wait 3000
-agent-browser -p kernel get url     # Verify redirect
+agent-browser -p kernel wait --load domcontentloaded
+
+# Use semantic selectors for stability
+agent-browser -p kernel find label "Email" fill "user@example.com"
+agent-browser -p kernel find label "Password" fill "secret123"
+agent-browser -p kernel find role button click --name "Sign In"
+
+# Wait for actual redirect, not arbitrary timeout
+agent-browser -p kernel wait --url "**/dashboard"
 ```
 
-### Two-Step Form
+### Two-Step Form (Optimized)
 
 Username first, then password on a second screen:
 
 ```bash
 agent-browser -p kernel open https://example.com/login
-agent-browser -p kernel fill @e1 "username"
+agent-browser -p kernel wait --load domcontentloaded
+
+# Step 1: Username
+agent-browser -p kernel find label "Username" fill "myuser"
 agent-browser -p kernel press Enter
+
+# Wait for password field to appear (not a fixed sleep!)
+agent-browser -p kernel wait --text "Password"
+
+# Step 2: Password
+agent-browser -p kernel find label "Password" fill "secret123"
+agent-browser -p kernel press Enter
+
+# Wait for successful redirect
+agent-browser -p kernel wait --url "**/home"
+```
+
+### Comparison: Old vs Optimized
+
+```bash
+# OLD (slow, fragile):
 agent-browser -p kernel wait 2000
-agent-browser -p kernel snapshot -i   # Get new refs for password page
+agent-browser -p kernel fill @e1 "username"
+agent-browser -p kernel wait 2000
 agent-browser -p kernel fill @e3 "password"
-agent-browser -p kernel press Enter
-agent-browser -p kernel wait 3000
+agent-browser -p kernel wait 5000
+
+# OPTIMIZED (fast, stable):
+agent-browser -p kernel wait --load domcontentloaded
+agent-browser -p kernel find label "Username" fill "username"
+agent-browser -p kernel wait --text "Password"
+agent-browser -p kernel find label "Password" fill "password"
+agent-browser -p kernel wait --url "**/dashboard"
 ```
 
 ### Modal Login
@@ -256,16 +339,32 @@ Login form appears in a modal overlay:
 
 ```bash
 # Click login link to open modal
+agent-browser -p kernel find text "Log In" click
+agent-browser -p kernel wait --text "Password"  # Wait for modal
+
+# Fill modal fields
+agent-browser -p kernel find label "Email" fill "user@example.com"
+agent-browser -p kernel find label "Password" fill "password123"
+agent-browser -p kernel find role button click --name "Sign In"
+agent-browser -p kernel wait --url "**/dashboard"
+```
+
+### Fallback: JavaScript for Tricky Modals
+
+Some modals don't expose accessible labels:
+
+```bash
 agent-browser -p kernel eval "document.querySelector('.login-link').click()"
 agent-browser -p kernel wait 1000
 
-# Fill modal fields (may require eval if refs don't work)
 agent-browser -p kernel eval "
   document.getElementById('username').value = 'user@example.com';
+  document.getElementById('username').dispatchEvent(new Event('input', {bubbles: true}));
   document.getElementById('password').value = 'password123';
-  document.querySelector('button.btn-primary').click();
+  document.getElementById('password').dispatchEvent(new Event('input', {bubbles: true}));
+  document.querySelector('button[type=submit]').click();
 "
-agent-browser -p kernel wait 2000
+agent-browser -p kernel wait --url "**/dashboard"
 ```
 
 ## Handling New Tabs
@@ -343,11 +442,17 @@ export KERNEL_PROFILE_NAME=mysite
 export KERNEL_TIMEOUT_SECONDS=600
 agent-browser -p kernel open https://example.com
 
-# Basic interaction loop
+# Basic interaction with semantic selectors (recommended)
+agent-browser -p kernel wait --load domcontentloaded
+agent-browser -p kernel find label "Email" fill "user@example.com"
+agent-browser -p kernel find label "Password" fill "secret"
+agent-browser -p kernel find role button click --name "Submit"
+agent-browser -p kernel wait --url "**/success"
+
+# Alternative: snapshot + refs (for exploration)
 agent-browser -p kernel snapshot -i
 agent-browser -p kernel fill @eN "text"
 agent-browser -p kernel click @eM
-agent-browser -p kernel wait --load networkidle
 
 # Get session info for manual intervention
 kernel browsers list
@@ -355,4 +460,24 @@ kernel browsers view <session-id>
 
 # Cleanup
 agent-browser -p kernel close
+```
+
+### Selector Cheat Sheet
+
+```bash
+# Buttons and links
+agent-browser -p kernel find role button click --name "Submit"
+agent-browser -p kernel find role link click --name "Next"
+agent-browser -p kernel find text "Click here" click
+
+# Form inputs
+agent-browser -p kernel find label "Email" fill "user@example.com"
+agent-browser -p kernel find placeholder "Search" type "query"
+agent-browser -p kernel find testid "username-input" fill "myuser"
+
+# Smart waits
+agent-browser -p kernel wait --load domcontentloaded
+agent-browser -p kernel wait --text "Success"
+agent-browser -p kernel wait --url "**/dashboard"
+agent-browser -p kernel wait --fn "window.loaded === true"
 ```
