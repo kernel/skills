@@ -18,6 +18,7 @@ Use browser-management skill when you need to:
 - **Capture screenshots** - Take screenshots of browser pages or specific regions
 - **Manage browser lifecycle** - Delete browser sessions when done to free resources
 - **Work with browser profiles** - Load saved authentication data and cookies into sessions
+- **SSH & port forwarding** - SSH into browser VMs, forward local dev servers to the browser, or access VM services locally
 
 ## Prerequisites
 
@@ -79,6 +80,33 @@ kernel browsers computer screenshot <session_id> --to screenshot.png
 ```
 
 **MCP Tool:** Use `kernel:take_screenshot` with `session_id`. Optionally specify region with `x`, `y`, `width`, `height`.
+
+## SSH Access & Port Forwarding
+
+SSH into a running browser VM for debugging, running commands, or exposing a local dev server.
+
+Requires [websocat](https://github.com/vi/websocat) (`brew install websocat` on macOS).
+
+```bash
+# Open an interactive SSH shell
+kernel browsers ssh <session_id>
+
+# Forward local dev server (port 3000) into the browser VM
+kernel browsers ssh <session_id> -R 3000:localhost:3000
+
+# Forward a VM port to your local machine
+kernel browsers ssh <session_id> -L 5432:localhost:5432
+
+# Use an existing SSH key instead of generating an ephemeral one
+kernel browsers ssh <session_id> -i ~/.ssh/id_ed25519
+
+# Setup SSH on the VM without connecting (prints manual connection command)
+kernel browsers ssh <session_id> --setup-only
+```
+
+SSH connections alone don't count as browser activity. Set `--timeout` when creating the browser or keep the live view open to prevent cleanup.
+
+**MCP Tool:** Use `kernel:create_browser` with `remote_forward` (e.g., `3000:localhost:3000`) or `local_forward` to include the SSH command in the response.
 
 ## Common Pattern: Create, Use, Delete
 
