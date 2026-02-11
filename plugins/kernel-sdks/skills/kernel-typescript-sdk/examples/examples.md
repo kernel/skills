@@ -323,3 +323,155 @@ app.action<Input, Output>("get-title", async (ctx: KernelContext, payload?: Inpu
 // Deploy: kernel deploy index.ts
 // Invoke: kernel invoke my-app get-title -p '{"url": "https://example.com"}'
 ```
+
+---
+
+## Managed Auth - Hosted UI Flow
+
+Create authenticated browser profiles via Kernel's hosted login page.
+
+```typescript
+import { Kernel } from "@onkernel/sdk";
+
+const kernel = new Kernel();
+
+// Create connection linking a profile to a domain
+const auth = await kernel.auth.connections.create({
+  domain: "linkedin.com",
+  profile_name: "linkedin-profile",
+  allowed_domains: ["www.linkedin.com"],
+});
+
+// Start login session
+const login = await kernel.auth.connections.login(auth.id);
+console.log("Login URL:", login.hosted_url);
+// Redirect user to login.hosted_url
+
+// Poll until done
+let state = await kernel.auth.connections.retrieve(auth.id);
+while (state.flow_status === "IN_PROGRESS") {
+  await new Promise((r) => setTimeout(r, 2000));
+  state = await kernel.auth.connections.retrieve(auth.id);
+}
+
+if (state.status === "AUTHENTICATED") {
+  // Launch browser with authenticated profile
+  const browser = await kernel.browsers.create({
+    profile: { name: "linkedin-profile" },
+    stealth: true,
+  });
+  // Browser is already logged in
+}
+```
+
+---
+
+## Managed Auth - Programmatic Flow
+
+Submit credentials programmatically instead of using the hosted page.
+
+```typescript
+import { Kernel } from "@onkernel/sdk";
+
+const kernel = new Kernel();
+
+const auth = await kernel.auth.connections.create({
+  domain: "github.com",
+  profile_name: "gh-profile",
+});
+
+await kernel.auth.connections.login(auth.id);
+
+// Poll and submit credentials when fields are discovered
+let state = await kernel.auth.connections.retrieve(auth.id);
+while (state.flow_status === "IN_PROGRESS") {
+  if (state.flow_step === "AWAITING_INPUT") {
+    if (state.discovered_fields?.length) {
+      const fieldNames = state.discovered_fields.map((f) => f.name);
+      if (fieldNames.includes("username")) {
+        await kernel.auth.connections.submit(auth.id, {
+          fields: { username: "my-user", password: "my-pass" },
+        });
+      } else {
+        // 2FA code
+        const code = "123456";
+        await kernel.auth.connections.submit(auth.id, {
+          fields: { [state.discovered_fields[0].name]: code },
+        });
+      }
+    }
+    // SSO buttons
+    if (state.pending_sso_buttons?.length) {
+      await kernel.auth.connections.submit(auth.id, {
+        sso_button_selector: state.pending_sso_buttons[0].selector,
+      });
+    }
+    // MFA selection
+    if (state.mfa_options?.length) {
+      await kernel.auth.connections.submit(auth.id, {
+        mfa_option_id: "totp",
+      });
+    }
+  }
+  await new Promise((r) => setTimeout(r, 2000));
+  state = await kernel.auth.connections.retrieve(auth.id);
+}
+```
+
+---
+
+## Managed Auth - SSE Streaming
+
+Stream login flow events in real time instead of polling.
+
+```typescript
+import { Kernel } from "@onkernel/sdk";
+
+const kernel = new Kernel();
+
+const auth = await kernel.auth.connections.create({
+  domain: "example.com",
+  profile_name: "my-profile",
+  credential: { name: "my-saved-cred" },
+});
+
+await kernel.auth.connections.login(auth.id);
+
+const stream = await kernel.auth.connections.follow(auth.id);
+for await (const evt of stream) {
+  if (evt.event === "managed_auth_state") {
+    console.log(`${evt.flow_status} / ${evt.flow_step}`);
+    if (evt.flow_status === "SUCCESS") break;
+    if (["FAILED", "EXPIRED", "CANCELED"].includes(evt.flow_status)) {
+      console.error("Login failed:", evt.error_message);
+      break;
+    }
+  }
+}
+```
+
+---
+
+## Managed Auth - 1Password Credential Provider
+
+Use 1Password as an external credential source.
+
+```typescript
+import { Kernel } from "@onkernel/sdk";
+
+const kernel = new Kernel();
+
+// Create connection with 1Password auto-lookup
+const auth = await kernel.auth.connections.create({
+  domain: "github.com",
+  profile_name: "gh-1p",
+  credential: {
+    provider: "my-1password-provider",
+    auto: true, // auto-lookup by domain
+  },
+  health_check_interval: 3600,
+});
+
+await kernel.auth.connections.login(auth.id);
+// Credentials are fetched from 1Password automatically
+```
