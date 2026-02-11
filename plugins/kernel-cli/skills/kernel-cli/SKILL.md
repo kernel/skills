@@ -43,6 +43,7 @@ kernel browsers delete <session_id> --yes
 - [Computer Controls](./references/computer-controls.md) - OS-level mouse, keyboard, and screenshot capabilities
 - [Process Execution](./references/process-execution.md) - Execute and manage processes in browser VMs
 - [Profiles](./references/profiles.md) - Manage persistent browser profiles
+- [Managed Auth](../kernel-managed-auth/SKILL.md) - Create authenticated browser profiles with automatic re-authentication
 - [Proxies](./references/proxies.md) - Create and manage datacenter, ISP, residential, and mobile proxies
 - [Browser Pools](./references/browser-pools.md) - Manage pre-warmed browser pools
 - [Extensions](./references/extensions.md) - Upload and manage Chrome extensions
