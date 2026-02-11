@@ -236,3 +236,152 @@ server = create_sdk_mcp_server(
 ```
 
 ---
+
+## Managed Auth - Hosted UI Flow
+
+Create authenticated browser profiles via Kernel's hosted login page.
+
+```python
+from kernel import Kernel
+import asyncio
+
+client = Kernel()
+
+# Create connection linking a profile to a domain
+auth = client.auth.connections.create(
+    domain="linkedin.com",
+    profile_name="linkedin-profile",
+    allowed_domains=["www.linkedin.com"],
+)
+
+# Start login session
+login = client.auth.connections.login(auth.id)
+print(f"Login URL: {login.hosted_url}")
+# Redirect user to login.hosted_url
+
+# Poll until done
+state = client.auth.connections.retrieve(auth.id)
+while state.flow_status == "IN_PROGRESS":
+    await asyncio.sleep(2)
+    state = client.auth.connections.retrieve(auth.id)
+
+if state.status == "AUTHENTICATED":
+    # Launch browser with authenticated profile
+    browser = client.browsers.create(
+        profile={"name": "linkedin-profile"},
+        stealth=True,
+    )
+    # Browser is already logged in
+```
+
+---
+
+## Managed Auth - Programmatic Flow
+
+Submit credentials programmatically instead of using the hosted page.
+
+```python
+from kernel import Kernel
+import asyncio
+
+client = Kernel()
+
+auth = client.auth.connections.create(
+    domain="github.com",
+    profile_name="gh-profile",
+)
+
+client.auth.connections.login(auth.id)
+
+# Poll and submit credentials when fields are discovered
+state = client.auth.connections.retrieve(auth.id)
+while state.flow_status == "IN_PROGRESS":
+    if state.flow_step == "AWAITING_INPUT":
+        if state.discovered_fields:
+            field_names = [f["name"] for f in state.discovered_fields]
+            if "username" in field_names:
+                client.auth.connections.submit(
+                    auth.id,
+                    fields={"username": "my-user", "password": "my-pass"},
+                )
+            else:
+                # 2FA code
+                code = "123456"
+                client.auth.connections.submit(
+                    auth.id,
+                    fields={state.discovered_fields[0]["name"]: code},
+                )
+        # SSO buttons
+        if state.pending_sso_buttons:
+            client.auth.connections.submit(
+                auth.id,
+                sso_button_selector=state.pending_sso_buttons[0]["selector"],
+            )
+        # MFA selection
+        if state.mfa_options:
+            client.auth.connections.submit(
+                auth.id,
+                mfa_option_id="totp",
+            )
+
+    await asyncio.sleep(2)
+    state = client.auth.connections.retrieve(auth.id)
+```
+
+---
+
+## Managed Auth - SSE Streaming
+
+Stream login flow events in real time instead of polling.
+
+```python
+from kernel import Kernel
+
+client = Kernel()
+
+auth = client.auth.connections.create(
+    domain="example.com",
+    profile_name="my-profile",
+    credential={"name": "my-saved-cred"},
+)
+
+client.auth.connections.login(auth.id)
+
+stream = client.auth.connections.follow(auth.id)
+for evt in stream:
+    if evt.event == "managed_auth_state":
+        print(f"{evt.flow_status} / {evt.flow_step}")
+        if evt.flow_status == "SUCCESS":
+            break
+        if evt.flow_status in ("FAILED", "EXPIRED", "CANCELED"):
+            print(f"Login failed: {evt.error_message}")
+            break
+```
+
+---
+
+## Managed Auth - 1Password Credential Provider
+
+Use 1Password as an external credential source.
+
+```python
+from kernel import Kernel
+
+client = Kernel()
+
+# Create connection with 1Password auto-lookup
+auth = client.auth.connections.create(
+    domain="github.com",
+    profile_name="gh-1p",
+    credential={
+        "provider": "my-1password-provider",
+        "auto": True,  # auto-lookup by domain
+    },
+    health_check_interval=3600,
+)
+
+client.auth.connections.login(auth.id)
+# Credentials are fetched from 1Password automatically
+```
+
+---

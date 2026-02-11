@@ -29,6 +29,8 @@ The SDK is organized into resource-based modules:
 - `kernel.browsers.computer` - OS-level controls (mouse, keyboard, screenshots)
 - `kernel.browserPools` - Pre-warmed browser pool management
 - `kernel.profiles` - Persistent browser profiles (auth state)
+- `kernel.auth.connections` - Managed auth (create, login, submit, follow, retrieve, delete)
+- `kernel.credentialProviders` - External credential providers (1Password)
 - `kernel.proxies` - Proxy configuration
 - `kernel.extensions` - Chrome extension management
 - `kernel.deployments` - App deployment
