@@ -13,6 +13,9 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 # Install the CLI skill
 /plugin install kernel-cli
 
+# Install the Auth skill
+/plugin install kernel-auth
+
 # Install the SDK skills (TypeScript & Python)
 /plugin install kernel-sdks
 ```
@@ -27,6 +30,7 @@ npx skills add kernel/skills
 ```bash
 git clone https://github.com/kernel/skills.git
 cp -r skills/plugins/kernel-cli ~/.claude/skills/
+cp -r skills/plugins/kernel-auth ~/.claude/skills/
 cp -r skills/plugins/kernel-sdks ~/.claude/skills/
 ```
 
@@ -57,6 +61,14 @@ Command-line interface skills for using Kernel CLI commands.
 |-------|-------------|
 | **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
 | **kernel-agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
+
+### kernel-auth
+
+Setup and manage authentication for services like Gmail, GitHub, Outlook with Kernel's managed auth system.
+
+| Skill | Description |
+|-------|-------------|
+| **kernel-auth** | Setup and manage Kernel authentication connections with safety checks and reauthentication support |
 
 ### kernel-sdks
 

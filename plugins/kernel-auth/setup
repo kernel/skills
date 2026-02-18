@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -e
+
+SERVICE=${1:-}
+PROFILE_NAME=${3:-"$SERVICE-main"}
+DOMAIN=${5:-}
+
+# Map services to domains
+case "$SERVICE" in
+  gmail)
+    DOMAIN="gmail.com"
+    ;;
+  github)
+    DOMAIN="github.com"
+    ;;
+  outlook)
+    DOMAIN="outlook.com"
+    ;;
+  *)
+    if [ -n "$DOMAIN" ]; then
+      DOMAIN="$DOMAIN"
+    else
+      echo "Usage: kernel-auth setup <service> [--profile-name <name>]"
+      echo "Services: gmail, github, outlook, or --domain <custom-domain>"
+      exit 1
+    fi
+    ;;
+esac
+
+echo "🔐 Setting up Kernel auth for $SERVICE ($DOMAIN)"
+echo ""
+
+# Check if connection already exists
+echo "1️⃣  Checking for existing connection..."
+EXISTING=$(kernel auth connections list -o json | jq -r ".[] | select(.domain == \"$DOMAIN\" and .profile_name == \"$PROFILE_NAME\") | .id" 2>/dev/null || echo "")
+
+if [ -n "$EXISTING" ]; then
+  CONNECTION_ID="$EXISTING"
+  echo "✓ Using existing connection: $CONNECTION_ID"
+else
+  echo "Creating new connection..."
+  CONNECTION=$(kernel auth connections create \
+    --domain "$DOMAIN" \
+    --profile-name "$PROFILE_NAME" \
+    -o json)
+  
+  CONNECTION_ID=$(echo "$CONNECTION" | jq -r '.id')
+  echo "✓ Connection created: $CONNECTION_ID"
+fi
+echo ""
+
+# Get login URL (use existing if available, otherwise initiate new flow)
+echo "2️⃣  Getting login URL..."
+CONN_STATUS=$(kernel auth connections get "$CONNECTION_ID" -o json)
+
+LOGIN_URL=$(echo "$CONN_STATUS" | jq -r '.hosted_url // empty')
+EXPIRES=$(echo "$CONN_STATUS" | jq -r '.flow_expires_at // empty')
+
+# If no existing URL, initiate a new login flow
+if [ -z "$LOGIN_URL" ] || [ "$LOGIN_URL" = "null" ]; then
+  echo "Initiating new login flow..."
+  LOGIN=$(kernel auth connections login "$CONNECTION_ID" -o json)
+  LOGIN_URL=$(echo "$LOGIN" | jq -r '.hosted_url')
+  EXPIRES=$(echo "$LOGIN" | jq -r '.flow_expires_at')
+fi
+
+echo "✓ Login flow ready"
+echo ""
+
+# Write URL to file (avoid Telegram auto-opening)
+AUTH_URL_FILE="$HOME/.openclaw/workspace/.kernel-auth-url"
+cat > "$AUTH_URL_FILE" << EOF
+Kernel Gmail Auth Login URL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+URL: $LOGIN_URL
+Expires: $EXPIRES
+Connection ID: $CONNECTION_ID
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+
+echo "3️⃣  Login URL saved to:"
+echo "   ~/.openclaw/workspace/.kernel-auth-url"
+echo ""
+echo "⚠️  Do NOT open this link via Telegram (it will consume the code)"
+echo "   Instead: cat ~/.openclaw/workspace/.kernel-auth-url"
+echo ""
+echo "4️⃣  Ready for login"
+echo "   Copy the URL and visit it in your browser."
