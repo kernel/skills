@@ -1,6 +1,6 @@
 ---
 name: kernel-auth
-description: Setup and manage Kernel authentication connections for services like Gmail, GitHub, Outlook. Handles managed auth flows with automatic reauth checks.
+description: Setup and manage Kernel authentication connections for any website (Gmail, GitHub, Outlook, or custom domains). Handles managed auth flows with automatic reauthentication support.
 metadata:
   {
     "openclaw":
@@ -12,7 +12,7 @@ metadata:
 
 # Kernel Auth Skill
 
-Setup and manage Kernel managed authentication connections with safety checks and reauthentication support.
+Setup and manage Kernel managed authentication connections for **any website** with safety checks and reauthentication support.
 
 ## Quick Start
 
@@ -22,18 +22,29 @@ kernel-auth setup gmail
 
 Then visit the URL printed to complete login.
 
+> **Works for any website** — See [Using Custom Domains](#using-custom-domains) for any other site.
+
 ## Usage
 
 ```bash
 kernel-auth setup <service> [--profile-name <name>]
 ```
 
-### Supported Services
+### Built-in Services
 
 - `gmail` → gmail.com
 - `github` → github.com
 - `outlook` → outlook.com
-- `Custom` → `--domain <domain>`
+
+### Using Custom Domains
+
+For any other website, use the `--domain` flag:
+
+```bash
+kernel-auth setup --domain amazon.com --profile-name amazon-main
+kernel-auth setup --domain linkedin.com
+kernel-auth setup --domain example.com --profile-name custom-site
+```
 
 ### Examples
 

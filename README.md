@@ -64,11 +64,11 @@ Command-line interface skills for using Kernel CLI commands.
 
 ### kernel-auth
 
-Setup and manage authentication for services like Gmail, GitHub, Outlook with Kernel's managed auth system.
+Setup and manage authentication for **any website** (Gmail, GitHub, Outlook, custom domains) with Kernel's managed auth system.
 
 | Skill | Description |
 |-------|-------------|
-| **kernel-auth** | Setup and manage Kernel authentication connections with safety checks and reauthentication support |
+| **kernel-auth** | Setup and manage Kernel authentication connections for any website with safety checks and reauthentication support |
 
 ### kernel-sdks
 
