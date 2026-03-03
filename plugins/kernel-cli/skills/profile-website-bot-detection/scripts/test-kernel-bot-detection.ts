@@ -1617,13 +1617,14 @@ async function runTest(): Promise<void> {
     console.error(error);
     process.exit(1);
   } finally {
-    // Disconnect (don't close - browser session continues running)
+    // Use disconnect() not close() — close() destroys remote contexts/pages,
+    // disconnect() drops the CDP client while leaving the Kernel session intact.
     if (browser) {
       try {
-        await browser.close();
+        await browser.disconnect();
         log('Disconnected from browser (session still active)');
       } catch {
-        // Browser might already be closed
+        // Already disconnected
       }
     }
   }
