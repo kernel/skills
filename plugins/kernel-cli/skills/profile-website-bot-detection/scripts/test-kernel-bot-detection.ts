@@ -1062,22 +1062,27 @@ async function detectBlockPage(page: Page): Promise<BlockDetectionResult> {
       if (confidence === 'low') confidence = 'medium';
     }
 
-    // Vendor-specific block detection
-    if (/cloudflare/i.test(pageData.html) || /ray\s*id/i.test(pageData.body)) {
-      vendor = 'Cloudflare';
-      evidence.push('Cloudflare block page detected');
-    } else if (/akamai/i.test(pageData.html) || /access\s*denied.*akamai/i.test(pageData.body)) {
-      vendor = 'Akamai';
-      evidence.push('Akamai block page detected');
-    } else if (/imperva|incapsula/i.test(pageData.html)) {
-      vendor = 'Imperva';
-      evidence.push('Imperva/Incapsula block page detected');
-    } else if (/datadome/i.test(pageData.html)) {
-      vendor = 'DataDome';
-      evidence.push('DataDome block page detected');
-    } else if (/perimeter|human.*security/i.test(pageData.html)) {
-      vendor = 'HUMAN';
-      evidence.push('HUMAN/PerimeterX block page detected');
+    // Vendor attribution for already-detected blocks only.
+    // These patterns match block-page-specific markup, not general CDN usage,
+    // and only run when a block signal has already been found — so a site that
+    // merely loads a Cloudflare/Akamai script doesn't get flagged as suspicious.
+    if (confidence !== 'low') {
+      if (/class="cf-error-details"|cf-error-code|cf-ray/i.test(pageData.html) || /ray\s*id:\s*[\da-f]+/i.test(pageData.body)) {
+        vendor = 'Cloudflare';
+        evidence.push('Cloudflare block page detected');
+      } else if (/access\s*denied.*akamai|akamai.*reference\s*#/i.test(pageData.body)) {
+        vendor = 'Akamai';
+        evidence.push('Akamai block page detected');
+      } else if (/class="(incapsula|imperva)[^"]*"|_Incapsula_Resource/i.test(pageData.html)) {
+        vendor = 'Imperva';
+        evidence.push('Imperva/Incapsula block page detected');
+      } else if (/captcha-delivery\.com|datadome.*blocked/i.test(pageData.html)) {
+        vendor = 'DataDome';
+        evidence.push('DataDome block page detected');
+      } else if (/perimeterx\.com\/blocked|_pxCaptcha/i.test(pageData.html)) {
+        vendor = 'HUMAN';
+        evidence.push('HUMAN/PerimeterX block page detected');
+      }
     }
 
     const isBlocked = evidence.length > 0 && confidence !== 'low';
