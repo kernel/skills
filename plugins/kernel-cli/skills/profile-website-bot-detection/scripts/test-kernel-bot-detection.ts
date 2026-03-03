@@ -528,13 +528,19 @@ const VENDOR_SIGNATURES: VendorSignature[] = [
   // Shape Security (F5)
   {
     vendor: 'Shape Security',
-    urlPatterns: [/shape/i, /f5\.com.*shape/i],
+    urlPatterns: [
+      /shapesecurity\.com/i,
+      /shapeapp\.com/i,
+      /f5\.com\/shape/i,
+      /\/shapes\/telemetry/i,
+      /\/api\/shapes\//i,
+    ],
     cookiePatterns: [],
     headerPatterns: [{ name: /^x-shape/i }, { name: /^x-f5/i }],
     products: [
       {
         name: 'Enterprise Defense',
-        urlPatterns: [/shape.*enterprise/i],
+        urlPatterns: [/shapesecurity\.com/i, /shapeapp\.com/i, /f5\.com\/shape/i],
       },
     ],
   },
