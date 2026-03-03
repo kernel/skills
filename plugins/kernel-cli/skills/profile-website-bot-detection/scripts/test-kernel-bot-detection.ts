@@ -530,7 +530,7 @@ const VENDOR_SIGNATURES: VendorSignature[] = [
     vendor: 'Shape Security',
     urlPatterns: [/shape/i, /f5\.com.*shape/i],
     cookiePatterns: [],
-    headerPatterns: [{ name: /^x-']$/i }],
+    headerPatterns: [{ name: /^x-shape/i }, { name: /^x-f5/i }],
     products: [
       {
         name: 'Enterprise Defense',
