@@ -1242,14 +1242,32 @@ async function runTest(): Promise<void> {
       };
       collectedData.networkResponses.push(entry);
 
+      // Register vendor detection from response URL or headers (mirrors the request handler).
+      // Response headers are the only signal for vendors like Cloudflare (cf-ray),
+      // Kasada (x-kpsdk-*), Imperva (x-iinfo, x-cdn: imperva), and Akamai (akamai-*).
+      if (vendorMatch) {
+        const context = vendorFromHeaders && !vendorFromUrl ? 'header' : 'url';
+        const evidence = context === 'header'
+          ? `Response header match for ${vendorMatch.vendor}`
+          : url;
+        updateVendorDetection(vendorMatch, context, evidence);
+        log(`[VENDOR RESPONSE] ${vendorMatch.vendor} - ${vendorMatch.product}: ${url.substring(0, 80)}...`, 'WARN');
+      }
+
       if (challengeInfo) {
         log(`[CHALLENGE] ${challengeInfo.vendor} - ${challengeInfo.product} (Status: ${status})`, 'WARN');
-        const detection = collectedData.vendorDetections.get(challengeInfo.vendor);
-        if (detection) {
-          detection.challengeType = challengeInfo.product;
-          detection.isBlocked = challengeInfo.isBlocked;
-          detection.blockReason = challengeInfo.blockReason;
+        // Ensure a vendorDetection entry exists before annotating it with challenge info.
+        if (!collectedData.vendorDetections.has(challengeInfo.vendor)) {
+          updateVendorDetection(
+            { vendor: challengeInfo.vendor, product: challengeInfo.product, confidence: 'high', evidence: [`Challenge detected at ${url} (status ${status})`] },
+            'url',
+            url,
+          );
         }
+        const detection = collectedData.vendorDetections.get(challengeInfo.vendor)!;
+        detection.challengeType = challengeInfo.product;
+        detection.isBlocked = challengeInfo.isBlocked;
+        detection.blockReason = challengeInfo.blockReason;
       }
 
       // Track detected vendor scripts (not saved to disk)
