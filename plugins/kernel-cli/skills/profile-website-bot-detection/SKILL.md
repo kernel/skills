@@ -36,10 +36,10 @@ cd scripts
 npm install  # first run only
 
 # Test with stealth browser
-KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$STEALTH_ID TARGET_URL=<url> BROWSER_MODE=stealth npm test
+KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$STEALTH_ID TARGET_URL=<url> BROWSER_MODE=stealth npm run analyze
 
 # Test with non-stealth browser
-KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$NORMAL_ID TARGET_URL=<url> BROWSER_MODE=normal npm test
+KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$NORMAL_ID TARGET_URL=<url> BROWSER_MODE=normal npm run analyze
 ```
 
 ### Step 3: Compare Results
@@ -204,8 +204,8 @@ echo "Normal: $NORMAL_ID"
 
 # Run analysis on both
 cd scripts
-KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$STEALTH_ID TARGET_URL=chase.com BROWSER_MODE=stealth npm test
-KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$NORMAL_ID TARGET_URL=chase.com BROWSER_MODE=normal npm test
+KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$STEALTH_ID TARGET_URL=chase.com BROWSER_MODE=stealth npm run analyze
+KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$NORMAL_ID TARGET_URL=chase.com BROWSER_MODE=normal npm run analyze
 
 # Output structure:
 # ./output/chase-com/stealth/report-*.json

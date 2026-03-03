@@ -4,7 +4,7 @@
   "description": "Bot detection profiling script for Kernel browser",
   "type": "module",
   "scripts": {
-    "test": "tsx test-kernel-bot-detection.ts"
+    "analyze": "tsx test-kernel-bot-detection.ts"
   },
   "dependencies": {
     "@onkernel/sdk": "^0.25.0",

@@ -5,8 +5,8 @@
  * to detect and identify bot detection vendors and their specific products.
  *
  * Usage:
- *   KERNEL_BROWSER_ID=<session_id> npm run test:kernel
- *   KERNEL_BROWSER_ID=<session_id> TARGET_URL=https://example.com npm run test:kernel
+ *   KERNEL_BROWSER_ID=<session_id> npm run analyze
+ *   KERNEL_BROWSER_ID=<session_id> TARGET_URL=https://example.com npm run analyze
  *
  * The script:
  * 1. Connects to an existing browser session via CDP
@@ -1101,7 +1101,7 @@ async function runTest(): Promise<void> {
 ║  ERROR: KERNEL_BROWSER_ID environment variable is required     ║
 ╠════════════════════════════════════════════════════════════════╣
 ║  Usage:                                                        ║
-║    KERNEL_BROWSER_ID=<session_id> npm run test:kernel          ║
+║    KERNEL_BROWSER_ID=<session_id> npm run analyze              ║
 ║                                                                ║
 ║  To create a Kernel browser:                                   ║
 ║    kernel browsers create -s --viewport 1920x1080@25 -t 300    ║
