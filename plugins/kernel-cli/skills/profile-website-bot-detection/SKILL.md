@@ -11,6 +11,7 @@ Analyzes a target website to identify bot detection vendors, their specific prod
 
 - Kernel CLI installed and authenticated
 - Node.js 22+ installed
+- `jq` installed (`brew install jq` or `apt install jq`)
 - `KERNEL_API_KEY` environment variable set. If it is not set, prompt the user to supply.
 
 ## Comparative Workflow (Recommended)
@@ -72,6 +73,7 @@ echo "=== NORMAL VENDORS ===" && cat output/$HOST/normal/report-*.json | jq '.su
 | Normal blocked, stealth passes | 0 blocks | Blocked | Stealth mode is effective |
 | Both blocked | Blocked | Blocked | Bot detection defeats stealth |
 | Different challenge types | Lighter | Harder | Stealth reduces suspicion |
+
 ### Step 5: Provide Summary
 
 After running the comparative analysis, provide a detailed summary report to the user that includes:
@@ -232,25 +234,30 @@ kernel browsers delete -y $STEALTH_ID
 kernel browsers delete -y $NORMAL_ID
 ```
 
-## Analyzing Specific Vendors
+## Vendor-Specific Detection Notes
+
+### Akamai
+- Cookies: `_abck` (core validation), `bm_sz`, `bm_sv`
+- Cookie `~0~` in `_abck` value = valid session
 
 ### Cloudflare
 - Cookies: `__cf_bm`, `cf_clearance`
 - Challenge: `/cdn-cgi/challenge-platform/`
 - Turnstile: `challenges.cloudflare.com/turnstile`
 
+### DataDome
+- Cookie: `datadome`
+- `dd.t === 'bv'` = hard IP block (changing IP required, solving captcha won't help)
+
+### HUMAN/PerimeterX
+- Cookies: `_px2`, `_px3`, `_pxhd`
+- Press & Hold challenge requires behavioral simulation
+
 ### Imperva/Incapsula
 - **utmvc**: Script via `/_Incapsula_Resource`
 - **reese84**: Cookie or `x-d-token` header
 
-## Cleanup
-Automatically delete session by running:
-
-```bash
-# Single browser (use -y to skip confirmation prompt)
-kernel browsers delete -y <session_id>
-
-# After comparative test
-kernel browsers delete -y $STEALTH_ID
-kernel browsers delete -y $NORMAL_ID
-```
+### Kasada
+- Headers: `x-kpsdk-ct`, `x-kpsdk-cd`
+- Flow 1 (IPS): 429 on initial page load, must solve `ips.js` first
+- Flow 2 (FP): Background `/fp` fingerprint requests
