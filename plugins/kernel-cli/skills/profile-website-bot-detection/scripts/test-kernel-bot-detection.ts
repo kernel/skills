@@ -794,7 +794,7 @@ async function findLoginPage(page: Page, baseUrl: string): Promise<string | null
   
   // First, try to find a login link on the page
   try {
-    const loginLink = await page.evaluate((patterns: string[]) => {
+    const loginLink = await page.evaluate((args: { urlPatterns: string[]; textPatterns: string[] }) => {
       const links = Array.from(document.querySelectorAll('a[href]'));
       
       for (const link of links) {
@@ -802,7 +802,7 @@ async function findLoginPage(page: Page, baseUrl: string): Promise<string | null
         const text = link.textContent?.trim() || '';
         
         // Check if href matches login patterns
-        for (const pattern of patterns) {
+        for (const pattern of args.urlPatterns) {
           const regex = new RegExp(pattern, 'i');
           if (regex.test(href)) {
             return href;
@@ -810,13 +810,16 @@ async function findLoginPage(page: Page, baseUrl: string): Promise<string | null
         }
         
         // Check if link text suggests login
-        if (/^(log\s*in|sign\s*in|login|signin|my\s*account)$/i.test(text)) {
-          return href;
+        for (const pattern of args.textPatterns) {
+          const regex = new RegExp(pattern, 'i');
+          if (regex.test(text)) {
+            return href;
+          }
         }
       }
       
       return null;
-    }, LOGIN_URL_PATTERNS.map(p => p.source));
+    }, { urlPatterns: LOGIN_URL_PATTERNS.map(p => p.source), textPatterns: LOGIN_LINK_TEXT_PATTERNS.map(p => p.source) });
     
     if (loginLink) {
       // Convert relative URL to absolute
