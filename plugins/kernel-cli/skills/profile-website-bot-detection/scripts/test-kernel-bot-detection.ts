@@ -52,7 +52,18 @@ function getHostnameForFolder(url: string): string {
   }
 }
 
-const targetUrl = normalizeUrl(process.env.TARGET_URL || 'https://www.hyatt.com');
+if (!process.env.TARGET_URL) {
+  console.error(`
+╔════════════════════════════════════════════════════════════════╗
+║  ERROR: TARGET_URL environment variable is required            ║
+╠════════════════════════════════════════════════════════════════╣
+║  Usage:                                                        ║
+║    TARGET_URL=https://example.com npm run analyze              ║
+╚════════════════════════════════════════════════════════════════╝
+`);
+  process.exit(1);
+}
+const targetUrl = normalizeUrl(process.env.TARGET_URL);
 const baseOutputDir = process.env.OUTPUT_DIR || './output';
 const hostFolder = getHostnameForFolder(targetUrl);
 const browserMode = process.env.BROWSER_MODE || ''; // e.g., 'stealth' or 'normal'
