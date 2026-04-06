@@ -10,7 +10,7 @@
   "homepage": "https://kernel.sh",
   "repository": "https://github.com/kernel/skills",
   "license": "MIT",
-  "logo": "assets/logo.png",
+  "logo": "assets/logo.svg",
   "keywords": [
     "browse", "browser", "browser-automation", "web-scraping", "scrape",
     "playwright", "cloud-browser", "mcp", "ai-agents", "screenshots",
