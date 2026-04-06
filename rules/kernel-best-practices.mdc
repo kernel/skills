@@ -1,0 +1,14 @@
+---
+description: best practices for kernel cloud browser automation and web scraping
+alwaysApply: false
+---
+
+- always delete browsers when done. use try/finally to guarantee cleanup.
+- set `timeout_seconds` on every browser as a safety net. default is 60s — increase for longer tasks, max is 72h.
+- use `stealth: true` when accessing any site with bot detection. stealth mode adds a recaptcha solver and residential proxy automatically.
+- use browser profiles for sites requiring authentication. set `save_profile_changes: true` to persist session changes.
+- prefer the playwright execution API (`execute_playwright_code`) for simple one-off scripts. use the SDK + CDP connection for complex multi-step automations.
+- use `headless: true` for faster execution when you don't need to watch the browser via live view.
+- proxy quality for anti-detection, best to worst: mobile > residential > ISP > datacenter.
+- no charges for idle time — only for active browser usage.
+- never hardcode credentials in automation code. use kernel's managed auth or browser profiles instead.

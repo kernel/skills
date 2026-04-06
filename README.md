@@ -17,6 +17,16 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 /plugin install kernel-sdks
 ```
 
+### Cursor
+
+Install from the Cursor Marketplace:
+
+1. Open Cursor Settings > Plugins
+2. Search for "Kernel"
+3. Install the plugin
+
+The Cursor plugin includes all skills, an MCP server for cloud browser management, and best-practice rules.
+
 ### Any Agent
 ```bash
 npx skills add kernel/skills

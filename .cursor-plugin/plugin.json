@@ -1,0 +1,27 @@
+{
+  "name": "kernel",
+  "displayName": "Kernel",
+  "version": "1.0.0",
+  "description": "browser infrastructure for AI agents and web automations. cloud browsers in <30ms, anti-bot stealth mode, managed auth, playwright execution, and a serverless app platform — no local chrome needed.",
+  "author": {
+    "name": "Kernel",
+    "email": "support@onkernel.com"
+  },
+  "homepage": "https://kernel.sh",
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "browse", "browser", "browser-automation", "web-scraping", "scrape",
+    "playwright", "cloud-browser", "mcp", "ai-agents", "screenshots",
+    "stealth", "headless", "typescript-sdk", "python-sdk", "authentication",
+    "managed-auth", "computer-use", "puppeteer", "cdp"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "browse", "browser-automation", "cloud-browsers",
+    "web-scraping", "mcp", "developer-tools"
+  ],
+  "skills": ["./plugins/kernel-cli/skills/", "./plugins/kernel-sdks/skills/"],
+  "rules": "./rules/"
+}
