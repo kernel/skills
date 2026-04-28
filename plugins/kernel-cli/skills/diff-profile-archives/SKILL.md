@@ -195,7 +195,7 @@ for side in a b; do
   fi
   # Inventory all map-N-* keys (the actual session storage entries)
   strings "$SS_DIR"/*.{log,ldb} 2>/dev/null \
-    | grep -oE 'map-[0-9]+-[A-Za-z._0-9]+' \
+    | grep -oE 'map-[0-9]+-[A-Za-z._0-9-]+' \
     | sort -u > "diff/sessionstorage-keys-$side.txt"
   # Origin → namespace UUID mappings (so you know which map-N belongs to which site)
   strings "$SS_DIR"/*.{log,ldb} 2>/dev/null \
