@@ -170,7 +170,8 @@ Chrome serializes sessionStorage namespaces as `map-N-<key>` entries keyed off a
 for side in a b; do
   SS_DIR=$(find "$side" -type d -name 'Session Storage' -not -path '*/Extension*' | head -1)
   if [ -z "$SS_DIR" ]; then
-    echo "(no Session Storage)" > "diff/sessionstorage-$side.txt"
+    echo "(no Session Storage)" > "diff/sessionstorage-keys-$side.txt"
+    echo "(no Session Storage)" > "diff/sessionstorage-namespaces-$side.txt"
     continue
   fi
   # Inventory all map-N-* keys (the actual session storage entries)
@@ -238,7 +239,7 @@ Extension IDs are 32-char hashes. To map an ID to a name, read its `manifest.jso
 for side in a b; do
   LOGIN_DB=$(find "$side" -name 'Login Data' -not -name '*-journal' | head -1)
   sqlite3 "$LOGIN_DB" \
-    "SELECT origin_url, username_value IS NOT NULL AS has_user, length(password_value) AS pw_len, date_created
+    "SELECT origin_url, length(username_value) > 0 AS has_user, length(password_value) AS pw_len, date_created
      FROM logins ORDER BY origin_url;" \
     > "diff/logins-$side.txt" 2>/dev/null || echo "(no Login Data)" > "diff/logins-$side.txt"
 done
