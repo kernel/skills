@@ -170,7 +170,7 @@ for side in a b; do
     echo "(no Local Storage)" > "diff/mp-events-$side.txt"
     continue
   fi
-  strings "$LS_DIR"/leveldb/*.log 2>/dev/null \
+  strings "$LS_DIR"/leveldb/*.{log,ldb} 2>/dev/null \
     | grep -oE '"event":"[^"]+"|"Last Login":"[^"]+"|"Timestamp":"[^"]+"' \
     | tail -20 > "diff/mp-events-$side.txt"
 done
