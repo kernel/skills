@@ -87,10 +87,14 @@ When in doubt, start with **Cookies + Session Storage + Local Storage + Preferen
 for side in a b; do
   # Cookies live under Default/Cookies (or Default/Network/Cookies on newer Chrome)
   COOKIE_DB=$(find "$side" -name 'Cookies' -not -name '*-journal' | head -1)
+  if [ -z "$COOKIE_DB" ]; then
+    echo "(no Cookies DB)" > "diff/cookies-$side.txt"
+    continue
+  fi
   sqlite3 "$COOKIE_DB" \
     "SELECT host_key, name, length(encrypted_value), is_secure, is_httponly, samesite, expires_utc, source_scheme
      FROM cookies ORDER BY host_key, name;" \
-    > "diff/cookies-$side.txt"
+    > "diff/cookies-$side.txt" 2>/dev/null || echo "(cookies query failed)" > "diff/cookies-$side.txt"
 done
 diff -u diff/cookies-a.txt diff/cookies-b.txt > diff/cookies.diff || true
 ```
@@ -115,6 +119,10 @@ Common bot-detection cookie names to flag if present in one and not the other: `
 ```bash
 for side in a b; do
   PREF=$(find "$side" -name 'Preferences' -not -path '*/Extension*' | head -1)
+  if [ -z "$PREF" ]; then
+    echo "(no Preferences)" > "diff/preferences-$side.json"
+    continue
+  fi
   # Already pretty-printed thanks to --pretty
   cp "$PREF" "diff/preferences-$side.json"
 done
@@ -130,6 +138,12 @@ Highlight any differences in: `intl.*` (locale, accept_languages), `profile.defa
 ```bash
 for side in a b; do
   LS_DIR=$(find "$side" -type d -name 'Local Storage' -not -path '*/Extension*' | head -1)
+  if [ -z "$LS_DIR" ]; then
+    echo "(no Local Storage)" > "diff/localstorage-files-$side.txt"
+    echo "(no Local Storage)" > "diff/localstorage-origins-$side.txt"
+    echo "(no Local Storage)" > "diff/localstorage-signals-$side.txt"
+    continue
+  fi
   # File inventory
   ls -la "$LS_DIR/leveldb" > "diff/localstorage-files-$side.txt" 2>&1
   # All origins that have any data
@@ -180,7 +194,7 @@ for side in a b; do
     | sort -u > "diff/sessionstorage-keys-$side.txt"
   # Origin → namespace UUID mappings (so you know which map-N belongs to which site)
   strings "$SS_DIR"/*.{log,ldb} 2>/dev/null \
-    | grep -oE 'namespace-[a-z0-9_]+-https?://[^/[:space:]]+' \
+    | grep -oE 'namespace-[a-f0-9-]+-https?://[^/[:space:]]+' \
     | sort -u > "diff/sessionstorage-namespaces-$side.txt"
 done
 diff -u diff/sessionstorage-keys-a.txt diff/sessionstorage-keys-b.txt || true
@@ -196,6 +210,7 @@ for side in a b; do
   IDB_DIR=$(find "$side" -type d -name 'IndexedDB' -not -path '*/Extension*' | head -1)
   if [ -z "$IDB_DIR" ]; then
     echo "(no IndexedDB)" > "diff/idb-$side.txt"
+    echo "(no IndexedDB)" > "diff/idb-sizes-$side.txt"
     continue
   fi
   # Per-origin database directories
