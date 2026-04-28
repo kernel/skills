@@ -73,7 +73,7 @@ Pick the surfaces to compare based on what the user described. Don't compare eve
 | settings, language, timezone, UA, viewport | Preferences, Secure Preferences |
 | history, cache, "remembers" | History, Top Sites, Visited Links |
 | storage, indexeddb, quota | Local Storage, Session Storage, IndexedDB, Service Worker |
-| managed-auth profile saved too early / save-time race | Session Storage (sentinel keys absent), Local Storage analytics events as a bootstrap-timing tracer (e.g. Mixpanel `User Login`, Segment `track`) |
+| profile saved before post-login bootstrap finished (save-time race) | Session Storage (sentinel keys absent), Local Storage analytics events as a bootstrap-timing tracer (e.g. Mixpanel `User Login`, Segment `track`) |
 
 When in doubt, start with **Cookies + Session Storage + Local Storage + Preferences** — they explain the majority of "works on A, fails on B" issues. For SPA-style sites that route via URL hash (`/#/...`), put **Session Storage first**: the in-tab auth often lives there, and cookies alone won't tell the story.
 
@@ -162,7 +162,7 @@ For surgical deeper inspection, use a real LevelDB reader (e.g. `npx -y level-ls
 
 #### Session Storage (LevelDB)
 
-For SPAs (sites that route via URL hash like `app.example.com/#/home`), the in-tab auth state typically lives in `sessionStorage` rather than cookies — keys like `authCookie`, `expirationDateTime`, `sessionGUID`, `access_token`, account/tenant GUIDs, etc. If the saved profile is missing these for the auth origin, the app boots, sees no session in `sessionStorage`, and bounces to login even though cookies are intact. **This is the dominant failure mode for managed-auth profiles saved before the post-login SPA bootstrap finishes.**
+For SPAs (sites that route via URL hash like `app.example.com/#/home`), the in-tab auth state typically lives in `sessionStorage` rather than cookies — keys like `authCookie`, `expirationDateTime`, `sessionGUID`, `access_token`, account/tenant GUIDs, etc. If the saved profile is missing these for the auth origin, the app boots, sees no session in `sessionStorage`, and bounces to login even though cookies are intact. **This is a common failure mode when a profile is snapshotted before the post-login SPA bootstrap finishes.**
 
 Chrome serializes sessionStorage namespaces as `map-N-<key>` entries keyed off a per-tab namespace UUID (`namespace-<uuid>-<origin>`). The exact `N` varies by tab navigation history but Chrome restores the namespace→map binding on profile load, so different `map-N` numbers between profiles are fine — what matters is whether the keys exist at all for the origin in question.
 
@@ -186,7 +186,7 @@ diff -u diff/sessionstorage-keys-a.txt diff/sessionstorage-keys-b.txt || true
 diff -u diff/sessionstorage-namespaces-a.txt diff/sessionstorage-namespaces-b.txt || true
 ```
 
-Look for missing auth-shaped keys on the broken side: `authCookie`, `expirationDateTime`, `sessionGUID`, `userGuid*`, `userEmail`, `*_token`, `access_token`, `id_token`, anything that looks like an account/tenant/practice/org GUID. If the working side has a cluster of these and the broken side has only the pre-login subset (e.g. just `__mplss_*` Mixpanel session keys and no auth keys), the snapshot was taken too early.
+Look for missing auth-shaped keys on the broken side: `authCookie`, `expirationDateTime`, `sessionGUID`, `userGuid*`, `userEmail`, `*_token`, `access_token`, `id_token`, anything that looks like an account/tenant/org GUID. If the working side has a cluster of these and the broken side has only the pre-login subset (e.g. just `__mplss_*` Mixpanel session keys and no auth keys), the snapshot was taken too early.
 
 #### IndexedDB
 
@@ -263,8 +263,8 @@ This catches surprises: a file present in one profile and missing in the other (
 Tie each observed difference back to the issue description. Don't dump raw diffs at the user — interpret. Suspect any of these as likely root causes:
 
 - **Auth cookie/session token present on A, missing/expired on B** → session not established or evicted.
-- **Cookies match between A and B but `sessionStorage` auth keys (e.g. `authCookie`, `expirationDateTime`, `sessionGUID`, `*Guid*`, `access_token`) are missing on B** → snapshot was taken before the SPA finished its post-login bootstrap. Classic managed-auth race: URL flipped to the post-login route, profile got saved, SPA hadn't yet hydrated `sessionStorage`. On the next session the SPA boots, sees cookies but no in-tab session state, and bounces to login.
-- **localStorage analytics event tail differs** (e.g. broken profile's last Mixpanel event is `View 2FA Code` or similar mid-flow event, working profile's last event is `User Login` / `Authenticated` / `Identify`) → confirms the snapshot timing is the issue, regardless of which storage layer holds the auth.
+- **Cookies match between A and B but `sessionStorage` auth keys (e.g. `authCookie`, `expirationDateTime`, `sessionGUID`, `*Guid*`, `access_token`) are missing on B** → snapshot was taken before the SPA finished its post-login bootstrap. Classic save-time race: URL flipped to the post-login route, profile got saved, SPA hadn't yet hydrated `sessionStorage`. On the next session the SPA boots, sees cookies but no in-tab session state, and bounces to login.
+- **localStorage analytics event tail differs** (e.g. broken profile's last Mixpanel event is a mid-flow step like a 2FA prompt, working profile's last event is `User Login` / `Authenticated` / `Identify`) → confirms the snapshot timing is the issue, regardless of which storage layer holds the auth.
 - **Bot-detection vendor cookie (`_abck`, `datadome`, `cf_clearance`) only on one side** → the "good" profile already cleared the challenge; the other will be re-challenged.
 - **`intl.accept_languages` or `intl.selected_languages` differs** → server-side localization or geo heuristics will branch.
 - **Extension installed on one side but not the other** → ad blocker, anti-fingerprint, or password manager altering page behavior.
