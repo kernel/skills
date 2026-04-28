@@ -165,7 +165,12 @@ diff -u diff/localstorage-signals-a.txt diff/localstorage-signals-b.txt || true
 ```bash
 # Mixpanel example: pull the last few events from each side
 for side in a b; do
-  strings "$(find $side -type d -name 'Local Storage' -not -path '*/Extension*' | head -1)"/leveldb/*.log 2>/dev/null \
+  LS_DIR=$(find "$side" -type d -name 'Local Storage' -not -path '*/Extension*' | head -1)
+  if [ -z "$LS_DIR" ]; then
+    echo "(no Local Storage)" > "diff/mp-events-$side.txt"
+    continue
+  fi
+  strings "$LS_DIR"/leveldb/*.log 2>/dev/null \
     | grep -oE '"event":"[^"]+"|"Last Login":"[^"]+"|"Timestamp":"[^"]+"' \
     | tail -20 > "diff/mp-events-$side.txt"
 done
