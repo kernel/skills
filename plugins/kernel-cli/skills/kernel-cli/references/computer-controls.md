@@ -111,7 +111,7 @@ kernel browsers playwright execute $SESSION 'await page.goto("https://kernel.sh"
 kernel browsers computer screenshot $SESSION --to kernel-homepage.png
 
 # Cleanup
-kernel browsers delete $SESSION --yes
+kernel browsers delete $SESSION
 ```
 
 **MCP Tool:** Use `kernel:execute_playwright_code` and `kernel:take_screenshot` for playwright execution and screenshots.
