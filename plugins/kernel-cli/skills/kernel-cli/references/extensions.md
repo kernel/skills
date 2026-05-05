@@ -92,7 +92,7 @@ kernel extensions download-web-store \
 kernel extensions upload ./extensions/adguard --name adguard
 
 # 3. Create a browser with the extension
-kernel browsers create --extension adguard
+kernel browsers create --extension adguard -o json
 
 # 4. Verify upload
 kernel extensions list

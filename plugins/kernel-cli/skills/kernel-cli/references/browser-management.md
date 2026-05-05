@@ -28,11 +28,11 @@ Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ```bash
 # Basic browser creation
-kernel browsers create
+kernel browsers create -o json
 
 # With options
 kernel browsers create --stealth --headless -o json
-kernel browsers create --profile-name my-profile
+kernel browsers create --profile-name my-profile -o json
 ```
 
 Output contains `session_id`, `cdp_ws_url`, and `browser_live_view_url`.
@@ -54,7 +54,7 @@ kernel browsers view <session_id> -o json    # Get live view URL
 ## Delete a Browser
 
 ```bash
-kernel browsers delete <session_id> --yes
+kernel browsers delete <session_id>
 ```
 
 **MCP Tool:** Use `kernel:delete_browser` with the `session_id`.
@@ -118,5 +118,5 @@ SESSION=$(kernel browsers create -o json | jq -r '.session_id')
 # [perform operations]
 
 # Cleanup
-kernel browsers delete $SESSION --yes
+kernel browsers delete $SESSION
 ```

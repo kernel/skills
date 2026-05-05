@@ -24,7 +24,7 @@ The Kernel CLI provides command-line access to Kernel's cloud browser platform f
 export KERNEL_API_KEY=your_api_key
 
 # Create a browser session
-kernel browsers create
+kernel browsers create -o json
 
 # Run Playwright automation
 kernel browsers playwright execute <session_id> 'await page.goto("https://example.com")'
@@ -33,7 +33,7 @@ kernel browsers playwright execute <session_id> 'await page.goto("https://exampl
 kernel browsers computer screenshot <session_id> --to screenshot.png
 
 # Cleanup
-kernel browsers delete <session_id> --yes
+kernel browsers delete <session_id>
 ```
 
 ## References
