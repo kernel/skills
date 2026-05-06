@@ -69,6 +69,15 @@ Run Playwright/TypeScript code against a browser session:
 kernel browsers playwright execute <session_id> 'await page.goto("https://example.com")'
 ```
 
+Use `return` to get a value back from the execution context:
+
+```bash
+kernel browsers playwright execute <session_id> '
+  await page.goto("https://example.com");
+  return await page.evaluate(() => document.title);
+'
+```
+
 **MCP Tool:** Use `kernel:execute_playwright_code` to run automation scripts. If no `session_id` is provided, a new browser is created and cleaned up automatically.
 
 ### Take Screenshots
