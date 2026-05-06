@@ -26,8 +26,11 @@ export KERNEL_API_KEY=your_api_key
 # Create a browser session
 kernel browsers create -o json
 
-# Run Playwright automation
-kernel browsers playwright execute <session_id> 'await page.goto("https://example.com")'
+# Run Playwright automation (use `return` to get a value back)
+kernel browsers playwright execute <session_id> '
+  await page.goto("https://example.com");
+  return await page.evaluate(() => document.title);
+'
 
 # Take a screenshot
 kernel browsers computer screenshot <session_id> --to screenshot.png
