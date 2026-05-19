@@ -29,6 +29,8 @@ DEBUG=pw:browser*,pw:protocol* python your_script.py
 
 Reproduce the failure, then capture the last 50–100 lines of stderr/stdout. Those logs include the exact moment the WebSocket closed and which side initiated it.
 
+> **⚠️ Redact before sharing.** `pw:protocol` output includes Network events with full URLs, request/response headers, cookies, and `Authorization` values. Before pasting logs into a support thread or public issue, scrub headers (`cookie`, `authorization`, `set-cookie`, custom auth tokens), query strings, and any body payloads. If the failure path runs against production data, prefer reproducing against a test environment, or send only the close/error lines (the `WebSocket closed` / `Connection closed` lines and ~5–10 surrounding lines) — that's usually enough to identify which side initiated the close.
+
 ### Interpreting the output
 
 | Pattern in logs | What it means | Next step |
