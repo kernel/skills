@@ -97,9 +97,7 @@ For replay recording around a harness session, see the `kernel-cli` skill's repl
 
 5. **Always tear down**: `kernel browsers delete "$SESSION_ID"` when the task ends. Sessions bill until idle timeout. If you lost the SID, `kernel browsers list -o json | jq` recovers it.
 
-6. **`agent_helpers.py` is not a session-state stash**: the harness's editable workspace is for **durable, learned primitives** (reusable helpers, site-specific selectors, kernel SDK wrappers) — not ephemeral data like the session ID. Don't write `KERNEL_SESSION_ID = "..."` there. If you find yourself building a reusable Kernel-aware primitive (e.g. a function that combines a `kernel` CLI call with a harness helper), that *is* a fit for the workspace.
-
-7. **Skill responsibilities**: `browser-harness`'s `SKILL.md` owns helper usage (`new_tab`, `page_info`, `js`, …) and the heredoc form. The `kernel-cli` skill owns `kernel browsers create / list / get / delete` and `replays` lifecycle. This skill only owns the CLI-to-harness wiring.
+6. **Skill responsibilities**: `browser-harness`'s `SKILL.md` owns helper usage (`new_tab`, `page_info`, `js`, …) and the heredoc form. The `kernel-cli` skill owns `kernel browsers create / list / get / delete` and `replays` lifecycle. This skill only owns the CLI-to-harness wiring.
 
 ## Quick Reference
 
