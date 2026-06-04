@@ -16,7 +16,7 @@ Use this skill when you need to:
 - **Span multiple harness calls** across a long task (mint, drive, inspect, drive more, tear down)
 - **Record a replay** around a harness session for review or sharing
 - **Run parallel `browser-harness` sessions** against multiple Kernel browsers
-- **Recover a session ID** after losing local shell state
+- **Recover a session ID** from the harness workspace or `kernel browsers list` after losing local shell state
 
 ## Prerequisites
 
@@ -69,31 +69,54 @@ Common choices when minting a session for harness use:
 
 See `kernel browsers create --help` for the full list.
 
-## Multi-Step Usage (The Daemon Caches the Connection)
+## Multi-Step Usage (Persist the SID in the Harness Workspace)
 
-For tasks that span more than one shell call — mint, drive, inspect, drive more, tear down — you do **not** need to thread `BU_CDP_WS` through every call. The `browser-harness` daemon (addressed by `BU_NAME`) holds the CDP connection between invocations.
+For tasks that span more than one shell call — mint, drive, inspect, drive more, tear down — two things make this painless:
 
-The only state you need to persist between calls is `SESSION_ID`, for teardown. Write it to a known file when you mint:
+1. The `browser-harness` daemon (addressed by `BU_NAME`) holds the CDP connection between invocations, so `BU_CDP_WS` only needs to be set on the **first** call.
+2. The harness's editable workspace (`agent-workspace/agent_helpers.py`) is reloaded on every heredoc, so any Python constant you write there is automatically in scope for subsequent calls.
+
+Stash the session ID as a workspace constant on mint, then reference it directly from any heredoc:
 
 ```bash
-# mint (one shell call)
+# mint
 SESSION=$(kernel browsers create --stealth --timeout 1800 -o json)
-echo "$SESSION" | jq -r '.session_id' > /tmp/kernel-sid
+SID=$(echo "$SESSION" | jq -r '.session_id')
 export BU_CDP_WS=$(echo "$SESSION" | jq -r '.cdp_ws_url')
-BU_NAME=kernel browser-harness <<'PY'             # first call: daemon starts, caches the connection
-new_tab("https://news.ycombinator.com"); print(page_info())
+echo "live view: $(echo "$SESSION" | jq -r '.browser_live_view_url')"
+echo "KERNEL_SESSION_ID = \"$SID\"" >> agent-workspace/agent_helpers.py
+
+# first call: daemon starts, workspace loads — KERNEL_SESSION_ID now available in every heredoc
+BU_NAME=kernel browser-harness <<'PY'
+new_tab("https://news.ycombinator.com")
+print("session:", KERNEL_SESSION_ID, "title:", page_info()["title"])
 PY
 
-# subsequent harness calls (separate shell call — no BU_CDP_WS needed)
+# later harness calls — no BU_CDP_WS needed, KERNEL_SESSION_ID still available
 BU_NAME=kernel browser-harness <<'PY'
 print(js("document.querySelector('.titleline a').textContent"))
 PY
 
-# teardown (separate shell call)
-kernel browsers delete "$(cat /tmp/kernel-sid)" && rm /tmp/kernel-sid
+# teardown — `kernel-cli` skill handles the delete
+kernel browsers delete "$SID"
+sed -i '/^KERNEL_SESSION_ID = /d' agent-workspace/agent_helpers.py
 ```
 
-If `/tmp/kernel-sid` gets lost, recover the session ID with `kernel browsers list -o json | jq`.
+The workspace path is wherever `browser-harness` was installed — see the harness's install.md for the default location. `BH_AGENT_WORKSPACE` overrides it.
+
+Edits to `agent_helpers.py` are picked up by the next heredoc with no `--reload` needed (verified).
+
+### Fallback: a known-path file (no harness workspace)
+
+If you're driving the harness without an editable workspace (e.g. a non-Claude/Codex agent, or a plain shell script), persist the SID in a known file instead:
+
+```bash
+echo "$SID" > /tmp/kernel-sid
+# ... later ...
+kernel browsers delete "$(cat /tmp/kernel-sid)"
+```
+
+If the SID file gets lost, `kernel browsers list -o json | jq` recovers it.
 
 ## Recording
 
@@ -143,23 +166,26 @@ kernel browsers delete "$SID_A" "$SID_B"
 
 4. **Live view URL is for the human**: print `browser_live_view_url` from the create response so the user can watch. The agent only needs `cdp_ws_url`.
 
-5. **Always tear down**: `kernel browsers delete "$SESSION_ID"` when the task ends. Sessions bill until idle timeout. If you lost the SID, `kernel browsers list -o json | jq` recovers it.
+5. **Always tear down**: `kernel browsers delete "$SESSION_ID"` when the task ends. Sessions bill until idle timeout. If you lost the SID, read it from `agent_helpers.py` (`KERNEL_SESSION_ID`) or recover it with `kernel browsers list -o json | jq`.
 
 6. **Skill responsibilities**: `browser-harness`'s `SKILL.md` owns helper usage (`new_tab`, `page_info`, `js`, …) and the heredoc form. The `kernel-cli` skill owns `kernel browsers create / list / get / delete` and `replays` lifecycle. This skill only owns the CLI-to-harness wiring.
 
 ## Quick Reference
 
 ```bash
-# Mint + first harness call (one shell)
+# Mint + stash SID in workspace
 SESSION=$(kernel browsers create --stealth --timeout 1800 -o json)
-echo "$SESSION" | jq -r '.session_id' > /tmp/kernel-sid
+SID=$(echo "$SESSION" | jq -r '.session_id')
 export BU_CDP_WS=$(echo "$SESSION" | jq -r '.cdp_ws_url')
 echo "live view: $(echo "$SESSION" | jq -r '.browser_live_view_url')"
+echo "KERNEL_SESSION_ID = \"$SID\"" >> agent-workspace/agent_helpers.py
+
+# First harness call — daemon starts, workspace loads KERNEL_SESSION_ID
 BU_NAME=kernel browser-harness <<'PY'
-new_tab("https://example.com"); print(page_info())
+new_tab("https://example.com"); print("sid:", KERNEL_SESSION_ID, page_info())
 PY
 
-# More harness calls (separate shells, no BU_CDP_WS needed)
+# Later harness calls — no BU_CDP_WS, KERNEL_SESSION_ID still available from workspace
 BU_NAME=kernel browser-harness <<'PY'
 print(js("document.title"))
 PY
@@ -168,5 +194,6 @@ PY
 kernel browsers list -o json | jq
 
 # Teardown
-kernel browsers delete "$(cat /tmp/kernel-sid)" && rm /tmp/kernel-sid
+kernel browsers delete "$SID"
+sed -i '/^KERNEL_SESSION_ID = /d' agent-workspace/agent_helpers.py
 ```
