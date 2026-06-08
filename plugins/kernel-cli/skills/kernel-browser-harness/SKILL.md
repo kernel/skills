@@ -19,8 +19,8 @@ Use this skill when you need to:
 ## Prerequisites
 
 - Load the `kernel-cli` skill for Kernel CLI installation and authentication.
-- Install `browser-harness` per its [setup-prompt](https://github.com/browser-use/browser-harness#setup-prompt). If your agent uses Claude Code or Codex, paste that prompt into the same session before using this skill — it installs the harness binary and registers `browser-harness`'s own `SKILL.md` (helper library, heredoc form, interaction skills, daemon model).
-- Install `jq` (used to pull fields from the CLI's `-o json` output).
+- If `browser-harness` is not already on `$PATH`, install it per its [setup-prompt](https://github.com/browser-use/browser-harness#setup-prompt). If it is already installed, **do not reinstall or run setup prompts** — go straight to minting the Kernel browser.
+- Install `jq` only if missing (used to pull fields from the CLI's `-o json` output).
 
 ## Environment Variables
 
@@ -32,15 +32,16 @@ Use this skill when you need to:
 
 ## Basic Usage
 
-Mint a Kernel browser, extract `cdp_ws_url`, set `BU_CDP_WS`, then invoke `browser-harness` with the session ID as `BU_NAME`:
+Fast path: create **exactly one** Kernel browser, save the JSON, derive every value from that saved JSON, then pass the exact CDP URL to the first harness call. Do not re-run `kernel browsers create` just to recover variables or copy/paste values from terminal output.
 
 ```bash
-SESSION=$(kernel browsers create --stealth -o json)
-SESSION_ID=$(echo "$SESSION" | jq -r '.session_id')
-export BU_CDP_WS=$(echo "$SESSION" | jq -r '.cdp_ws_url')
-echo "live view: $(echo "$SESSION" | jq -r '.browser_live_view_url')"
+SESSION=$(kernel browsers create --stealth --timeout 1800 -o json)
+printf '%s\n' "$SESSION" > /tmp/kernel-session.json
+SESSION_ID=$(jq -r '.session_id' /tmp/kernel-session.json)
+CDP_WS=$(jq -r '.cdp_ws_url' /tmp/kernel-session.json)
+echo "live view: $(jq -r '.browser_live_view_url // empty' /tmp/kernel-session.json)"
 
-BU_NAME=$SESSION_ID browser-harness <<'PY'
+BU_NAME="$SESSION_ID" BU_CDP_WS="$CDP_WS" browser-harness <<'PY'
 new_tab("https://news.ycombinator.com")
 wait_for_load()
 print(page_info())
@@ -93,27 +94,30 @@ For replay recording around a harness session, see the `kernel-cli` skill's repl
 
 3. **Daemon won't pick up a new session**: if you mint a new Kernel browser but reuse a stale `BU_NAME`, the daemon stays connected to the old CDP URL. Using `BU_NAME=$SESSION_ID` avoids this entirely (new session, new socket). If you do hit it manually, `browser-harness --reload` stops the daemon so the next call connects fresh.
 
-4. **Live view URL is for the human**: print `browser_live_view_url` from the create response so the user can watch. The agent only needs `cdp_ws_url`.
+4. **Extra creates waste time and leak money**: one task should usually call `kernel browsers create` once. Save the `-o json` response immediately and reuse it; do not run a second create after seeing output, and do not hardcode IDs or CDP URLs from a previous command.
 
-5. **Always tear down**: `kernel browsers delete "$SESSION_ID"` when the task ends. Sessions bill until idle timeout. If you lost the SID, `kernel browsers list -o json | jq` recovers it.
+5. **Live view URL is for the human**: print `browser_live_view_url` from the create response so the user can watch. The agent only needs `cdp_ws_url`.
 
-6. **Skill responsibilities**: `browser-harness`'s `SKILL.md` owns helper usage (`new_tab`, `page_info`, `js`, …) and the heredoc form. The `kernel-cli` skill owns `kernel browsers create / list / get / delete` and `replays` lifecycle. This skill only owns the CLI-to-harness wiring.
+6. **Always tear down**: run `kernel browsers delete "$SESSION_ID"` when the task ends. Sessions bill until idle timeout. If you are wrapping several steps in a script, register a cleanup `trap` after `SESSION_ID` is known; for ad hoc command use, an explicit delete at the end is clearer. If you lost the SID, `kernel browsers list -o json | jq` recovers it.
+
+7. **Skill responsibilities**: `browser-harness`'s `SKILL.md` owns helper usage (`new_tab`, `page_info`, `js`, …) and the heredoc form. The `kernel-cli` skill owns `kernel browsers create / list / get / delete` and `replays` lifecycle. This skill only owns the CLI-to-harness wiring.
 
 ## Quick Reference
 
 ```bash
-# Mint
+# Mint once
 SESSION=$(kernel browsers create --stealth --timeout 1800 -o json)
-SESSION_ID=$(echo "$SESSION" | jq -r '.session_id')
-export BU_CDP_WS=$(echo "$SESSION" | jq -r '.cdp_ws_url')
-echo "live view: $(echo "$SESSION" | jq -r '.browser_live_view_url')"
+printf '%s\n' "$SESSION" > /tmp/kernel-session.json
+SESSION_ID=$(jq -r '.session_id' /tmp/kernel-session.json)
+CDP_WS=$(jq -r '.cdp_ws_url' /tmp/kernel-session.json)
 
-# Drive (any number of harness calls — only the first needs BU_CDP_WS)
-BU_NAME=$SESSION_ID browser-harness <<'PY'
+# Drive (first call seeds the daemon with the exact signed CDP URL)
+BU_NAME="$SESSION_ID" BU_CDP_WS="$CDP_WS" browser-harness <<'PY'
 new_tab("https://example.com"); print(page_info())
 PY
 
-BU_NAME=$SESSION_ID browser-harness <<'PY'
+# Later calls reuse BU_NAME only
+BU_NAME="$SESSION_ID" browser-harness <<'PY'
 print(js("document.title"))
 PY
 
