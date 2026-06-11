@@ -40,8 +40,9 @@ The patterns below are the video-specific composition lessons — what makes the
 - **A race is in *time*, not distance.** If two things "race", normalize each lane to the same finish and let them arrive at different *times* (fast one snaps and waits) — don't make the fast one travel a shorter track.
 - **Make slow feel slow, fast feel instant.** Slow path keeps an eased curve; the fast path goes linear and short (~150ms) so it reads as a snap, not a glide.
 - **Stage labels: anchor to the segment start, absolutely positioned — not fixed-width flex cells.** A narrow segment (e.g. a 300ms stage in a 6,900ms bar) will truncate its label ("identity bind" → "ident") if you size the label to the segment. Position each label at its start `left%`, `white-space: nowrap`, and let short ones overflow into the empty space after.
-- **Count up the numbers** rather than snapping them — a ticking `ms` value sells motion even on otherwise-static bars.
-- **Open on a held beat** (~400ms of the composed-but-unstarted state) so the viewer reads the labels before anything moves.
+- **Count up the numbers** rather than snapping them — a ticking `ms` value sells motion even on otherwise-static bars. Set `font-variant-numeric: tabular-nums` (or a monospace font) on any live readout — proportional digits change width every frame and jitter the surrounding layout.
+- **One reveal at a time.** Don't animate two independent elements simultaneously — the eye can't track both. Reveal, beat, next.
+- **Open on a held beat** (~400ms of the composed-but-unstarted state) so the viewer reads the labels before anything moves, and **hold the final frame ≥1s** before the clip ends.
 
 **Legibility for video, not for a desktop viewport:** type much larger than a normal web page (it'll be watched small / on mobile / autoplaying muted), generous spacing, high contrast. Render at 1600×900 or 1920×1080; bump `deviceScaleFactor` to 2 for retina-crisp text if the file size is fine.
 
@@ -152,7 +153,7 @@ Launch Chromium headful-less first:
   --remote-debugging-port=9460 about:blank >/tmp/chrome.log 2>&1 &
 ```
 
-Size the clip: `durationMs` = intro hold + animation + a hold on the final frame.
+Size the clip: `durationMs` = intro hold + animation + a hold on the final frame (≥1s).
 
 ### 3. Encode with ffmpeg
 
@@ -210,4 +211,5 @@ Share `<tunnel>/out.mp4`. Tear down when they've grabbed it.
 - Keep clips short (a few seconds to ~30s). One idea per clip; chain clips if needed.
 - 60 fps, 1600×900 (or 1920×1080) is a good default. Bump `deviceScaleFactor` to 2 for retina-crisp text if file size allows.
 - Make timings honest. If a number/curve implies a real metric, match the source (blog, benchmark). Label any reconstructed/illustrative element as such — don't pass an animation off as a live measurement.
-- Always preview a still before the full record, and re-check a frame from the final MP4 to confirm it encoded.
+- Always preview a still before the full record.
+- Verify the encoded MP4 before sharing, not just the PNG frames: `ffprobe -show_entries stream=nb_frames,duration out.mp4` should match `durationMs` × fps, and extract + view the first, a middle, and the last frame (`ffmpeg -ss <t> -i out.mp4 -frames:v 1 check.png`) to catch font flicker, missing assets, or a truncated render.
