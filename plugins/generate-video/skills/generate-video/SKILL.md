@@ -179,7 +179,7 @@ ffmpeg -y -framerate 60 -i frames/f%04d.png -i pal.png \
 
 ### 4. Iterate (preview a single frame, no full record)
 
-Before recording, **preview one frame** at a chosen virtual time to check the look: load the page with the flags injected, set `__vt`, wait 2 rAFs, `captureScreenshot` to a PNG, and view it. Tweak copy/timing/curve, repeat. Only do a full 60 fps record once the still looks right — it saves minutes per loop.
+Before recording, **preview one frame** at a chosen virtual time to check the look: load the page with the flags injected, advance the clock (`window.__vt=<t>; window.dispatchEvent(new Event('vt'))` — the dispatch matters, `useClock` only updates on the `vt` event), wait 2 rAFs, `captureScreenshot` to a PNG, and view it. Tweak copy/timing/curve, repeat. Only do a full 60 fps record once the still looks right — it saves minutes per loop.
 
 ### 5. Deliver
 
