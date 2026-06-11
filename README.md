@@ -15,6 +15,9 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 
 # Install the SDK skills (TypeScript & Python)
 /plugin install kernel-sdks
+
+# Install the video generation skill
+/plugin install generate-video
 ```
 
 ### Cursor
@@ -38,6 +41,7 @@ npx skills add kernel/skills
 git clone https://github.com/kernel/skills.git
 cp -r skills/plugins/kernel-cli ~/.claude/skills/
 cp -r skills/plugins/kernel-sdks ~/.claude/skills/
+cp -r skills/plugins/generate-video ~/.claude/skills/
 ```
 
 ## Prerequisites
@@ -78,6 +82,14 @@ SDK skills for building browser automation with TypeScript and Python.
 |-------|-------------|
 | **typescript-sdk** | Build automation with Kernel's Typescript SDK |
 | **python-sdk** | Build automation with kernel's Python SDK |
+
+### generate-video
+
+Render smooth, deterministic MP4s from web scenes. No Kernel account required — just Chromium, Node, and ffmpeg.
+
+| Skill | Description |
+|-------|-------------|
+| **generate-video** | Generate judder-free MP4 videos from web pages and animated visualizations: drive headless Chromium over CDP with an injected virtual clock, capture exact per-frame PNGs, encode with ffmpeg |
 
 ## Documentation
 

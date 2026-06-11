@@ -22,6 +22,14 @@
       },
       "description": "TypeScript and Python SDK skills for building browser automation with Kernel's Typescript and Python SDKs. Use when writing code to control browsers programmatically.",
       "source": "./plugins/kernel-sdks"
+    },
+    {
+      "name": "generate-video",
+      "author": {
+        "name": "Kernel"
+      },
+      "description": "Generate crisp, perfectly smooth MP4 videos from web pages and animated visualizations by driving headless Chromium over CDP with deterministic frame-stepping, then encoding with ffmpeg. Use when making demo videos, explainer clips, or launch animations.",
+      "source": "./plugins/generate-video"
     }
   ]
 }
