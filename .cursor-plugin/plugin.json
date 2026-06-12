@@ -22,6 +22,6 @@
     "browse", "browser-automation", "cloud-browsers",
     "web-scraping", "mcp", "developer-tools"
   ],
-  "skills": ["./plugins/kernel-cli/skills/", "./plugins/kernel-sdks/skills/"],
+  "skills": ["./plugins/kernel-cli/skills/", "./plugins/kernel-sdks/skills/", "./plugins/generate-video/skills/"],
   "rules": "./rules/"
 }

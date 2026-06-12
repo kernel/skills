@@ -1,0 +1,11 @@
+{
+  "name": "generate-video",
+  "version": "1.0.0",
+  "description": "Generate crisp, perfectly smooth MP4 videos from web pages and animated visualizations using deterministic CDP frame-stepping and ffmpeg",
+  "author": {
+    "name": "Kernel",
+    "url": "www.kernel.sh"
+  },
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT"
+}
