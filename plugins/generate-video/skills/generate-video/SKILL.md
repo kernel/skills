@@ -118,7 +118,8 @@ fs.rmSync(DIR, { recursive: true, force: true }); fs.mkdirSync(DIR, { recursive:
 
 // connect to a PAGE target (not the browser endpoint — it lacks Page/Runtime)
 const list = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();
-const page = list.find((t) => t.type === "page") || list[0];
+const page = list.find((t) => t.type === "page");
+if (!page) throw new Error("no page target in /json/list — is Chromium running with a tab open?");
 const ws = new WebSocket(page.webSocketDebuggerUrl.replace("localhost", "127.0.0.1"));
 let id = 0; const pend = new Map();
 const send = (m, p = {}) => new Promise((r) => { const i = ++id; pend.set(i, r); ws.send(JSON.stringify({ id: i, method: m, params: p })); });
