@@ -103,6 +103,8 @@ export function useRamp(target: number, dur: number, go: boolean, power = 2): nu
 
 Drive **all** time-based state from this — bar widths, count-ups, and phase switches (use `clock >= 4800` instead of `setTimeout`). Anything still on `setTimeout`/real `rAF` will freeze during recording.
 
+One caveat on live (non-recording) mode: each `useClock` instance runs its own `rAF` loop anchored at its own mount time, so hooks in components mounted at different times read different timelines, and a late-mounted component starts at 0. Mount the whole scene up front (the patterns here all do), or call `useClock()` once in the scene root and derive ramps from that single value. Recording is immune either way — every instance reads the same global `window.__vt`.
+
 Tip: a slower thing should keep an eased curve (`power 2`); to make something read as *instant* against it, make it **linear and short** (`power 1`, ~150 ms).
 
 ### 2. Record deterministically (the recorder)
