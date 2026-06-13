@@ -1,0 +1,33 @@
+name: Notify hypeship of skill update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**'
+      - '.github/workflows/notify-hypeship.yml'
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate hypeship dispatch token
+        id: token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.HYPESHIP_DISPATCH_APP_ID }}
+          private-key: ${{ secrets.HYPESHIP_DISPATCH_APP_PRIVATE_KEY }}
+          owner: kernel
+          repositories: hypeship
+
+      - name: Dispatch skills-updated to kernel/hypeship
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          SOURCE_REPO: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          gh api repos/kernel/hypeship/dispatches \
+            -f event_type=skills-updated \
+            -f "client_payload[source_repo]=${SOURCE_REPO}" \
+            -f "client_payload[sha]=${SOURCE_SHA}"
