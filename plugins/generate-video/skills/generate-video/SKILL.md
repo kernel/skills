@@ -55,6 +55,22 @@ The patterns below are the video-specific composition lessons — what makes the
 - **Encode**: **ffmpeg** (PNG image sequence → H.264).
 - **Deliver**: `python3 -m http.server` + a **cloudflared** quick tunnel when the user is remote from the rendering machine.
 
+### Preflight: check the tools are installed
+
+Don't get 500 frames deep and discover `ffmpeg` is missing. Verify up front:
+
+```bash
+for c in chromium ffmpeg ffprobe node cloudflared; do command -v "$c" >/dev/null && echo "ok  $c" || echo "MISSING  $c"; done
+```
+
+`chromium`, `node`, and `cloudflared` are usually present; **`ffmpeg` (with `ffprobe`) frequently is not.** Install it before recording:
+
+```bash
+sudo apt-get update && sudo apt-get install -y ffmpeg   # ffprobe ships in the same package
+```
+
+The `apt-get update` is not optional — a bare `apt-get install -y ffmpeg` fails with `E: Unable to locate package ffmpeg` on a VM whose package lists are stale (the common case on a fresh box). Update first, then install.
+
 ## Workflow
 
 ### 1. Build the scene with an injectable clock
