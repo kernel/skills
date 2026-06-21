@@ -89,11 +89,12 @@ SDK skills for building browser automation with TypeScript and Python.
 
 ### cua
 
-Computer-use loop for Kernel cloud browsers — CLI for shell-driven automation and the `@onkernel/cua-agent` TS library for embedding in your own agents.
+Computer-use loop for Kernel cloud browsers — CLI for shell-driven automation and the `@onkernel/cua-agent` TS library for embedding in your own agents. One plugin, two skills (load whichever matches the task).
 
 | Skill | Description |
 |-------|-------------|
-| **cua** | Drive Kernel cua via the `cua` CLI (one-shot subcommands, named sessions, TUI) or the `@onkernel/cua-agent` library (`CuaAgent` / `CuaAgentHarness`); covers model selection, profile persistence, transcripts, live-view handoff, and Playwright escape hatches |
+| **cua-cli** | Drive a Kernel browser from shell via the `cua` binary: one-shot subcommands, named sessions, TUI, profile persistence, transcripts, live-view handoff |
+| **cua-agent** | Build TypeScript apps that embed Kernel cua's loop with `CuaAgent` / `CuaAgentHarness`: provider switching, custom tools, session repos, event-stream debugging |
 
 ### generate-video
 

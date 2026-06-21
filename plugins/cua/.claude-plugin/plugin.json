@@ -1,7 +1,7 @@
 {
   "name": "cua",
   "version": "1.0.0",
-  "description": "Drive Kernel cua: the `cua` CLI for shell-driven computer-use automation, and the @onkernel/cua-agent TS library for building your own computer-use agents on Kernel browsers",
+  "description": "Kernel cua skills: `cua-cli` for shell-driven computer-use automation via the `cua` binary, and `cua-agent` for building TypeScript apps on the @onkernel/cua-agent library (CuaAgent / CuaAgentHarness)",
   "author": {
     "name": "Kernel",
     "url": "www.kernel.sh"
