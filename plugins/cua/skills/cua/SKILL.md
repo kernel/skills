@@ -106,7 +106,7 @@ cua session show login                      # full JSON metadata
 
 Pass `--profile` when starting the named session; later `cua -s <name> …` calls attach to the same browser, so they don't need the profile flag.
 
-**Liveness**: Kernel browsers time out from inactivity. If you see `error session "<name>" is no longer alive on Kernel …`, run `cua session stop <name> && cua --profile <name> session start <name>` to re-provision with the same persisted profile.
+**Liveness**: Kernel browsers time out from inactivity. If you see `error session "<name>" is no longer alive on Kernel …`, run `cua session stop <name> && cua --profile <same-profile-as-before> session start <name>` to re-provision with the same persisted profile.
 
 Named-session metadata lives in `$XDG_DATA_HOME/cua/named-sessions/<name>.json`.
 
@@ -214,34 +214,31 @@ Not every provider's native vocabulary includes navigation. Pass `computerUseExt
 
 ## Browser config
 
-Provision the underlying Kernel browser to match the task before handing it to cua:
+The CLI always provisions stealth-on browsers and exposes profile persistence via `--profile` / `--profile-no-save-changes`. For any other browser knob — non-stealth, custom viewport, proxy, custom timeout — use the library and provision the browser yourself:
 
 ```ts
 const browser = await client.browsers.create({
-  stealth: true,           // bypass most fingerprinting; default off
-  headless: false,         // headful => live view URL; smaller image when headless
+  stealth: true,           // CLI hardcodes this on; flip to false only via the library
+  headless: false,         // headful => live view URL; headless => no live view, smaller image
   timeout: 1800,           // seconds before the Kernel browser auto-times-out
   profile: { name: "github", save_changes: true },  // load + save persisted state
   // proxy: { ... },        // optional outbound proxy
 });
 ```
 
-The CLI exposes equivalents via `--profile`, `--profile-no-save-changes`, and the underlying Kernel CLI flags (the cua CLI itself doesn't surface a `--stealth` flag yet — when stealth matters, use the library or pre-create the browser via `kernel browsers create` and reuse the session).
+If you need a custom-provisioned browser from the CLI, pre-create it with `kernel browsers create` and attach via `cua session …` — see the kernel-cli skill for the create flag reference.
 
 ## Adding your own tools
 
-```ts
-import { CuaAgentHarness } from "@onkernel/cua-agent";
-import { tool } from "@earendil-works/pi-agent-core";
+Pass any pi `AgentTool` (see [`@earendil-works/pi-agent-core`](https://www.npmjs.com/package/@earendil-works/pi-agent-core) for the tool shape) via `extraTools`. The CUA defaults stay installed; your tools run alongside them.
 
-const lookupOrder = tool({
-  name: "lookup_order",
-  description: "Look up an order by id in our DB.",
-  schema: { /* … */ },
-  handler: async ({ orderId }) => {
-    return await db.orders.findOne(orderId);
-  },
-});
+```ts
+import type { AgentTool } from "@onkernel/cua-agent";
+import { CuaAgentHarness } from "@onkernel/cua-agent";
+
+const lookupOrder: AgentTool = {
+  // shape per pi-agent-core docs: name, description, schema, run, ...
+};
 
 const harness = new CuaAgentHarness({
   browser, client,
@@ -312,7 +309,7 @@ kernel browsers exec <session-id> --code "
 "
 ```
 
-From the library, you already have `browser.session_id` and the Kernel client, so call into the SDK directly.
+From the library, you already have `browser.session_id` and the Kernel client — call the same exec endpoint via the SDK.
 
 ## Debugging
 
@@ -377,9 +374,12 @@ cua --print -m anthropic:claude-opus-4-7 "..."
 # Get the live view URL
 cua session show work | jq -r .live_url
 kernel browsers view <session-id>   # alternative
+```
 
-# Library — minimal harness
+```ts
+// Library — minimal harness
 import { CuaAgentHarness, InMemorySessionRepo, NodeExecutionEnv } from "@onkernel/cua-agent";
+
 const session = await new InMemorySessionRepo().create({ id: "main" });
 const harness = new CuaAgentHarness({
   browser, client, session,
