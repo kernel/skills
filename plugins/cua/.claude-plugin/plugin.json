@@ -1,0 +1,11 @@
+{
+  "name": "cua",
+  "version": "1.0.0",
+  "description": "Drive Kernel cua: the `cua` CLI for shell-driven computer-use automation, and the @onkernel/cua-agent TS library for building your own computer-use agents on Kernel browsers",
+  "author": {
+    "name": "Kernel",
+    "url": "www.kernel.sh"
+  },
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT"
+}

@@ -18,6 +18,9 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 
 # Install the video generation skill
 /plugin install generate-video
+
+# Install the cua skill (CLI + library for computer-use on Kernel)
+/plugin install cua
 ```
 
 ### Cursor
@@ -42,6 +45,7 @@ git clone https://github.com/kernel/skills.git
 cp -r skills/plugins/kernel-cli ~/.claude/skills/
 cp -r skills/plugins/kernel-sdks ~/.claude/skills/
 cp -r skills/plugins/generate-video ~/.claude/skills/
+cp -r skills/plugins/cua ~/.claude/skills/
 ```
 
 ## Prerequisites
@@ -82,6 +86,14 @@ SDK skills for building browser automation with TypeScript and Python.
 |-------|-------------|
 | **typescript-sdk** | Build automation with Kernel's Typescript SDK |
 | **python-sdk** | Build automation with kernel's Python SDK |
+
+### cua
+
+Computer-use loop for Kernel cloud browsers — CLI for shell-driven automation and the `@onkernel/cua-agent` TS library for embedding in your own agents.
+
+| Skill | Description |
+|-------|-------------|
+| **cua** | Drive Kernel cua via the `cua` CLI (one-shot subcommands, named sessions, TUI) or the `@onkernel/cua-agent` library (`CuaAgent` / `CuaAgentHarness`); covers model selection, profile persistence, transcripts, live-view handoff, and Playwright escape hatches |
 
 ### generate-video
 
