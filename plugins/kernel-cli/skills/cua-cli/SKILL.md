@@ -10,7 +10,7 @@ description: Drive a Kernel cloud browser from the shell using the `cua` CLI. Us
 ## When to use this skill
 
 - **Use this skill** when you need shell-callable computer-use steps (`cua open`, `cua click`, `cua do …`), an interactive TUI, or want to chain browser actions in a shell pipeline.
-- **Reach for [`cua-agent`](../cua-agent/SKILL.md)** when you're writing a TypeScript app that needs to embed cua's prompt → screenshot → tool-call loop programmatically.
+- **Reach for the `cua-agent` skill** (in the `kernel-sdks` plugin) when you're writing a TypeScript app that needs to embed cua's prompt → screenshot → tool-call loop programmatically.
 - **Reach for `kernel-agent-browser`** when you need deterministic browser scripting (semantic selectors, `find role`, `wait --text`, accessibility-tree snapshots).
 - **Reach for `kernel-cli`** for raw Kernel browser management (`kernel browsers create`, `kernel browsers exec`, profile / proxy CRUD).
 

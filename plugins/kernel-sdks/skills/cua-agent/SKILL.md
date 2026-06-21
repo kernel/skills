@@ -15,7 +15,7 @@ Both translate per-provider computer-use tool calls (OpenAI's `computer`, Anthro
 ## When to use this skill
 
 - **Use this skill** when writing TS code that embeds cua inside a larger app, needs a custom session repo, runs its own pi tools alongside computer use, or reacts to per-event streams programmatically.
-- **Reach for [`cua-cli`](../cua-cli/SKILL.md)** when shell-callable computer-use is enough (`cua open`, `cua click`, `cua do`).
+- **Reach for the `cua-cli` skill** (in the `kernel-cli` plugin) when shell-callable computer-use is enough (`cua open`, `cua click`, `cua do`).
 - **Reach for `kernel-typescript-sdk`** for raw Playwright / CDP control over a Kernel browser without an LLM in the loop.
 
 ## Prerequisites
