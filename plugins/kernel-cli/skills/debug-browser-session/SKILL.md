@@ -18,22 +18,7 @@ If either is missing, ask for it before proceeding. The issue description determ
 
 ## Prerequisites
 
-Install and authenticate the Kernel CLI:
-
-```bash
-brew install onkernel/tap/kernel    # or: npm install -g @onkernel/cli
-kernel auth status                  # confirm you're logged in (or KERNEL_API_KEY is set)
-```
-
-Explore commands recursively when you need options:
-
-```bash
-kernel --help
-kernel browsers --help
-kernel browsers fs --help
-kernel browsers process --help
-kernel browsers playwright --help
-```
+Load the `kernel-cli` skill for Kernel CLI installation and authentication. Its references cover the full command surface (`browser-management`, `filesystem-ops`, `process-execution`, `computer-controls`) when you need options beyond the ones below.
 
 ## Core CLI commands
 
@@ -46,7 +31,7 @@ kernel browsers get <SESSION_ID>
 
 ### Screenshot the current state
 ```bash
-kernel browsers screenshot <SESSION_ID>
+kernel browsers computer screenshot <SESSION_ID> --to screenshot.png
 ```
 
 ### Inspect page state via Playwright
@@ -63,7 +48,7 @@ kernel browsers fs read-file <SESSION_ID> --path /var/log/supervisord/neko
 
 ### List files in the VM
 ```bash
-kernel browsers fs ls <SESSION_ID> --path /var/log
+kernel browsers fs list-files <SESSION_ID> --path /var/log
 ```
 
 ### Run commands inside the VM
@@ -87,7 +72,7 @@ Signs of bot detection:
 - "Access Denied", captcha pages, or "Checking your browser…" messages
 - `stealth: false` in the browser config (check with `kernel browsers get`)
 
-Solutions: enable `stealth: true`, use profiles with real auth, or try shorter session lifetimes.
+Solutions: stealth is set at creation and can't be toggled on a live session, so recreate it with `kernel browsers create --stealth`; use profiles with real auth; or try shorter session lifetimes.
 
 ### Browser not responding
 Cause: Chrome process crashed or hung.
@@ -100,7 +85,7 @@ Check: `curl` from inside the VM, `/etc/resolv.conf` for DNS config, proxy setti
 
 ### Live view not working
 Cause: Neko/WebRTC issues.
-Check: Neko logs for connection errors.
+Check: fetch the live view URL with `kernel browsers view <SESSION_ID>` and open it; check Neko logs for connection errors.
 Solutions: check for a firewall blocking WebRTC, verify the browser isn't in headless mode.
 
 ## Expected log entries (normal operation)
