@@ -36,7 +36,7 @@ The three packages divide responsibility:
 - `@onkernel/cua-ai` — model catalog (`getCuaModel` / `listCuaModels`), canonical CUA tool schemas, per-provider adapters.
 - `@onkernel/sdk` — Kernel SDK client used to provision the browser.
 
-Both classes re-export the full pi-agent-core surface from `@onkernel/cua-agent`, including `NodeExecutionEnv` (via the `/node` subpath under the hood) and `InMemorySessionRepo`. Import them from `@onkernel/cua-agent` directly.
+Both classes re-export the full pi-agent-core surface from `@onkernel/cua-agent`, including `NodeExecutionEnv` (via the `/node` subpath under the hood) and `InMemorySessionRepo`. Import them from `@onkernel/cua-agent` directly — you don't install `@earendil-works/pi-agent-core` separately; it's the upstream reference docs only.
 
 ## Environment variables
 
@@ -50,6 +50,8 @@ If you don't pass explicit auth callbacks, both classes resolve provider keys vi
 | `GOOGLE_API_KEY` or `GEMINI_API_KEY` | `google:…` models |
 | `YUTORI_API_KEY` | `yutori:…` models |
 | `TZAFON_API_KEY` | `tzafon:…` models |
+
+When a provider lists two env vars, `getCuaEnvApiKey` returns the first one set in this order: `ANTHROPIC_OAUTH_TOKEN` then `ANTHROPIC_API_KEY`; `GOOGLE_API_KEY` then `GEMINI_API_KEY`.
 
 ## Quick start — `CuaAgentHarness`
 
@@ -79,15 +81,17 @@ const harness = new CuaAgentHarness({
 const textOf = (m: AssistantMessage) =>
   m.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("").trim();
 
-const first = await harness.prompt("Open example.com and describe what you see.");
-console.log(textOf(first));
+try {
+  const first = await harness.prompt("Open example.com and describe what you see.");
+  console.log(textOf(first));
 
-// Swap providers mid-session — CUA tools and the default prompt refresh.
-await harness.setModel("anthropic:claude-opus-4-7");
-const second = await harness.prompt("Open the most relevant link from what you found.");
-console.log(textOf(second));
-
-await client.browsers.deleteByID(browser.session_id);
+  // Swap providers mid-session — CUA tools and the default prompt refresh.
+  await harness.setModel("anthropic:claude-opus-4-7");
+  const second = await harness.prompt("Open the most relevant link from what you found.");
+  console.log(textOf(second));
+} finally {
+  await client.browsers.deleteByID(browser.session_id);
+}
 ```
 
 While a turn is running: `steer()` injects course corrections, `followUp()` queues the next instruction, `subscribe()` streams underlying agent events, and `compact()` collapses long transcripts. See [`@earendil-works/pi-agent-core`](https://www.npmjs.com/package/@earendil-works/pi-agent-core) for the full harness lifecycle.
@@ -145,7 +149,7 @@ agent.state.model = "anthropic:claude-opus-4-7";
 
 In both cases CUA-owned tools and the default system prompt refresh for the next provider request.
 
-Not every provider's native vocabulary includes navigation (`goto`, `back`, `forward`, `url`). Pass `computerUseExtra: true` to add the provider-neutral `computer_use_extra` tool when the model can click/type but can't navigate.
+Not every provider's native computer-use vocab includes navigation (`goto`, `back`, `forward`, `url`). Pass `computerUseExtra: true` on the harness or agent to add the provider-neutral `computer_use_extra` tool — safe to leave on by default; it's a no-op for providers whose native tools already cover navigation. The Quick reference at the bottom shows it set.
 
 ## Browser provisioning
 
@@ -174,11 +178,18 @@ The `browser.browser_live_view_url` field on the create response is the URL to s
 Pass any pi `AgentTool` (see [`@earendil-works/pi-agent-core`](https://www.npmjs.com/package/@earendil-works/pi-agent-core) for the tool shape) via `extraTools`. The CUA defaults stay installed; your tools run alongside them.
 
 ```ts
+import { z } from "zod";
 import type { AgentTool } from "@onkernel/cua-agent";
 import { CuaAgentHarness } from "@onkernel/cua-agent";
 
 const lookupOrder: AgentTool = {
-  // shape per pi-agent-core docs: name, description, schema, run, ...
+  name: "lookup_order",
+  description: "Look up an order in our backend by id.",
+  schema: z.object({ orderId: z.string() }),
+  run: async ({ orderId }) => {
+    const order = await db.orders.get(orderId);
+    return { content: [{ type: "text", text: JSON.stringify(order) }] };
+  },
 };
 
 const harness = new CuaAgentHarness({
@@ -223,19 +234,38 @@ await harness.prompt("Now click 'Settings' and read me the current value of X.")
 
 Profile saves on browser teardown, so future runs with the same profile name skip the manual login.
 
-## Cross-origin iframes / Playwright escape hatch
+## Mixing vision and DOM (Playwright on the same browser)
 
-cua drives by clicking pixels, so cross-origin iframes work in the screenshot flow without special handling. When you need a deterministic Playwright action against the underlying browser (e.g. fill a card form via a fixed selector), drop to the Kernel SDK's exec endpoint with the session id you already have:
+cua's strength is semantic, vision-driven interaction — describe what's on screen, the model finds it. Playwright's strength is deterministic DOM access — exact selectors, structured data extraction, file uploads, network interception. Real apps often need both, and the harness is built for it: you already hold the `browser.session_id`, so any Playwright snippet you ship through `client.browsers.exec` runs against the same browser the agent is driving. State (URL, cookies, storage) is shared.
+
+Reach for Playwright on the cua browser when:
+
+- you need a **fixed selector** (form auto-fill, hidden inputs, file uploads, attribute reads).
+- you want **structured extraction** (`page.$$eval` over a list) rather than asking the model to read pixels.
+- you're driving a **cross-origin iframe** with a known DOM contract (payment widgets, SSO popups).
+- you need to **wait on a network response or DOM condition** rather than a visual cue.
+
+A common pattern — vision turn to navigate, DOM turn to extract, then back to vision:
 
 ```ts
-await client.browsers.exec(browser.session_id, {
+await harness.prompt("Search for 'wireless headphones' and open the results page.");
+
+const products = await client.browsers.exec(browser.session_id, {
   code: `
-    const frame = page.frameLocator('#payment-iframe');
-    await frame.locator('#card-number').fill('4111111111111111');
-    await frame.locator('#submit').click();
+    return await page.$$eval('[data-product-id]', els =>
+      els.map(el => ({
+        id: el.dataset.productId,
+        title: el.querySelector('.title')?.textContent,
+        price: el.querySelector('.price')?.textContent,
+      }))
+    );
   `,
 });
+
+await harness.prompt(`Click the cheapest product from this list: ${JSON.stringify(products)}`);
 ```
+
+You can also wire Playwright work in as an `AgentTool` (see "Adding your own tools") so the model itself decides when to switch modes — useful when "do I have a stable selector for this?" is part of the task, not a fixed plan.
 
 ## Debugging
 

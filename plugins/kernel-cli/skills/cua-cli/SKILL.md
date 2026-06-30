@@ -36,8 +36,8 @@ npx -y -p @onkernel/cua-cli cua --help
 | --- | --- |
 | `KERNEL_API_KEY` | Kernel API key (always required) |
 | `OPENAI_API_KEY` | OpenAI models (`-m openai:…`) |
-| `ANTHROPIC_API_KEY` | Anthropic models (`-m anthropic:…`) |
-| `GOOGLE_API_KEY` / `GEMINI_API_KEY` | Google / Gemini models (`-m google:…`) |
+| `ANTHROPIC_OAUTH_TOKEN` / `ANTHROPIC_API_KEY` | Anthropic models (`-m anthropic:…`); OAuth token wins if both are set |
+| `GOOGLE_API_KEY` / `GEMINI_API_KEY` | Google / Gemini models (`-m google:…`); `GOOGLE_API_KEY` wins if both are set |
 | `YUTORI_API_KEY` | Yutori Navigator (`-m yutori:…`) |
 | `TZAFON_API_KEY` | Tzafon (`-m tzafon:…`) |
 | `KERNEL_BASE_URL` | Override Kernel base URL |
@@ -70,6 +70,8 @@ Useful flags:
 
 The cua CLI always provisions **stealth-on** browsers. If you need non-stealth or a custom viewport / proxy, pre-create the browser via `kernel browsers create` and attach the cua session to it.
 
+If you're unsure of a flag or subcommand, `cua --help` and `cua <subcommand> --help` print the current surface.
+
 ## Named sessions
 
 Without `-s`, each subcommand provisions a brand-new browser. To keep state across calls, allocate a named session first:
@@ -93,7 +95,12 @@ cua session show login                      # full JSON metadata
 
 Pass `--profile` when starting the named session; later `cua -s <name> …` calls attach to the same browser, so they don't need the profile flag again.
 
-**Liveness**: Kernel browsers time out from inactivity. If you see `error session "<name>" is no longer alive on Kernel …`, run `cua session stop <name> && cua --profile <same-profile-as-before> session start <name>` to re-provision with the same persisted profile.
+**Liveness**: Kernel browsers time out from inactivity. If you see `error session "login" is no longer alive on Kernel …`, re-provision with the same profile and name:
+
+```bash
+cua session stop login                       # safe even if the Kernel browser is already gone
+cua --profile github session start login     # re-attach name=login to a fresh browser, same profile
+```
 
 Named-session metadata lives in `$XDG_DATA_HOME/cua/named-sessions/<name>.json`.
 
@@ -106,6 +113,8 @@ cua "..."                                         # interactive TUI (real termin
 ```
 
 `--print` exits when the agent finishes; the TUI runs until Ctrl+C. Add `--jsonl-include-deltas` for token deltas, `--jsonl-include-images` for base64 screenshots in `tool_result` events.
+
+**If you're an agent driving cua from a shell, always pass `--print` or `--print -o jsonl`.** The bare `cua "..."` form opens an interactive TUI that needs a real terminal — it will hang in a non-interactive context.
 
 ## Model selection
 
@@ -138,21 +147,36 @@ If you only have a session id (e.g. from `cua session list`), the `kernel` CLI a
 kernel browsers view <session-id>
 ```
 
-## Cross-origin iframes / Playwright escape hatch
+## Mixing vision and DOM (Playwright on the same browser)
 
-cua drives by clicking pixels, so cross-origin iframes (payment forms, embedded vendor widgets) work in the screenshot flow without special handling — the model just clicks them. When you need a deterministic Playwright action against the underlying browser (e.g. fill a card form via a fixed selector), break out to Kernel's exec endpoint with the session id:
+cua's strength is semantic, vision-driven interaction — describe what's on screen, the model finds it. Playwright's strength is deterministic DOM access — exact selectors, structured data extraction, file uploads, network interception. Real workflows often need both, and the named-session model is built for it: every `cua -s <name>` session exposes a `kernel_session_id` that points at the same underlying Kernel browser, so you can interleave vision turns and Playwright snippets without losing state.
+
+Reach for Playwright on the cua browser when:
+
+- you need a **fixed selector** (form auto-fill, hidden inputs, file uploads, attribute reads).
+- you want **structured extraction** (`page.$$eval` over a list) rather than asking the model to read pixels.
+- you're driving a **cross-origin iframe** with a known DOM contract (payment widgets, SSO popups). cua can click iframes too, but Playwright gives you `frameLocator()` and structured assertions.
+- you need to **wait on a network response or DOM condition** rather than a visual cue.
 
 ```bash
-# Find the session id
-cua session show login | jq -r .kernel_session_id
+# Vision turns to get logged in and to the right page
+cua --profile mysite session start login
+cua -s login open https://example.com/checkout
+cua -s login click "Continue to payment"
 
-# Run a Playwright snippet against the same browser
+# Same browser, DOM-precise card fill
+cua session show login | jq -r .kernel_session_id   # → <session-id>
 kernel browsers exec <session-id> --code "
   const frame = page.frameLocator('#payment-iframe');
-  await frame.locator('#card-number').fill('4111111111111111');
+  await frame.locator('#card-number').fill(process.env.CARD_NUMBER);
   await frame.locator('#submit').click();
 "
+
+# Hand control back to vision for the confirmation flow
+cua -s login observe "did the payment succeed?"
 ```
+
+State (URL, cookies, storage) is shared because it's the same browser — vision and DOM steps see each other's effects.
 
 ## Debugging
 
@@ -195,23 +219,23 @@ jq -r 'select(.role == "assistant") | .content[]?
 cua --print "open hn and tell me the top story"
 
 # Named session for multi-step
-cua --profile mysite session start work
-cua -s work open https://example.com
-cua -s work click "Log in"
-cua -s work type "email field" "$EMAIL"
-cua -s work click "Submit"
-cua -s work url
-cua session stop work
+cua --profile github session start login
+cua -s login open https://example.com
+cua -s login click "Log in"
+cua -s login type "email field" "$EMAIL"
+cua -s login click "Submit"
+cua -s login url
+cua session stop login
 
 # List models, switch model per call
 cua models
 cua --print -m anthropic:claude-opus-4-7 "..."
 
 # Get the live view URL
-cua session show work | jq -r .live_url
+cua session show login | jq -r .live_url
 kernel browsers view <session-id>   # alternative
 
-# Drop to Playwright for deterministic actions
-cua session show work | jq -r .kernel_session_id
+# Mix in a Playwright/DOM action against the same browser
+cua session show login | jq -r .kernel_session_id
 kernel browsers exec <session-id> --code "..."
 ```
