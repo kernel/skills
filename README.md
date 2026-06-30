@@ -1,6 +1,6 @@
 # Kernel Skills
 
-Official AI agent skills from the Kernel for installing useful skills for our CLI and SDKs that you can load into popular coding agents.
+Official AI agent skills from [Kernel](https://kernel.sh) for installing useful skills for our CLI and SDKs that you can load into popular coding agents.
 
 ## Installation
 
