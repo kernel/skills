@@ -149,7 +149,7 @@ kernel browsers view <session-id>
 
 ## Mixing vision and DOM (Playwright on the same browser)
 
-cua's strength is semantic, vision-driven interaction — describe what's on screen, the model finds it. Playwright's strength is deterministic DOM access — exact selectors, structured data extraction, file uploads, network interception. Real workflows often need both, and the named-session model is built for it: every `cua -s <name>` session exposes a `kernel_session_id` that points at the same underlying Kernel browser, so you can interleave vision turns and Playwright snippets without losing state.
+cua's strength is semantic, vision-driven interaction — describe what's on screen, the model finds it. Playwright's strength is deterministic DOM access — exact selectors, structured data extraction, file uploads, network interception. Real workflows often need both, and the named-session model is built for it: every `cua -s <name>` session exposes a `kernel_session_id` that points at the same underlying Kernel browser, so you can interleave vision turns and Playwright snippets. State (URL, cookies, storage) is shared.
 
 Reach for Playwright on the cua browser when:
 
@@ -175,8 +175,6 @@ kernel browsers exec <session-id> --code "
 # Hand control back to vision for the confirmation flow
 cua -s login observe "did the payment succeed?"
 ```
-
-State (URL, cookies, storage) is shared because it's the same browser — vision and DOM steps see each other's effects.
 
 ## Debugging
 
