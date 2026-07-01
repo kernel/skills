@@ -1,6 +1,6 @@
 ---
 name: cua-cli
-description: Drive a Kernel cloud browser from the shell using the `cua` CLI. Use this skill when you need to open URLs, click elements, type into fields, take screenshots, or chain multi-step browser tasks across shell calls. Supports named sessions for stateful workflows, profile persistence for logins, transcript-based debugging, and live-view handoff when stealth fails. For building your own TS agent on top of cua, see `cua-agent`.
+description: Drive a Kernel cloud browser from the shell using the `cua` CLI. Use this skill when you need to open URLs, click elements, type into fields, take screenshots, or chain multi-step browser tasks across shell calls. Supports named sessions for stateful workflows, profile persistence for logins, transcript-based debugging, live-view handoff, and mixing vision-driven computer-use with `playwright_execute` for DOM-precise steps the model picks per action (`--playwright`). For building your own TS agent on top of cua, see `cua-agent`.
 ---
 
 # cua-cli
@@ -64,6 +64,7 @@ Useful flags:
 - `-m <model>` — pick the LLM (default `openai:gpt-5.5`). `cua models` to list.
 - `--max-steps <n>` — bound the loop on `cua do`.
 - `--profile <id-or-name>` — load a Kernel browser profile for persisted cookies / storage. Existing ids or names are reused; a non-id name is created if missing. Pass `--profile-no-save-changes` for read-only.
+- `--playwright` — expose the `playwright_execute` tool alongside computer-use so the model can run Playwright/TS against the live browser for steps that are cleaner as DOM operations (form fills, structured extraction, `waitForSelector`). Off by default. See "Mixing vision and DOM" below.
 - `-v` — verbose progress on stderr (provisioning, tool calls, transcript path).
 
 `click` and `type` match **semantically**, not by selector — use natural-language descriptions of what's visible on screen.
@@ -116,6 +117,8 @@ cua "..."                                         # interactive TUI (real termin
 
 **If you're an agent driving cua from a shell, always pass `--print` or `--print -o jsonl`.** The bare `cua "..."` form opens an interactive TUI that needs a real terminal — it will hang in a non-interactive context.
 
+Inside the TUI, `/playwright on` and `/playwright off` toggle the `playwright_execute` tool mid-session without restarting.
+
 ## Model selection
 
 Run `cua models` for the current catalog. Pick with `-m <ref>` (default `openai:gpt-5.5`). Switch per call or per named session.
@@ -147,33 +150,45 @@ If you only have a session id (e.g. from `cua session list`), the `kernel` CLI a
 kernel browsers view <session-id>
 ```
 
-## Mixing vision and DOM (Playwright on the same browser)
+## Mixing vision and DOM
 
-cua's strength is semantic, vision-driven interaction — describe what's on screen, the model finds it. Playwright's strength is deterministic DOM access — exact selectors, structured data extraction, file uploads, network interception. Real workflows often need both, and the named-session model is built for it: every `cua -s <name>` session exposes a `kernel_session_id` that points at the same underlying Kernel browser, so you can interleave vision turns and Playwright snippets. State (URL, cookies, storage) is shared.
+Vision (computer-use tools) and DOM (Playwright) are peer capabilities against the same browser. Real workloads mix both — a login flow may be visual and bot-detected while the data extraction on the other side is a stable table with reliable selectors. cua exposes both so the *model* picks per action:
 
-Reach for Playwright on the cua browser when:
+- **Reach for computer use when**: DOM is brittle or unknown, the target is canvas/video/pixel UI, bot detection makes human-like input matter, or the check is visual ("did the modal close?").
+- **Reach for Playwright when**: selectors are stable, you want structured extraction (`page.$$eval` over a list) instead of asking the model to read pixels, you're filling many form fields or hidden inputs, or you need to wait on a network/DOM condition rather than a visual cue.
 
-- you need a **fixed selector** (form auto-fill, hidden inputs, file uploads, attribute reads).
-- you want **structured extraction** (`page.$$eval` over a list) rather than asking the model to read pixels.
-- you're driving a **cross-origin iframe** with a known DOM contract (payment widgets, SSO popups). cua can click iframes too, but Playwright gives you `frameLocator()` and structured assertions.
-- you need to **wait on a network response or DOM condition** rather than a visual cue.
+### Model-picked (`--playwright`)
+
+Pass `--playwright` and the model gets both toolsets and chooses per step:
 
 ```bash
-# Vision turns to get logged in and to the right page
-cua --profile mysite session start login
-cua -s login open https://example.com/checkout
-cua -s login click "Continue to payment"
+cua --playwright --profile mysite session start work
+cua -s work --print "log in to example.com, then pull the last 10 orders as JSON"
+# The model picks computer_use for the login (visual, bot-detected)
+# and playwright_execute for the extraction (structured, stable DOM).
+```
 
-# Same browser, DOM-precise card fill
-cua session show login | jq -r .kernel_session_id   # → <session-id>
+Inside `playwright_execute`, `page`, `context`, and `browser` are in scope and the code may `return` a JSON-serializable value that comes back as the tool result. Each call runs in a fresh JS context (locals don't persist), but the browser session does. Screenshots aren't auto-attached — the model requests one on a follow-up turn when it needs to see the page.
+
+Verified end-to-end against Anthropic, Tzafon, and Yutori CUA models; OpenAI and Google are unit-tested. In the TUI, `/playwright on` / `/playwright off` toggle the tool mid-session.
+
+### Developer-scripted split
+
+If you'd rather orchestrate the split yourself instead of letting the model pick — for repeatable batch jobs, or when you know the DOM shape in advance — `kernel browsers exec` runs Playwright against the same `kernel_session_id`:
+
+```bash
+cua --profile mysite session start work
+cua -s work open https://example.com/checkout
+cua -s work click "Continue to payment"
+
+cua session show work | jq -r .kernel_session_id   # → <session-id>
 kernel browsers exec <session-id> --code "
   const frame = page.frameLocator('#payment-iframe');
   await frame.locator('#card-number').fill(process.env.CARD_NUMBER);
   await frame.locator('#submit').click();
 "
 
-# Hand control back to vision for the confirmation flow
-cua -s login observe "did the payment succeed?"
+cua -s work observe "did the payment succeed?"
 ```
 
 ## Debugging
@@ -233,7 +248,10 @@ cua --print -m anthropic:claude-opus-4-7 "..."
 cua session show login | jq -r .live_url
 kernel browsers view <session-id>   # alternative
 
-# Mix in a Playwright/DOM action against the same browser
+# Let the model mix vision and DOM via playwright_execute
+cua --playwright --print "log in and pull the last 10 orders as JSON"
+
+# Or orchestrate the split yourself against the same session
 cua session show login | jq -r .kernel_session_id
 kernel browsers exec <session-id> --code "..."
 ```

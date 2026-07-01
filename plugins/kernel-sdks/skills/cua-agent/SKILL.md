@@ -1,6 +1,6 @@
 ---
 name: cua-agent
-description: Build TypeScript apps that embed Kernel's computer-use loop with `@onkernel/cua-agent` — `CuaAgent` and `CuaAgentHarness` classes drive a Kernel cloud browser via prompt → screenshot → tool-call loops across OpenAI, Anthropic, Google, and Yutori provider tools. Use when writing TS code that needs computer-use against a Kernel browser, swapping providers mid-session, adding your own pi tools alongside computer use, or hooking into the agent event stream. For shell-callable cua, see `cua-cli`.
+description: Build TypeScript apps that embed Kernel's computer-use loop with `@onkernel/cua-agent` — `CuaAgent` and `CuaAgentHarness` classes drive a Kernel cloud browser via prompt → screenshot → tool-call loops across OpenAI, Anthropic, Google, and Yutori provider tools. Use when writing TS code that needs computer-use against a Kernel browser, swapping providers mid-session, adding your own pi tools alongside computer use, mixing vision with `playwright_execute` (via `playwright: true`) so the model picks DOM or vision per action, or hooking into the agent event stream. For shell-callable cua, see `cua-cli`.
 ---
 
 # cua-agent
@@ -76,6 +76,7 @@ const harness = new CuaAgentHarness({
   env: new NodeExecutionEnv({ cwd: process.cwd() }),
   model: "openai:gpt-5.5",
   session,
+  playwright: true,          // expose playwright_execute so the model can pick DOM or vision per action
 });
 
 const textOf = (m: AssistantMessage) =>
@@ -106,6 +107,7 @@ import { CuaAgent } from "@onkernel/cua-agent";
 const agent = new CuaAgent({
   browser,
   client,
+  playwright: true,          // same flags as CuaAgentHarness — computerUseExtra, playwright, extraTools, ...
   initialState: {
     model: "openai:gpt-5.5",
     systemPrompt: "You are a careful browser automation agent.",
@@ -149,7 +151,12 @@ agent.state.model = "anthropic:claude-opus-4-7";
 
 In both cases CUA-owned tools and the default system prompt refresh for the next provider request.
 
-Not every provider's native computer-use vocab includes navigation (`goto`, `back`, `forward`, `url`). Pass `computerUseExtra: true` on the harness or agent to add the provider-neutral `computer_use_extra` tool — safe to leave on by default; it's a no-op for providers whose native tools already cover navigation. The Quick reference at the bottom shows it set.
+Two opt-in tool flags round out the default computer-use set on either class:
+
+- **`computerUseExtra: true`** — adds `computer_use_extra` (`goto`, `back`, `forward`, `url`) for providers whose native vocab doesn't include navigation. Safe to leave on; it's inert for providers that already navigate.
+- **`playwright: true`** — adds `playwright_execute` so the model can run Playwright/TS against the live browser for DOM-precise steps (form fills, structured extraction, `waitForSelector`). See "Mixing vision and DOM" below for when it's the right pick.
+
+Both are off by default. The Quick reference at the bottom shows them enabled.
 
 ## Browser provisioning
 
@@ -175,7 +182,7 @@ The `browser.browser_live_view_url` field on the create response is the URL to s
 
 ## Adding your own tools
 
-Pass any pi `AgentTool` (see [`@earendil-works/pi-agent-core`](https://www.npmjs.com/package/@earendil-works/pi-agent-core) for the tool shape) via `extraTools`. The CUA defaults stay installed; your tools run alongside them.
+`extraTools` is for **domain-specific** tools the model needs — a database lookup, a payment API, an internal service call — not for exposing Playwright (that's what `playwright: true` is for). Pass any pi `AgentTool` (see [`@earendil-works/pi-agent-core`](https://www.npmjs.com/package/@earendil-works/pi-agent-core) for the tool shape); the CUA defaults stay installed and your tools run alongside them.
 
 ```ts
 import { z } from "zod";
@@ -234,18 +241,39 @@ await harness.prompt("Now click 'Settings' and read me the current value of X.")
 
 Profile saves on browser teardown, so future runs with the same profile name skip the manual login.
 
-## Mixing vision and DOM (Playwright on the same browser)
+## Mixing vision and DOM
 
-cua's strength is semantic, vision-driven interaction — describe what's on screen, the model finds it. Playwright's strength is deterministic DOM access — exact selectors, structured data extraction, file uploads, network interception. Real apps often need both, and the harness is built for it: you already hold the `browser.session_id`, so any Playwright snippet you ship through `client.browsers.exec` runs against the same browser the agent is driving. State (URL, cookies, storage) is shared.
+Vision (computer-use) and DOM (Playwright) are peer capabilities against the same browser. Real apps mix both — a login may be visual and bot-detected while the extraction on the other side is a stable table with reliable selectors. cua-agent supports two shapes for the mix depending on who you want making the call.
 
-Reach for Playwright on the cua browser when:
+Decision rubric — the same one that fits inside a system prompt if you want the model to internalize it:
 
-- you need a **fixed selector** (form auto-fill, hidden inputs, file uploads, attribute reads).
-- you want **structured extraction** (`page.$$eval` over a list) rather than asking the model to read pixels.
-- you're driving a **cross-origin iframe** with a known DOM contract (payment widgets, SSO popups).
-- you need to **wait on a network response or DOM condition** rather than a visual cue.
+- **Reach for computer use when**: DOM is brittle or unknown, the target is canvas/video/pixel UI, bot detection makes human-like input matter, or the check is visual ("did the modal close?").
+- **Reach for Playwright when**: selectors are stable, you want structured extraction (`page.$$eval` over a list) instead of asking the model to read pixels, you're filling many form fields or hidden inputs, or you need to wait on a network/DOM condition rather than a visual cue.
 
-A common pattern — vision turn to navigate, DOM turn to extract, then back to vision:
+### Model-picked (`playwright: true`)
+
+Set `playwright: true` on the constructor and the model gets `playwright_execute` alongside its computer-use tools; it picks per action.
+
+```ts
+const harness = new CuaAgentHarness({
+  browser, client, session,
+  env: new NodeExecutionEnv({ cwd: process.cwd() }),
+  model: "openai:gpt-5.5",
+  playwright: true,
+});
+
+await harness.prompt("Log in to example.com, then return the last 10 orders as JSON.");
+// The model uses computer_use for the login (visual, bot-detected)
+// and playwright_execute for the extraction (structured, stable DOM).
+```
+
+Inside `playwright_execute`, `page`, `context`, and `browser` are in scope and the code may `return` a JSON-serializable value that comes back as the tool result. Each call runs in a fresh JS context (locals don't persist), but the browser session does (navigation, cookies, DOM state carry over). Screenshots aren't auto-attached — the model requests one on a follow-up turn when it needs to see the page. Playwright-level failures come back as tool content so the model can adapt rather than crash the turn.
+
+Verified end-to-end against Anthropic, Tzafon, and Yutori CUA models; OpenAI and Google are unit-tested.
+
+### Developer-scripted split
+
+If you'd rather orchestrate the split yourself instead of letting the model pick — for repeatable batch jobs, or when you know the DOM shape in advance — call `client.browsers.exec` against the same `browser.session_id`:
 
 ```ts
 await harness.prompt("Search for 'wireless headphones' and open the results page.");
@@ -265,7 +293,7 @@ const products = await client.browsers.exec(browser.session_id, {
 await harness.prompt(`Click the cheapest product from this list: ${JSON.stringify(products)}`);
 ```
 
-You can also wire Playwright work in as an `AgentTool` (see "Adding your own tools") so the model itself decides when to switch modes — useful when "do I have a stable selector for this?" is part of the task, not a fixed plan.
+Same browser, same state — pick this shape when the split is deterministic; pick `playwright: true` when the split depends on what the model finds mid-run.
 
 ## Debugging
 
@@ -285,8 +313,10 @@ You can also wire Playwright work in as an `AgentTool` (see "Adding your own too
 - **You own the browser lifecycle.** Always tear down with `client.browsers.deleteByID(browser.session_id)` in a `finally` block — Kernel timeouts will reclaim eventually but profile state saves on close, not continuously.
 - **`setModel` is async.** It propagates through pi's snapshot machinery — `await` it before the next `prompt()`.
 - **Provider tool vocab gaps.** If a model can click and type but can't navigate, set `computerUseExtra: true` to add provider-neutral `goto` / `back` / `forward` / `url`.
+- **`playwright: true` is off by default.** Turn it on to let the model pick DOM operations per action; leave it off if you want vision-only or you're orchestrating the DOM split yourself via `client.browsers.exec`.
+- **`playwright_execute` runs each call in a fresh JS context.** Local variables don't persist across calls — persist state on `page`/`context` (cookies, storage, current URL) or by `return`ing values that the next prompt threads back in.
 - **`InMemorySessionRepo` is in-process only.** Reach for a persistent `SessionRepo` implementation if you need transcripts to survive restarts.
-- **`extraTools` runs alongside CUA tools, not in place of them.** To replace the defaults, build the tool list with `createCuaComputerTools()` yourself.
+- **`extraTools` runs alongside CUA tools, not in place of them.** Reserve it for domain-specific tools (DB, APIs, internal services); Playwright is `playwright: true`, not a hand-rolled `extraTools` entry.
 - **Stealth, headless, viewport, proxy** are all `browsers.create` flags — set them when provisioning, not on the harness.
 
 ## Quick reference
@@ -308,7 +338,8 @@ const harness = new CuaAgentHarness({
   browser, client, session,
   env: new NodeExecutionEnv({ cwd: process.cwd() }),
   model: "openai:gpt-5.5",
-  computerUseExtra: true,
+  computerUseExtra: true,   // provider-neutral goto/back/forward/url
+  playwright: true,         // let the model pick DOM operations per action
 });
 
 harness.subscribe((event) => { /* ... */ });
