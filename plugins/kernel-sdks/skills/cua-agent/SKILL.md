@@ -1,6 +1,6 @@
 ---
 name: cua-agent
-description: Build TypeScript apps that embed Kernel's computer-use loop with `@onkernel/cua-agent` — `CuaAgent` and `CuaAgentHarness` classes drive a Kernel cloud browser via prompt → screenshot → tool-call loops across OpenAI, Anthropic, Google, and Yutori provider tools. Use when writing TS code that needs computer-use against a Kernel browser, swapping providers mid-session, adding your own pi tools alongside computer use, mixing vision with `playwright_execute` (via `playwright: true`) so the model picks DOM or vision per action, or hooking into the agent event stream. For shell-callable cua, see `cua-cli`.
+description: Build TypeScript apps that embed Kernel's computer-use loop with `@onkernel/cua-agent` — `CuaAgent` and `CuaAgentHarness` classes drive a Kernel cloud browser via prompt → screenshot → tool-call loops across OpenAI, Anthropic, Google, and Yutori provider tools. Use when writing TS code that needs computer-use against a Kernel browser, swapping providers mid-session, adding your own pi tools alongside computer use, mixing vision with the built-in `playwright_execute` tool so the model picks DOM or vision per action, or hooking into the agent event stream. For shell-callable cua, see `cua-cli`.
 ---
 
 # cua-agent
