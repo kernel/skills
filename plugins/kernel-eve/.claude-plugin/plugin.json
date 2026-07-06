@@ -1,0 +1,11 @@
+{
+  "name": "kernel-eve",
+  "version": "1.0.0",
+  "description": "Give a Vercel eve agent a real web browser. Create stealth Kernel cloud browsers, drive them with server-side Playwright execution, and hand off to a human via live view.",
+  "author": {
+    "name": "Kernel",
+    "url": "www.kernel.sh"
+  },
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT"
+}

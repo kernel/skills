@@ -18,6 +18,9 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 
 # Install the video generation skill
 /plugin install generate-video
+
+# Install the eve browser-agent skill
+/plugin install kernel-eve
 ```
 
 ### Cursor
@@ -91,6 +94,14 @@ Render smooth, deterministic MP4s from web scenes. No Kernel account required â€
 | Skill | Description |
 |-------|-------------|
 | **generate-video** | Generate judder-free MP4 videos from web pages and animated visualizations: drive headless Chromium over CDP with an injected virtual clock, capture exact per-frame PNGs, encode with ffmpeg |
+
+### kernel-eve
+
+Give a [Vercel eve](https://vercel.com/eve) agent a real web browser. Includes drop-in eve tools and a runnable example agent with a working Slack channel.
+
+| Skill | Description |
+|-------|-------------|
+| **eve-browser-agent** | Turn an eve agent into a browser agent: create stealth Kernel cloud browsers, drive them with server-side Playwright execution, persist sessions across turns, and hand off to a human via live view |
 
 ## Documentation
 

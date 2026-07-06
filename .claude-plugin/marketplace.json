@@ -30,6 +30,14 @@
       },
       "description": "Generate crisp, perfectly smooth MP4 videos from web pages and animated visualizations by driving headless Chromium over CDP with deterministic frame-stepping, then encoding with ffmpeg. Use when making demo videos, explainer clips, or launch animations.",
       "source": "./plugins/generate-video"
+    },
+    {
+      "name": "kernel-eve",
+      "author": {
+        "name": "Kernel"
+      },
+      "description": "Give a Vercel eve agent a real web browser. Create stealth Kernel cloud browsers, drive them with server-side Playwright execution, and hand off to a human via live view. Use when building an eve agent that browses or acts on live websites.",
+      "source": "./plugins/kernel-eve"
     }
   ]
 }
