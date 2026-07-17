@@ -1,6 +1,6 @@
 ---
 name: debug-browser-session
-description: Systematically debug a Kernel cloud browser session — VM issues, network errors, Chrome crashes, page-load failures, and live-view problems. Use when a browser session misbehaves (e.g. ERR_HTTP2_PROTOCOL_ERROR, "browser not responding", blank/error pages, captcha or "checking your browser" blocks, live view not loading) and you have the session ID. Drives the Kernel CLI to inspect session status, screenshots, page state, VM logs, network connectivity, and archived telemetry events (which remain readable even after the session is deleted).
+description: Systematically debug a Kernel cloud browser session — VM issues, network errors, Chrome crashes, page-load failures, and live-view problems. Use when a browser session misbehaves (e.g. ERR_HTTP2_PROTOCOL_ERROR, "browser not responding", blank/error pages, captcha or "checking your browser" blocks, live view not loading) and you have the session ID. Drives the Kernel CLI to inspect session status, screenshots, page state, VM logs, network connectivity, and telemetry events (which remain readable even after the session is deleted).
 ---
 
 # Debug a Kernel Browser Session
