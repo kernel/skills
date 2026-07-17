@@ -62,9 +62,9 @@ kernel browsers process exec <SESSION_ID> -- cat /etc/resolv.conf
 kernel browsers playwright execute <SESSION_ID> "const cookies = await page.context().cookies(); return { count: cookies.length, domains: [...new Set(cookies.map(c => c.domain))] }"
 ```
 
-## Browser telemetry events (works after the session is deleted)
+## Browser telemetry event categories
 
-Every command above needs a live session; telemetry events don't. Events captured in the VM stay readable after telemetry is disabled or the session is deleted — for a session that's already gone, this is the only data source in this skill that still works.
+Every command above needs a live session; telemetry events don't. Events captured in the VM stay readable after telemetry is disabled or the session is deleted.
 
 Event categories: console (console output and uncaught exceptions), network (request/response metadata), page (navigation and lifecycle), interaction (clicks, keys, scrolls), control (agent-driven API calls), connection (CDP/live-view attach/detach), system (VM health), screenshot (monitor screenshots on page load or JS exception), captcha (captcha detection and solve outcomes), monitor (telemetry collector health; captured automatically whenever console, network, page, or interaction is enabled). High-signal event types: console_error, network_loading_failed, network_response with non-2xx status, captcha_solve_result, system_oom_kill, service_crashed, monitor_disconnected (telemetry gap — treat following events as incomplete).
 
