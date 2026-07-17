@@ -62,7 +62,7 @@ kernel browsers process exec <SESSION_ID> -- cat /etc/resolv.conf
 kernel browsers playwright execute <SESSION_ID> "const cookies = await page.context().cookies(); return { count: cookies.length, domains: [...new Set(cookies.map(c => c.domain))] }"
 ```
 
-## Browser telemetry event categories
+## Browser telemetry events (works even after deletion)
 
 Every command above needs a live session; telemetry events don't. Events captured in the VM stay readable after telemetry is disabled or the session is deleted.
 
@@ -75,7 +75,7 @@ kernel browsers telemetry events <SESSION_ID> --since 24h --categories console,n
 kernel browsers telemetry events <SESSION_ID> --since 24h --types console_error,network_loading_failed
 ```
 
-`--since` accepts an RFC-3339 timestamp or a duration like `5m`, and **defaults to the last 5 minutes** — a deleted session can't be `get`ed to check its lifetime, so when in doubt use a generous window like `--since 24h` (as in the examples), or the session's created_at if you know it. `--all` walks every page in the window (default is one page of 20 events, `--limit` up to 100, with an `--offset` cursor for manual paging); a `--types` filter walks the whole window automatically. Use `-o json` for full event payloads — the default table shows only sequence, time, category, and type, so anything that depends on event contents (a `network_response` status code, a console error message, a URL) requires json output. The same archive is available via the API/SDK (`GET /browsers/{session_id}/telemetry/events`, which has the same 5-minute `since` default) and — if your Kernel MCP server build includes it — the `manage_browsers` tool's `get_telemetry` action (which defaults to the full session window). For a live session, `kernel browsers telemetry stream <SESSION_ID>` tails events as they happen.
+`--since` accepts an RFC-3339 timestamp or a duration like `5m`, and **defaults to the last 5 minutes** — a deleted session can't be `get`ed to check its lifetime, so when in doubt use a generous window like `--since 24h` (as in the examples), or the session's created_at if you know it. `--all` walks every page in the window (default is one page of 20 events, `--limit` up to 100, with an `--offset` cursor for manual paging); a `--types` filter walks the whole window automatically. Use `-o json` for full event payloads — the default table shows only sequence, time, category, and type, so anything that depends on event contents (a `network_response` status code, a console error message, a URL) requires json output. The same events are available via the API/SDK (`GET /browsers/{session_id}/telemetry/events`, which has the same 5-minute `since` default) and — if your Kernel MCP server build includes it — the `manage_browsers` tool's `get_telemetry` action (which defaults to the full session window). For a live session, `kernel browsers telemetry stream <SESSION_ID>` tails events as they happen.
 
 ### Enable capture
 ```bash
@@ -83,13 +83,13 @@ kernel browsers create --telemetry=console,network,page
 kernel browsers update <SESSION_ID> --telemetry=console,network
 ```
 
-Capture starts the moment it's enabled and can't backfill — enable the categories, reproduce the issue, then read the archive.
+Capture starts the moment it's enabled and can't backfill — enable the categories, reproduce the issue, then read the events.
 
 Gotchas:
 
 - **Telemetry is opt-in.** No events may just mean it was never enabled — not that nothing happened.
 - **The default bundle omits the debug-critical categories (`console`, `network`, `page`).** `--telemetry=all` captures control/connection/system/captcha only; request `console`, `network`, and `page` explicitly (as above) when you need those signals.
-- **`monitor_disconnected` marks a telemetry gap.** The collector dropped; treat console/network/page/interaction coverage as incomplete until the next `monitor_reconnected`, or through the end of the archive if none appears.
+- **`monitor_disconnected` marks a telemetry gap.** The collector dropped; treat console/network/page/interaction coverage as incomplete until the next `monitor_reconnected`, or through the end of the event history if none appears.
 
 ## Common issues & solutions
 
@@ -134,7 +134,7 @@ These are normal and don't indicate problems:
 - [ ] Network connectivity works (curl test)
 - [ ] No critical errors in chromium logs
 - [ ] Cookies/session state are correct
-- [ ] Telemetry archive checked for console_error / network_loading_failed / system events (especially if the session is gone)
+- [ ] Telemetry events checked for console_error / network_loading_failed / system events (especially if the session is gone)
 
 ## Suggested order
 
@@ -143,3 +143,5 @@ These are normal and don't indicate problems:
 3. Check the page URL to see whether it's on an error page.
 4. Test network connectivity if seeing connection errors.
 5. Review logs for specific error patterns.
+
+If the session no longer exists, skip straight to telemetry events — the only step here that still works.
