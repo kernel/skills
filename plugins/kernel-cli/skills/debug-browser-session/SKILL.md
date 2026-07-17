@@ -68,7 +68,7 @@ Every command above needs a live session. Telemetry events are the exception: ev
 
 Event categories: console (console output and uncaught exceptions), network (request/response metadata), page (navigation and lifecycle), interaction (clicks, keys, scrolls), control (agent-driven API calls), connection (CDP/live-view attach/detach), system (VM health), screenshot (monitor screenshots on page load or JS exception), captcha (captcha detection and solve outcomes), monitor (telemetry collector health; captured automatically whenever console, network, page, or interaction is enabled). High-signal event types: console_error, network_loading_failed, network_response with non-2xx status, captcha_solve_result, system_oom_kill, service_crashed, monitor_disconnected (telemetry gap — treat following events as incomplete).
 
-### Read archived events
+### Read events
 ```bash
 kernel browsers telemetry events <SESSION_ID> --since 24h --all
 kernel browsers telemetry events <SESSION_ID> --since 24h --categories console,network --all
