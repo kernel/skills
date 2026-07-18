@@ -64,9 +64,9 @@ kernel browsers playwright execute <SESSION_ID> "const cookies = await page.cont
 
 ## Browser telemetry events (works even after deletion)
 
-Every command above needs a live session; telemetry events don't. Events captured in the VM stay readable after telemetry is disabled or the session is deleted.
+Telemetry only helps if it was enabled before the failure — capture is off by default. When it was on, events captured in the VM stay readable after telemetry is disabled or the session is deleted; every other command in this skill needs a live session.
 
-Event categories: console (console output and uncaught exceptions), network (request/response metadata), page (navigation and lifecycle), interaction (clicks, keys, scrolls), control (agent-driven API calls), connection (CDP/live-view attach/detach), system (VM health), screenshot (monitor screenshots on page load or JS exception), captcha (captcha detection and solve outcomes), monitor (telemetry collector health; captured automatically whenever console, network, page, or interaction is enabled). High-signal event types: console_error, network_loading_failed, network_response with non-2xx status, captcha_solve_result, system_oom_kill, service_crashed, monitor_disconnected (telemetry gap — treat following events as incomplete).
+The debug-critical categories are console (console output and uncaught exceptions), network (request/response metadata), and page (navigation and lifecycle). High-signal event types: console_error, network_loading_failed, network_response with non-2xx status, system_oom_kill, and monitor_disconnected (telemetry gap — treat following events as incomplete). For the full category and event-type catalog, see the [telemetry categories docs](https://docs.onkernel.com/browsers/telemetry/categories).
 
 ### Read events
 ```bash
@@ -83,7 +83,7 @@ kernel browsers create --telemetry=console,network,page
 kernel browsers update <SESSION_ID> --telemetry=console,network
 ```
 
-Capture starts the moment it's enabled and can't backfill — enable the categories, reproduce the issue, then read the events.
+Capture starts the moment it's enabled and can't backfill. For automations you expect to debug, enable telemetry (including `console`, `network`, `page`) at create time so the evidence exists when something fails; on a live session, enable the categories, reproduce the issue, then read the events.
 
 Gotchas:
 
@@ -144,4 +144,4 @@ These are normal and don't indicate problems:
 4. Test network connectivity if seeing connection errors.
 5. Review logs for specific error patterns.
 
-If the session no longer exists, skip straight to telemetry events — the only step here that still works.
+If the session no longer exists, telemetry events are the only remaining signal — and only if telemetry was enabled while it ran.
