@@ -80,7 +80,7 @@ kernel browsers telemetry events <SESSION_ID> --since 24h --types console_error,
 ### Enable capture
 ```bash
 kernel browsers create --telemetry=console,network,page
-kernel browsers update <SESSION_ID> --telemetry=console,network
+kernel browsers update <SESSION_ID> --telemetry=console,network,page
 ```
 
 Capture starts the moment it's enabled and can't backfill. For automations you expect to debug, enable telemetry (including `console`, `network`, `page`) at create time so the evidence exists when something fails; on a live session, enable the categories, reproduce the issue, then read the events.
