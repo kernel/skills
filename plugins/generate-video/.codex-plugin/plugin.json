@@ -1,0 +1,37 @@
+{
+  "name": "generate-video",
+  "version": "1.0.0",
+  "description": "Generate smooth MP4 videos from web pages using deterministic CDP frame stepping and ffmpeg",
+  "author": {
+    "name": "Kernel",
+    "url": "https://kernel.sh"
+  },
+  "homepage": "https://kernel.sh",
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT",
+  "keywords": [
+    "video-generation",
+    "animation",
+    "chromium",
+    "cdp",
+    "ffmpeg",
+    "rendering"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Generate Video",
+    "shortDescription": "Render smooth MP4 videos from web pages and animated visualizations",
+    "longDescription": "Installs a workflow for rendering deterministic, judder-free MP4 videos from web scenes by stepping Chromium frames over CDP and encoding them with ffmpeg.",
+    "developerName": "Kernel",
+    "category": "Creativity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://kernel.sh",
+    "defaultPrompt": [
+      "Generate a smooth demo video from this web page.",
+      "Create an animated product teaser and render it to MP4."
+    ]
+  }
+}

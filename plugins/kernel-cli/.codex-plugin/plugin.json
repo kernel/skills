@@ -1,0 +1,38 @@
+{
+  "name": "kernel-cli",
+  "version": "1.0.0",
+  "description": "CLI skills for managing Kernel cloud browsers, apps, authentication, and browser automation",
+  "author": {
+    "name": "Kernel",
+    "url": "https://kernel.sh"
+  },
+  "homepage": "https://kernel.sh",
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT",
+  "keywords": [
+    "kernel",
+    "browser-automation",
+    "cloud-browser",
+    "web-scraping",
+    "playwright",
+    "managed-auth"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Kernel CLI",
+    "shortDescription": "Manage cloud browsers and browser automations with the Kernel CLI",
+    "longDescription": "Installs Kernel CLI skills for creating and debugging cloud browsers, automating websites, managing authentication, profiling bot detection, and deploying browser apps.",
+    "developerName": "Kernel",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://kernel.sh",
+    "defaultPrompt": [
+      "Use Kernel to automate a website in a cloud browser.",
+      "Use Kernel to debug a browser session.",
+      "Use Kernel to set up managed authentication for a website."
+    ]
+  }
+}
