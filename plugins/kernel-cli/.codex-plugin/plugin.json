@@ -1,6 +1,6 @@
 {
   "name": "kernel-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI skills for managing Kernel cloud browsers, apps, authentication, and browser automation",
   "author": {
     "name": "Kernel",
@@ -29,6 +29,9 @@
       "Write"
     ],
     "websiteURL": "https://kernel.sh",
+    "brandColor": "#81B300",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg",
     "defaultPrompt": [
       "Use Kernel to automate a website in a cloud browser.",
       "Use Kernel to debug a browser session.",

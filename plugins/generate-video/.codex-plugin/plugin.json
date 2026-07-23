@@ -1,6 +1,6 @@
 {
   "name": "generate-video",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate smooth MP4 videos from web pages using deterministic CDP frame stepping and ffmpeg",
   "author": {
     "name": "Kernel",
@@ -29,6 +29,9 @@
       "Write"
     ],
     "websiteURL": "https://kernel.sh",
+    "brandColor": "#81B300",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg",
     "defaultPrompt": [
       "Generate a smooth demo video from this web page.",
       "Create an animated product teaser and render it to MP4."

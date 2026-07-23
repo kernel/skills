@@ -1,6 +1,6 @@
 {
   "name": "kernel-sdks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript and Python SDK skills for building browser automation with Kernel",
   "author": {
     "name": "Kernel",
@@ -29,6 +29,9 @@
       "Write"
     ],
     "websiteURL": "https://kernel.sh",
+    "brandColor": "#81B300",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg",
     "defaultPrompt": [
       "Use the Kernel TypeScript SDK to build a browser automation.",
       "Use the Kernel Python SDK with Playwright to automate a website."
