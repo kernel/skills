@@ -1,0 +1,40 @@
+{
+  "name": "kernel-sdks",
+  "version": "1.0.1",
+  "description": "TypeScript and Python SDK skills for building browser automation with Kernel",
+  "author": {
+    "name": "Kernel",
+    "url": "https://kernel.sh"
+  },
+  "homepage": "https://kernel.sh",
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT",
+  "keywords": [
+    "kernel",
+    "browser-automation",
+    "cloud-browser",
+    "playwright",
+    "typescript",
+    "python"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Kernel SDKs",
+    "shortDescription": "Build cloud browser automations with the Kernel TypeScript and Python SDKs",
+    "longDescription": "Installs Kernel TypeScript and Python SDK skills for creating cloud browser sessions, connecting with Playwright, and building browser automation scripts.",
+    "developerName": "Kernel",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://kernel.sh",
+    "brandColor": "#81B300",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg",
+    "defaultPrompt": [
+      "Use the Kernel TypeScript SDK to build a browser automation.",
+      "Use the Kernel Python SDK with Playwright to automate a website."
+    ]
+  }
+}

@@ -20,6 +20,20 @@ Official AI agent skills from the Kernel for installing useful skills for our CL
 /plugin install generate-video
 ```
 
+### Codex
+
+```bash
+# Add the Kernel plugin marketplace
+codex plugin marketplace add kernel/skills
+
+# Install one or more plugins
+codex plugin add kernel-cli@kernel
+codex plugin add kernel-sdks@kernel
+codex plugin add generate-video@kernel
+```
+
+You can also install them from the Plugins Directory in the ChatGPT desktop app. Restart the app after adding the marketplace, open **Plugins** in Codex, and find the Kernel plugins under **Public**.
+
 ### Cursor
 
 Install from the Cursor Marketplace:
