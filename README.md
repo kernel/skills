@@ -32,7 +32,7 @@ codex plugin add kernel-sdks@kernel
 codex plugin add generate-video@kernel
 ```
 
-You can also install them from the Plugins Directory in the ChatGPT desktop app. Restart the app after adding the marketplace, open **Plugins** in Codex, and choose the **Kernel** marketplace.
+You can also install them from the Plugins Directory in the ChatGPT desktop app. Restart the app after adding the marketplace, open **Plugins** in Codex, and find the Kernel plugins under **Public**.
 
 ### Cursor
 
