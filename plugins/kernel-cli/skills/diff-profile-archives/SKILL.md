@@ -1,11 +1,11 @@
 ---
 name: diff-profile-archives
-description: Compare two Kernel profile archives to investigate behavioral differences. Use when an issue (e.g. login failure, captcha, broken automation, vendor mismatch) reproduces on one profile but not another, or when a "good" vs "bad" profile needs to be diffed. Takes two profile IDs/names plus an issue description, downloads both archives via the Kernel CLI, and surfaces differences in cookies, storage, preferences, extensions, and login state that could explain the issue.
+description: Compare two Kernel profile snapshots to investigate behavioral differences. Use when an issue (e.g. login failure, captcha, broken automation, vendor mismatch) reproduces on one profile but not another, or when a "good" vs "bad" profile needs to be diffed. Takes two profile IDs/names plus an issue description, downloads and extracts both profiles via the Kernel CLI, and surfaces differences in cookies, storage, preferences, extensions, and login state that could explain the issue.
 ---
 
 # Diff Kernel Profile Archives
 
-Compare the actual contents of two Kernel browser profiles to identify state differences that could explain a reported issue. The skill downloads both profile archives via the Kernel CLI, decompresses them, and produces a structured diff focused on the surfaces most likely to drive divergent behavior: cookies, local/session storage, preferences, extension state, login data, and history.
+Compare the actual contents of two Kernel browser profiles to identify state differences that could explain a reported issue. The skill downloads and extracts both profiles via the Kernel CLI, then produces a structured diff focused on the surfaces most likely to drive divergent behavior: cookies, local/session storage, preferences, extension state, login data, and history.
 
 ## Inputs
 
@@ -19,9 +19,9 @@ If any of these are missing, prompt for them before proceeding. The issue descri
 
 ## Prerequisites
 
-- Kernel CLI installed and authenticated (`kernel auth status`)
-- `KERNEL_API_KEY` set, or the user is logged in via `kernel auth login`
-- `zstd`, `tar`, `sqlite3`, and `jq` available (install via `apt-get install -y zstd sqlite3 jq` if needed)
+- Kernel CLI installed and authenticated (`kernel auth`)
+- `KERNEL_API_KEY` set, or the user is logged in via `kernel login`
+- `sqlite3` and `jq` available (install via `apt-get install -y sqlite3 jq` if needed)
 - ~500MB free disk space per profile (profiles can be large)
 
 ## Workflow
@@ -35,29 +35,38 @@ mkdir -p a b diff
 echo "Workspace: $WORKDIR"
 ```
 
-### Step 2: Download both archives
+### Step 2: Resolve and download both profiles
 
 ```bash
-# Replace <A> and <B> with the profile IDs or names from the user
-kernel profiles download <A> --pretty --to a/profile.zip
-kernel profiles download <B> --pretty --to b/profile.zip
+# Replace these with the profile IDs or exact names from the user.
+PROFILE_A='<working-id-or-name>'
+PROFILE_B='<broken-id-or-name>'
+
+# Record metadata and confirm the identifiers resolve to two distinct profile IDs.
+kernel profiles get "$PROFILE_A" -o json | tee diff/profile-a.json
+kernel profiles get "$PROFILE_B" -o json | tee diff/profile-b.json
+A_ID=$(jq -r '.id' diff/profile-a.json)
+B_ID=$(jq -r '.id' diff/profile-b.json)
+[ "$A_ID" != "$B_ID" ] || { echo "Both inputs resolve to $A_ID" >&2; exit 1; }
+
+# --to is an extraction directory, not an archive filename.
+kernel profiles download "$PROFILE_A" --to a
+kernel profiles download "$PROFILE_B" --to b
 ```
 
-`--pretty` pretty-prints JSON files (e.g. `Preferences`) so they diff cleanly line-by-line. Always pass it.
+Profile names and IDs are resolved in the CLI's active project scope. If the user specifies a project, use the same `--project <id-or-name>` on every `profiles get` and `profiles download` command.
 
-### Step 3: Extract
-
-The archive is **Zstandard-compressed TAR despite the `.zip` extension**. Standard unzip will fail.
+The CLI requests `tar.zst` by default, streams the response, decompresses it, and extracts it directly under `--to`. It does not leave an archive file. Keep the default for the smaller transfer. Use `--format tar` only to bypass zstd decompression while debugging a format/decompression problem; the CLI still extracts the response into `--to`:
 
 ```bash
-for side in a b; do
-  zstd -d "$side/profile.zip" -o "$side/profile.tar"
-  tar -xf "$side/profile.tar" -C "$side"
-  rm "$side/profile.tar"
-done
+kernel profiles download "$PROFILE_A" --format tar --to a
 ```
 
-After extraction each side typically contains a Chrome user-data-dir layout (e.g. `Default/` with `Cookies`, `Local Storage/`, `Preferences`, etc.). If the layout differs, run `find a -maxdepth 3 -type d` to orient yourself before continuing.
+If the CLI reports that a profile has no saved data yet, stop: the profile must first be used in a browser session so Kernel can capture state.
+
+### Step 3: Inspect the extracted layout
+
+Each side typically contains a Chrome user-data-dir layout (e.g. `Default/` with `Cookies`, `Local Storage/`, `Preferences`, etc.). Run `find a b -maxdepth 3 -type d | sort` to orient yourself before continuing.
 
 ### Step 4: Triage by issue description
 
@@ -123,8 +132,8 @@ for side in a b; do
     echo "(no Preferences)" > "diff/preferences-$side.json"
     continue
   fi
-  # Already pretty-printed thanks to --pretty
-  cp "$PREF" "diff/preferences-$side.json"
+  # Normalize key ordering and indentation before diffing.
+  jq -S . "$PREF" > "diff/preferences-$side.json"
 done
 diff -u diff/preferences-a.json diff/preferences-b.json > diff/preferences.diff || true
 ```
@@ -327,7 +336,7 @@ Use this template:
 
 ### Step 8: Cleanup
 
-Profile archives can contain credentials. Always remove the workspace when done:
+Extracted profile data can contain credentials. Always remove the workspace when done:
 
 ```bash
 rm -rf "$WORKDIR"
@@ -337,8 +346,8 @@ If the user wants to keep the artifacts for further investigation, tell them the
 
 ## Notes & gotchas
 
-- **Archive format**: `.zip` extension is misleading — it's `zstd`-compressed TAR. Use `zstd -d` then `tar -xf`, not `unzip`.
-- **`--pretty` is mandatory** for meaningful JSON diffs. Without it, `Preferences` is a single line and diffs are unreadable.
+- **Download destination**: `--to` names an extraction directory. Do not give it a `.zip` filename and do not run `unzip`, `zstd`, or `tar`; the CLI extracts the requested `tar.zst` (default) or `tar` response itself.
+- **Normalize JSON locally**: `profiles download` has no `--pretty` flag. Use `jq -S .` before diffing JSON files so formatting and key order do not create noise.
 - **Chrome profile path varies**: most data lives under `Default/`, but newer Chrome moved cookies to `Default/Network/Cookies`. Use `find` instead of hardcoding paths.
 - **SQLite locks**: profiles are downloaded as snapshots, so DBs aren't locked — but if a query errors with "database is locked", make sure you're querying the extracted copy, not a path inside an open archive.
 - **Don't compare `Cache/`, `Code Cache/`, `GPUCache/`, `Service Worker/CacheStorage/`** — these are noise and will produce huge meaningless diffs.
