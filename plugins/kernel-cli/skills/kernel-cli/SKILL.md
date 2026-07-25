@@ -9,7 +9,7 @@ The Kernel CLI provides command-line access to Kernel's cloud browser platform f
 
 ## Installation
 
-- Homebrew: `brew install onkernel/tap/kernel`
+- Homebrew: `brew install kernel/tap/kernel`
 - npm: `npm install -g @onkernel/cli`
 
 Verify with `kernel --version`. Use `kernel <command> --help` as the source of truth for the installed version.
