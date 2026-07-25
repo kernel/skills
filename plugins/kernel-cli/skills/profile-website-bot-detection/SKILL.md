@@ -10,73 +10,105 @@ Analyzes a target website to identify bot detection vendors, their specific prod
 ## Prerequisites
 
 - Kernel CLI installed and authenticated
-- Node.js 22+ installed
-- `jq` installed (`brew install jq` or `apt install jq`)
-- `KERNEL_API_KEY` environment variable set. If it is not set, prompt the user to supply.
+- Bash, Node.js 22+, and `jq` installed
+- `KERNEL_API_KEY` exported for the analysis script; never print it or ask the user to paste it into chat
 
 ## Comparative Workflow (Recommended)
 
-Compare bot detection behavior between stealth and non-stealth browsers to evaluate stealth effectiveness.
+Compare bot detection behavior between stealth and non-stealth browsers while controlling the network path. Run Steps 1-7 in the same Bash process so the cleanup trap remains armed. Do not run Step 2 as a standalone non-interactive shell: its EXIT trap will delete the sessions when that shell returns.
 
-### Step 1: Create Both Browser Types
+### Step 1: Prepare the Analyzer
 
-```bash
-# Create stealth browser (with -s flag)
-kernel browsers create -s --viewport 1920x1080@25 -t 300
-# Save session_id as STEALTH_ID
-
-# Create non-stealth headful browser (no -s flag)
-kernel browsers create --viewport 1920x1080@25 -t 300
-# Save session_id as NORMAL_ID
-```
-
-### Step 2: Run Analysis on Both Browsers
+Install dependencies before creating billable browser sessions:
 
 ```bash
 cd scripts
 npm install  # first run only
-
-# Test with stealth browser
-KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$STEALTH_ID TARGET_URL=<url> BROWSER_MODE=stealth npm run analyze
-
-# Test with non-stealth browser
-KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$NORMAL_ID TARGET_URL=<url> BROWSER_MODE=normal npm run analyze
+export TARGET_URL='https://example.com'
+test -n "${KERNEL_API_KEY:-}" || { echo "KERNEL_API_KEY is not set" >&2; exit 1; }
 ```
 
-### Step 3: Compare Results
+### Step 2: Create Both Browser Types and Arm Cleanup
 
-Compare the vendor detections and blocking behavior:
+Use JSON output to capture exact session IDs. The EXIT trap cleans up the first session if the second creation or a later analysis fails.
 
 ```bash
-# Set the hostname folder (e.g., chase-com for chase.com)
-HOST=chase-com
+set -euo pipefail
+STEALTH_ID=
+NORMAL_ID=
 
-# Quick verdict comparison
-echo "=== STEALTH VERDICT ===" && cat output/$HOST/stealth/report-*.json | jq '.summary.verdict'
-echo "=== NORMAL VERDICT ===" && cat output/$HOST/normal/report-*.json | jq '.summary.verdict'
+cleanup() {
+  local ids=()
+  [[ -n "${STEALTH_ID:-}" ]] && ids+=("$STEALTH_ID")
+  [[ -n "${NORMAL_ID:-}" ]] && ids+=("$NORMAL_ID")
+  if ((${#ids[@]})); then
+    kernel browsers delete "${ids[@]}" || true
+  fi
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
-# Compare block status
-echo "=== STEALTH BLOCKED ===" && cat output/$HOST/stealth/report-*.json | jq '.summary | {isBlocked, blockedPages, blockedVendors}'
-echo "=== NORMAL BLOCKED ===" && cat output/$HOST/normal/report-*.json | jq '.summary | {isBlocked, blockedPages, blockedVendors}'
+STEALTH_ID=$(kernel browsers create --stealth --viewport 1920x1080@25 --timeout 300 --output json | jq -er '.session_id')
+NORMAL_ID=$(kernel browsers create --viewport 1920x1080@25 --timeout 300 --output json | jq -er '.session_id')
 
-# Compare detected vendors
-echo "=== STEALTH VENDORS ===" && cat output/$HOST/stealth/report-*.json | jq '.summary.vendorNames'
-echo "=== NORMAL VENDORS ===" && cat output/$HOST/normal/report-*.json | jq '.summary.vendorNames'
+# Isolate browser stealth behavior: route the stealth session directly, like the normal session.
+kernel browsers update "$STEALTH_ID" --disable-default-proxy >/dev/null
 ```
 
-### Step 4: Interpret Comparison
+A stealth session otherwise uses Kernel's default stealth proxy, while a normal session connects directly. Without the update, the result measures **stealth plus proxy** versus **normal plus direct**, not stealth alone. Apply `--disable-default-proxy` only to the stealth session; the API rejects it for non-stealth sessions.
+
+Choose one network design before navigating:
+
+- **Browser-mode comparison (recommended):** Keep the update above so both sessions connect directly.
+- **Platform-default comparison:** Omit the update and report the stealth result as `stealth + default proxy`; do not attribute differences solely to stealth.
+- **Explicit-proxy comparison:** Optionally validate a configured proxy with `kernel proxies check "$PROXY_ID" --url https://example.com --output json`, add `--proxy-id "$PROXY_ID"` to both create commands, and omit the update. This controls proxy configuration, though provider rotation can still produce different exit IPs.
+
+### Step 3: Run Analysis on Both Browsers
+
+```bash
+KERNEL_BROWSER_ID="$STEALTH_ID" TARGET_URL="$TARGET_URL" BROWSER_MODE=stealth npm run analyze
+KERNEL_BROWSER_ID="$NORMAL_ID" TARGET_URL="$TARGET_URL" BROWSER_MODE=normal npm run analyze
+```
+
+### Step 4: Compare Results
+
+Compare the newest report from each mode rather than concatenating multiple JSON documents:
+
+```bash
+# Set the hostname folder (e.g., chase-com for chase.com).
+HOST=chase-com
+latest_report() {
+  local reports=("$1"/report-*.json)
+  [[ -e "${reports[0]}" ]] || return 1
+  printf '%s\n' "${reports[@]}" | sort | tail -n 1
+}
+STEALTH_REPORT=$(latest_report "output/$HOST/stealth")
+NORMAL_REPORT=$(latest_report "output/$HOST/normal")
+
+echo "=== STEALTH VERDICT ===" && jq '.summary.verdict' "$STEALTH_REPORT"
+echo "=== NORMAL VERDICT ===" && jq '.summary.verdict' "$NORMAL_REPORT"
+
+echo "=== STEALTH BLOCKED ===" && jq '.summary | {isBlocked, blockedPages, blockedVendors}' "$STEALTH_REPORT"
+echo "=== NORMAL BLOCKED ===" && jq '.summary | {isBlocked, blockedPages, blockedVendors}' "$NORMAL_REPORT"
+
+echo "=== STEALTH VENDORS ===" && jq '.summary.vendorNames' "$STEALTH_REPORT"
+echo "=== NORMAL VENDORS ===" && jq '.summary.vendorNames' "$NORMAL_REPORT"
+```
+
+### Step 5: Interpret Comparison
 
 | Scenario | Stealth | Normal | Meaning |
 |----------|---------|--------|---------|
-| No vendors detected | 0 | 0 | Site has no bot detection |
+| No vendors detected | 0 | 0 | No signals observed; do not assume the site has no bot detection |
 | Same vendors, no blocks | N | N | Bot detection present, both pass |
-| Normal blocked, stealth passes | 0 blocks | Blocked | Stealth mode is effective |
-| Both blocked | Blocked | Blocked | Bot detection defeats stealth |
-| Different challenge types | Lighter | Harder | Stealth reduces suspicion |
+| Normal blocked, stealth passes | 0 blocks | Blocked | With a controlled network, stealth is effective |
+| Both blocked | Blocked | Blocked | Both tested configurations are blocked |
+| Different challenge types | Lighter | Harder | With a controlled network, stealth likely reduces suspicion |
 
-### Step 5: Provide Summary
+### Step 6: Provide Summary
 
-After running the comparative analysis, provide a detailed summary report to the user that includes:
+After running the comparative analysis, state the network design explicitly. Claim stealth effectiveness only when both sessions used the same network class.
 
 **Summary Report Template:**
 
@@ -84,9 +116,10 @@ After running the comparative analysis, provide a detailed summary report to the
 ## Bot Detection Comparative Analysis: [TARGET_URL]
 
 ### Verdict
+- **Network Design**: [both direct / same explicit proxy config / platform defaults]
 - **Stealth Browser**: [verdict from summary.verdict]
 - **Normal Browser**: [verdict from summary.verdict]
-- **Stealth Effectiveness**: [Effective/Ineffective/Inconclusive]
+- **Stealth Effectiveness**: [Effective/Ineffective/Inconclusive; use Inconclusive for mixed network paths]
 
 ### Block Status
 | Browser | Blocked | Block Type | Evidence |
@@ -117,12 +150,16 @@ Use the JSON reports to populate this template:
 - `summary.vendorNames` - List of detected vendors
 - `vendorDetections` - Detailed vendor/product information
 
-### Step 6: Cleanup
+### Step 7: Cleanup
+
+Delete both sessions immediately after collecting reports. `browsers delete` is non-interactive and accepts multiple IDs; it has no `-y` flag.
 
 ```bash
-kernel browsers delete -y $STEALTH_ID
-kernel browsers delete -y $NORMAL_ID
+cleanup
+trap - EXIT INT TERM
 ```
+
+If the shell was interrupted or the variables were lost, use `kernel browsers list` to find the created sessions and delete each with `kernel browsers delete <session-id>`.
 
 ---
 
@@ -193,46 +230,6 @@ The JSON report includes:
 - `vendorScriptsDetected`: URLs of detected vendor scripts (not saved to disk)
 - `networkRequests/networkResponses`: All requests with vendor matching
 - `cookies`: All cookies with vendor attribution
-
-## Example: Comparative Session
-
-```bash
-# Create both browsers
-STEALTH_ID=$(kernel browsers create -s --viewport 1920x1080@25 -t 300 -o json | jq -r '.session_id')
-NORMAL_ID=$(kernel browsers create --viewport 1920x1080@25 -t 300 -o json | jq -r '.session_id')
-
-echo "Stealth: $STEALTH_ID"
-echo "Normal: $NORMAL_ID"
-
-# Run analysis on both
-cd scripts
-KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$STEALTH_ID TARGET_URL=chase.com BROWSER_MODE=stealth npm run analyze
-KERNEL_API_KEY=$KERNEL_API_KEY KERNEL_BROWSER_ID=$NORMAL_ID TARGET_URL=chase.com BROWSER_MODE=normal npm run analyze
-
-# Output structure:
-# ./output/chase-com/stealth/report-*.json
-# ./output/chase-com/stealth/screenshot-*.png
-# ./output/chase-com/normal/report-*.json
-# ./output/chase-com/normal/screenshot-*.png
-
-# Quick comparison - check verdicts
-echo "--- Stealth verdict ---"
-cat output/chase-com/stealth/report-*.json | jq '.summary.verdict'
-
-echo "--- Normal verdict ---"
-cat output/chase-com/normal/report-*.json | jq '.summary.verdict'
-
-# Detailed vendor comparison
-echo "--- Stealth vendors ---"
-cat output/chase-com/stealth/report-*.json | jq '.summary.vendorNames'
-
-echo "--- Normal vendors ---"
-cat output/chase-com/normal/report-*.json | jq '.summary.vendorNames'
-
-# Cleanup
-kernel browsers delete -y $STEALTH_ID
-kernel browsers delete -y $NORMAL_ID
-```
 
 ## Vendor-Specific Detection Notes
 
