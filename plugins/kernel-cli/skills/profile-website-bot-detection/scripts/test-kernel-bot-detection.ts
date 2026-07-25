@@ -1659,19 +1659,15 @@ async function runTest(): Promise<void> {
     log(`Test failed: ${(error as Error).message}`, 'ERROR');
     console.error(error);
     process.exit(1);
-  } finally {
-    // Use disconnect() not close() — close() destroys remote contexts/pages,
-    // disconnect() drops the CDP client while leaving the Kernel session intact.
-    if (browser) {
-      try {
-        await browser.disconnect();
-        log('Disconnected from browser (session still active)');
-      } catch {
-        // Already disconnected
-      }
-    }
   }
 }
 
-// Run the test
-runTest().catch(console.error);
+// Run the test. The SDK's HTTP dispatcher can keep Node's event loop alive after
+// the report is written, so exit explicitly once cleanup has completed.
+runTest().then(
+  () => process.exit(0),
+  (error) => {
+    console.error(error);
+    process.exit(1);
+  },
+);

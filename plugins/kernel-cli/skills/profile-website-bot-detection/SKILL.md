@@ -71,6 +71,8 @@ KERNEL_BROWSER_ID="$STEALTH_ID" TARGET_URL="$TARGET_URL" BROWSER_MODE=stealth np
 KERNEL_BROWSER_ID="$NORMAL_ID" TARGET_URL="$TARGET_URL" BROWSER_MODE=normal npm run analyze
 ```
 
+Each analyzer run disconnects its local CDP client after writing the report; it leaves the Kernel session active for comparison and cleanup.
+
 ### Step 4: Compare Results
 
 Compare the newest report from each mode rather than concatenating multiple JSON documents:

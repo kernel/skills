@@ -115,13 +115,15 @@ agent-browser -p kernel find nth 2 ".card" hover
 
 ## Find the Kernel Session and Live View
 
-Match agent-browser's CDP URL to the active Kernel session. This is more reliable than guessing from creation time when several sessions share a profile. This workflow requires `jq`.
+Match agent-browser's CDP endpoint to the active Kernel session. Compare the URL without its query string: the CLI and agent-browser can hold different short-lived `jwt` query values for the same session. The endpoint's scheme, host, and path remain stable. This is more reliable than guessing from creation time when several sessions share a profile. This workflow requires `jq`.
 
 ```bash
 CDP_URL="$(agent-browser -p kernel get cdp-url)"
+CDP_ENDPOINT="${CDP_URL%%\?*}"
 SESSION_ID="$(
   kernel browsers list --status active --limit 100 -o json |
-    jq -r --arg cdp "$CDP_URL" '.[] | select(.cdp_ws_url == $cdp) | .session_id' |
+    jq -r --arg endpoint "$CDP_ENDPOINT" \
+      '.[] | select((.cdp_ws_url | split("?")[0]) == $endpoint) | .session_id' |
     head -n 1
 )"
 test -n "$SESSION_ID"
@@ -443,8 +445,10 @@ agent-browser -p kernel click @eM
 
 # Resolve the underlying session before manual intervention
 CDP_URL="$(agent-browser -p kernel get cdp-url)"
+CDP_ENDPOINT="${CDP_URL%%\?*}"
 SESSION_ID="$(kernel browsers list --status active --limit 100 -o json |
-  jq -r --arg cdp "$CDP_URL" '.[] | select(.cdp_ws_url == $cdp) | .session_id' |
+  jq -r --arg endpoint "$CDP_ENDPOINT" \
+    '.[] | select((.cdp_ws_url | split("?")[0]) == $endpoint) | .session_id' |
   head -n 1)"
 test -n "$SESSION_ID"
 kernel browsers view "$SESSION_ID"
