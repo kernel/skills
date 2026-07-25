@@ -1,6 +1,6 @@
 ---
 name: kernel-cli
-description: Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management
+description: Use the Kernel CLI to manage cloud browsers, apps, profiles, proxies, managed auth, API keys, projects, and organization limits. Use when installing or authenticating the CLI, looking up current command syntax, or choosing the right command group.
 ---
 
 # Kernel CLI
@@ -9,8 +9,10 @@ The Kernel CLI provides command-line access to Kernel's cloud browser platform f
 
 ## Installation
 
-- Homebrew: `brew install kernel/tap/kernel` (>=v0.13.4)
-- npm: `npm install -g @onkernel/cli` (>=v0.13.4)
+- Homebrew: `brew install onkernel/tap/kernel`
+- npm: `npm install -g @onkernel/cli`
+
+Verify with `kernel --version`. Use `kernel <command> --help` as the source of truth for the installed version.
 
 ## Authentication
 
@@ -38,6 +40,33 @@ kernel browsers computer screenshot <session_id> --to screenshot.png
 # Cleanup
 kernel browsers delete <session_id>
 ```
+
+## Safe Operation
+
+- Prefer `-o json` plus `jq` for scripts; deploy and invoke emit JSONL rather than one JSON object.
+- Use `--project <id-or-name>` or `KERNEL_PROJECT` when an API key can access multiple projects.
+- Keep confirmation prompts for destructive operations unless non-interactive execution is intentional.
+- Delete created browser sessions and pools after testing. Never echo, log, commit, or share API keys, credentials, or proxy passwords.
+
+## Project, API Key, and Organization Administration
+
+```bash
+# Rename, archive, or reactivate a project (provide at least one update)
+kernel projects update <id-or-name> --name <new-name> -o json
+kernel projects update <id-or-name> --status archived -o json
+kernel projects update <id-or-name> --status active -o json
+
+# Look up a soft-deleted API key
+kernel api-keys get <id> --include-deleted -o json
+
+# Inspect limits before changing the default project cap
+kernel org limits get -o json
+kernel org limits set --default-project-max-concurrent-sessions <n> -o json
+```
+
+For `org limits set`, `0` removes the default cap; the value cannot exceed the organization concurrency limit.
+
+Rotate an API key interactively with `kernel api-keys rotate <id>`. Use `--days-to-expire <1-3650>` to set the replacement key lifetime and `--expire-in-days <n>` to set the old key's grace period (default 7 days; `0` revokes it immediately). The output contains the replacement plaintext key once: keep it out of logs, migrate callers during the grace period, and then verify the old key no longer works.
 
 ## References
 
