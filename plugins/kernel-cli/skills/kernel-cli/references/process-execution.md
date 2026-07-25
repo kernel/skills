@@ -40,6 +40,10 @@ kernel browsers process exec <session_id> --cwd /tmp -- pwd
 
 # With specific user
 kernel browsers process exec <session_id> --as-user chromium -- whoami
+
+# Set repeatable process-scoped environment variables
+kernel browsers process exec <session_id> \
+  --env REGION=us-east --env MODE=debug -- printenv REGION MODE
 ```
 
 ## Spawn Background Process (Asynchronous)
@@ -51,9 +55,15 @@ kernel browsers process spawn <session_id> -- long-running-command
 # With timeout
 kernel browsers process spawn <session_id> --timeout 300 -- background-task
 
-# Start web server
-kernel browsers process spawn <session_id> -- python3 -m http.server 8080
+# Start web server with a process-scoped environment variable
+kernel browsers process spawn <session_id> --env PORT=8080 -- \
+  /bin/bash -c 'python3 -m http.server "$PORT"'
+
+# Allocate a PTY for a shell or another TTY-dependent program
+kernel browsers process spawn <session_id> --allocate-tty --cols 120 --rows 40 -- /bin/bash
 ```
+
+Repeat `--env KEY=VALUE` as needed. `--cols` and `--rows` are valid only with `--allocate-tty`.
 
 ## Additional Process Commands
 

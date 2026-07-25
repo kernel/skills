@@ -24,6 +24,7 @@ kernel auth connections create --domain <domain> --profile-name <name> [flags]
 | `--allowed-domain` | Additional allowed domains (repeatable) |
 | `--health-check-interval` | Seconds between health checks (300-86400) |
 | `--no-save-credentials` | Don't save credentials after login |
+| `--telemetry=<value>` | Default telemetry (`all`, `off`, or category list) for this connection's browser sessions |
 | `-o json` | JSON output |
 
 ### Credential source examples
@@ -42,13 +43,26 @@ kernel auth connections create --domain github.com --profile-name gh \
   --credential-provider my-1p --credential-auto
 ```
 
+Telemetry is opt-in. On create, `--telemetry=all` enables the default set, `--telemetry=off` disables capture, and `--telemetry=console,network` captures exactly those categories.
+
+## update
+
+Update settings used by future login sessions:
+
+```bash
+kernel auth connections update <id> --telemetry=console,network -o json
+kernel auth connections update <id> --telemetry=off -o json
+```
+
+Named categories merge into the current selection. `all` and `off` reset the complete telemetry config. Other update flags include login URL, health-check interval, credential source, proxy, allowed domains, and credential-saving behavior; run `kernel auth connections update --help` before changing them.
+
 ## get
 
 ```bash
 kernel auth connections get <id> [-o json]
 ```
 
-Shows: ID, domain, profile, status, flow status/step, credential, health check interval, hosted URL, live view URL, error message, last auth time, allowed domains.
+Shows: ID, domain, profile, status, flow status/step, credential, health check interval, hosted URL, live view URL, error message, last auth time, allowed domains, fields, and choices.
 
 ## list
 
@@ -64,26 +78,40 @@ kernel auth connections delete <id> [-y]
 
 ## login
 
-Start a login flow. Returns hosted URL, flow type, and expiry.
+Start a login flow. Returns hosted URL, flow type, and expiry. A login telemetry override merges onto the connection default for this flow only.
 
 ```bash
-kernel auth connections login <id> [--proxy-id <id>] [--proxy-name <name>] [-o json]
+kernel auth connections login <id> --telemetry=network,page -o json
 ```
+
+Use `--proxy-id` or `--proxy-name` to override the proxy for this login.
 
 ## submit
 
-Submit field values, SSO button selection, or MFA option to an active login flow.
+Submit field values or select a choice from the active flow. Prefer canonical IDs returned in the connection's `fields` and `choices` lists; names accepted by legacy `--field` can be ambiguous.
 
 ```bash
-# Submit credentials
-kernel auth connections submit <id> --field username=myuser --field password=mypass
+# Canonical field IDs; repeat for each requested field
+kernel auth connections submit <id> \
+  --field-value 'field_username=myuser' \
+  --field-value 'field_password=<value>'
 
-# Select SSO button
-kernel auth connections submit <id> --sso-button-selector "//button[@id='google-sso']"
-
-# Select MFA method
-kernel auth connections submit <id> --mfa-option-id totp
+# Canonical choice ID for SSO, MFA, or another discovered choice
+kernel auth connections submit <id> --choice-id <choice-id>
 ```
+
+Legacy selectors remain available (`--field`, `--mfa-option-id`, `--sign-in-option-id`, `--sso-button-selector`, and `--sso-provider`). Do not put real credential values in logs or committed shell scripts.
+
+## timeline
+
+Inspect login, reauth, and health-check history, newest first:
+
+```bash
+kernel auth connections timeline <id> --page 1 --per-page 20 -o json
+kernel auth connections timeline <id> --type reauth -o json
+```
+
+`--type` accepts `login`, `reauth`, or `health_check`; pages are 1-based.
 
 ## follow
 
