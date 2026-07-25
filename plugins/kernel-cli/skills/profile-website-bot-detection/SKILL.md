@@ -78,8 +78,8 @@ Each analyzer run disconnects its local CDP client after writing the report; it 
 Compare the newest report from each mode rather than concatenating multiple JSON documents:
 
 ```bash
-# Set the hostname folder (e.g., chase-com for chase.com).
-HOST=chase-com
+# Derive the same hostname folder used by the analyzer (e.g., chase.com -> chase-com).
+HOST=$(node -e 'const host = new URL(process.env.TARGET_URL).hostname; console.log(host.replace(/^www\./, "").replace(/\./g, "-"))')
 latest_report() {
   local reports=("$1"/report-*.json)
   [[ -e "${reports[0]}" ]] || return 1
