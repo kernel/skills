@@ -116,14 +116,15 @@ finally:
 
 Deleting the browser ends the session and allows profile changes to finalize. Do not delete the profile first. Use either `{"id": ...}` or `{"name": ...}`, not both.
 
-The current Python SDK's `profiles.download(id_or_name)` returns a zstd-compressed tar archive. Save it with:
+The Python SDK can request either archive format and rename profiles natively:
 
 ```python
-archive = client.profiles.download(profile.id)
-archive.write_to_file("profile.tar.zst")
+archive = client.profiles.download(profile.id, format="tar")
+archive.write_to_file("profile.tar")
+client.profiles.update(profile.id, name="checkout-login-v2")
 ```
 
-Do not pass the CLI-only `--format` concept to the SDK method. Use `kernel profiles download <id-or-name> --to ./profile --format tar` when server-side decompression and extraction are needed. The current SDK does not expose profile rename; use `kernel profiles update <id-or-name> --name <new-name>`.
+The SDK writes an archive for both `tar.zst` and `tar`; it never extracts the contents. Use `kernel profiles download <id-or-name> --to ./profile` when the archive must be unpacked into a directory.
 
 ## Proxies and Default Stealth Proxy
 
