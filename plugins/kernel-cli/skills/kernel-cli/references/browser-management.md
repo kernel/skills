@@ -51,6 +51,18 @@ kernel browsers view <session_id> -o json    # Get live view URL
 
 **MCP Tools:** Use `kernel:list_browsers`, `kernel:get_browser`.
 
+## Update a Browser
+
+```bash
+# Bypass the default stealth proxy and connect directly
+kernel browsers update <session_id> --disable-default-proxy -o json
+
+# Restore the default stealth proxy
+kernel browsers update <session_id> --disable-default-proxy=false -o json
+```
+
+This controls Kernel's default stealth proxy. Use `--proxy-id` or `--clear-proxy` to manage an explicitly assigned proxy instead.
+
 ## Delete a Browser
 
 ```bash

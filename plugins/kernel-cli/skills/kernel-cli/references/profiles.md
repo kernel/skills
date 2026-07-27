@@ -39,27 +39,33 @@ kernel profiles list -o json
 
 **MCP Tool:** Use `kernel:list_profiles`.
 
-## Get Profile Details
+## Get and Rename a Profile
 
 ```bash
 # Get by name
-kernel profiles get my-profile
+kernel profiles get my-profile -o json
+
+# Rename by ID or name; names must be unique in the project
+kernel profiles update my-profile --name renamed-profile -o json
 ```
+
+## Download Profile
+
+```bash
+# Request the default compressed tar.zst archive and extract it into a directory
+kernel profiles download renamed-profile --to ./profile-data
+
+# Ask the server to decompress the archive before transfer; output is still a directory
+kernel profiles download renamed-profile --to ./profile-data-tar --format tar
+```
+
+`--to` is an extraction directory, not an archive filename; the CLI creates it if needed. Supported request formats are `tar.zst` (default) and `tar`.
 
 ## Delete Profile
 
 ```bash
 # Delete with confirmation prompt
-kernel profiles delete my-profile
+kernel profiles delete renamed-profile
 ```
 
 **MCP Tool:** Use `kernel:delete_profile`.
-
-## Download Profile
-
-```bash
-# Download profile data as ZIP
-kernel profiles download my-profile --to profile.zip
-```
-
-The downloaded file contains the profile's cookies and local storage data.

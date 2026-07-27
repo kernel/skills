@@ -1,6 +1,6 @@
 ---
 name: kernel-agent-browser
-description: Best practices for using agent-browser with Kernel cloud browsers. Use when automating websites with agent-browser -p kernel, dealing with bot detection, iframes, login persistence, or needing to find Kernel browser session IDs and live view URLs.
+description: Best practices for using agent-browser with Kernel cloud browsers. Use when automating websites with agent-browser -p kernel, tuning stealth or proxy behavior, persisting profiles, handling iframes, discovering Kernel session IDs or live views, or cleaning up cloud sessions.
 ---
 
 # Agent-Browser with Kernel Cloud Browsers
@@ -34,28 +34,46 @@ Set these before your first `agent-browser -p kernel` call. The CLI holds state 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `KERNEL_API_KEY` | **Required.** Your Kernel API key for authentication | (none) |
-| `KERNEL_HEADLESS` | Run browser in headless mode (`true`/`false`) | `false` |
-| `KERNEL_STEALTH` | Enable stealth mode to avoid bot detection (`true`/`false`) | `true` |
+| `KERNEL_HEADLESS` | Run browser in headless mode (`true`/`false`) | `true` |
+| `KERNEL_STEALTH` | Launch a stealth browser (`true`/`false`) | `false` |
 | `KERNEL_TIMEOUT_SECONDS` | Session timeout in seconds | `300` |
-| `KERNEL_PROFILE_NAME` | Browser profile name for persistent cookies/logins | (none) |
+| `KERNEL_PROFILE_NAME` | Currently unusable with `-p kernel` in agent-browser 0.33.0; use the CDP workaround below | (none) |
 
 ### Recommended Configuration
+
+Set options explicitly; agent-browser reads them when it creates the provider session.
 
 ```bash
 export KERNEL_API_KEY="your-api-key"
 export KERNEL_TIMEOUT_SECONDS=600     # 10-minute timeout for complex workflows
-export KERNEL_STEALTH=true            # Avoid bot detection (default)
-export KERNEL_PROFILE_NAME=mysite     # Persist login sessions across runs
+export KERNEL_HEADLESS=false          # Required when you need a live view
+export KERNEL_STEALTH=true            # Opt in for bot-sensitive sites
+# Do not set KERNEL_PROFILE_NAME with -p kernel; use the workaround below.
 ```
 
 ### Profile Persistence
 
-When `KERNEL_PROFILE_NAME` is set:
-- The profile is created if it doesn't exist
-- Cookies, logins, and session data are automatically saved when the browser session ends
-- Future sessions with the same profile name restore the saved state
+> **Warning:** `KERNEL_PROFILE_NAME` doesn't work with `-p kernel` in agent-browser 0.33.0. It sends `profile` as a string instead of the object required by Kernel, so session creation fails with HTTP 400. It also doesn't set `save_changes`. Profiles must be pre-created.
 
-This is especially useful for sites requiring login—authenticate once, reuse across sessions.
+Until this is fixed upstream, create the browser with the Kernel CLI and attach agent-browser over CDP. Don't combine `-p kernel` with `--cdp`.
+
+```bash
+PROFILE_NAME=mysite  # Create once with: kernel profiles create --name mysite
+kernel profiles get "$PROFILE_NAME" >/dev/null
+BROWSER=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes --timeout 600 -o json)
+SESSION_ID=$(jq -er '.session_id' <<<"$BROWSER")
+CDP_URL=$(jq -er '.cdp_ws_url' <<<"$BROWSER")
+trap 'kernel browsers delete "$SESSION_ID" >/dev/null 2>&1 || true' EXIT
+
+agent-browser --session mysite --cdp "$CDP_URL" open https://example.com
+agent-browser --session mysite snapshot -i
+# Run additional commands with --session mysite, then disconnect and end the Kernel session.
+agent-browser --session mysite close
+kernel browsers delete "$SESSION_ID"
+trap - EXIT
+```
+
+Don't print or share `CDP_URL`; it grants browser access. Deleting the CLI-created session finalizes `--save-changes`, so later sessions can reuse the authenticated profile.
 
 ## Basic Usage
 
@@ -64,10 +82,10 @@ agent-browser -p kernel open <url>        # Navigate to page
 agent-browser -p kernel snapshot -i       # Get interactive elements with refs
 agent-browser -p kernel click @e1         # Click element by ref
 agent-browser -p kernel fill @e2 "text"   # Fill input by ref
-agent-browser -p kernel close             # Close browser and save profile
+agent-browser -p kernel close             # Close the provider session
 ```
 
-Always use the `-p kernel` flag with each command.
+For provider-managed sessions, use `-p kernel` with each command. For the profile/CDP workaround, reuse the same `--session` name and don't add `-p kernel`.
 
 ## Semantic Selectors (Recommended)
 
@@ -110,43 +128,52 @@ agent-browser -p kernel find nth 2 ".card" hover
 
 **Recommendation**: Use `find` for production automation. Use `@e` refs for exploration and quick prototyping, then convert to semantic selectors.
 
-## Finding Session ID and Live View URL
+## Find the Kernel Session and Live View
 
-agent-browser creates a Kernel browser session under the hood. To get the session ID or live view URL:
+Match agent-browser's CDP endpoint to the active Kernel session. Compare the URL without its query string: the CLI and agent-browser can hold different short-lived `jwt` query values for the same session. The endpoint's scheme, host, and path remain stable. This is more reliable than guessing from creation time when several sessions share a profile. This workflow requires `jq`.
 
 ```bash
-# List all Kernel browsers (find yours by profile name or creation time)
-kernel browsers list
+CDP_URL="$(agent-browser -p kernel get cdp-url)"
+CDP_ENDPOINT="${CDP_URL%%\?*}"
+SESSION_ID="$(
+  kernel browsers list --status active --limit 100 -o json |
+    jq -r --arg endpoint "$CDP_ENDPOINT" \
+      '.[] | select((.cdp_ws_url | split("?")[0]) == $endpoint) | .session_id' |
+    head -n 1
+)"
+test -n "$SESSION_ID"
 
-# Get live view URL for a specific session
-kernel browsers view <session-id>
+kernel browsers view "$SESSION_ID"
 ```
 
-This is useful when:
-- You need to execute Playwright scripts directly against the session
-- You want to share a live view URL with the user for manual intervention
-- You're debugging and want to watch the browser in real-time
+Do not print or share the CDP URL; it grants browser access. Share a live view URL only with the intended user. A headless session has no live view. If you use `--session <name>`, include it on every agent-browser command, including `get cdp-url`.
 
 ## Handling Bot Detection
 
-### Stealth Mode
+### Stealth and Proxy Routing
 
-Stealth mode (`KERNEL_STEALTH=true`) is enabled by default and helps avoid detection. However, some sites have aggressive bot detection that still triggers.
+Stealth is opt-in in current agent-browser releases. Set `KERNEL_STEALTH=true` before the first command for a session; changing it later does not reconfigure the running browser.
+
+A stealth browser can use Kernel's default stealth proxy. If that proxy causes a site-specific network or reputation failure and direct metro egress is acceptable, change the running session without disabling stealth:
+
+```bash
+kernel browsers update "$SESSION_ID" --disable-default-proxy
+# Retry the navigation and compare behavior.
+
+# Re-enable the default stealth proxy while continuing the same session.
+kernel browsers update "$SESSION_ID" --disable-default-proxy=false
+```
+
+Direct egress changes the public IP and can reduce anti-bot protection. Prefer the default proxy unless testing shows it is the problem. For a configured Kernel proxy, use `--proxy-id <proxy-id>`; remove it with `--clear-proxy`.
 
 ### Manual Login Fallback
 
-If login automation fails due to bot detection:
+If automated login fails:
 
-1. Get the live view URL:
-   ```bash
-   kernel browsers list
-   # Find your session by profile name
-   kernel browsers view <session-id>
-   ```
-
-2. Share the live view URL with the user and ask them to complete the login manually
-
-3. Once logged in, continue automation—the profile will save the authenticated state
+1. Resolve `SESSION_ID` using the CDP-matching workflow above.
+2. Run `kernel browsers view "$SESSION_ID"` and give the URL only to the intended user.
+3. Ask the user to complete login, then continue in the same agent-browser session.
+4. To persist the login, use the CLI-created profile/CDP workflow above. Close agent-browser, then delete the Kernel session so `--save-changes` finalizes.
 
 ### JavaScript Fallback for Tricky Elements
 
@@ -195,23 +222,17 @@ agent-browser -p kernel frame main           # Return to main frame
 
 ### Cross-Origin Iframes
 
-Cross-origin iframes require executing a Playwright script directly against the Kernel session:
+Try `agent-browser frame` first; current releases can switch into iframe context, including many cross-origin frames. If an out-of-process or payment iframe still fails, resolve `SESSION_ID` and use Kernel's Playwright executor:
 
-1. Find the session ID:
-   ```bash
-   kernel browsers list
-   ```
+```bash
+kernel browsers playwright execute "$SESSION_ID" '
+  const frame = page.frameLocator("#payment-iframe");
+  await frame.locator("#card-number").fill("4111111111111111");
+  await frame.locator("#submit").click();
+'
+```
 
-2. Execute a Playwright script:
-   ```bash
-   kernel browsers exec <session-id> --code "
-     const frame = page.frameLocator('#payment-iframe');
-     await frame.locator('#card-number').fill('4111111111111111');
-     await frame.locator('#submit').click();
-   "
-   ```
-
-See the kernel-cli skill for more details on executing Playwright code.
+Return to the main document with `agent-browser -p kernel frame main` after frame interactions.
 
 ## Waiting Strategies
 
@@ -315,24 +336,6 @@ agent-browser -p kernel press Enter
 agent-browser -p kernel wait --url "**/home"
 ```
 
-### Comparison: Old vs Optimized
-
-```bash
-# OLD (slow, fragile):
-agent-browser -p kernel wait 2000
-agent-browser -p kernel fill @e1 "username"
-agent-browser -p kernel wait 2000
-agent-browser -p kernel fill @e3 "password"
-agent-browser -p kernel wait 5000
-
-# OPTIMIZED (fast, stable):
-agent-browser -p kernel wait --load domcontentloaded
-agent-browser -p kernel find label "Username" fill "username"
-agent-browser -p kernel wait --text "Password"
-agent-browser -p kernel find label "Password" fill "password"
-agent-browser -p kernel wait --url "**/dashboard"
-```
-
 ### Modal Login
 
 Login form appears in a modal overlay:
@@ -402,11 +405,20 @@ agent-browser -p kernel get url
 
 ### Cleanup
 
-Always close the browser when done to save the profile:
+Close the same named agent-browser session you opened. This saves profile changes and deletes its Kernel browser:
 
 ```bash
 agent-browser -p kernel close
+# Named session: agent-browser -p kernel --session site1 close
 ```
+
+If agent-browser is unavailable or close fails, delete the orphan explicitly:
+
+```bash
+kernel browsers delete "$SESSION_ID"
+```
+
+Do not use `close --all` when unrelated agent-browser sessions may be running.
 
 ### Multiple Sessions
 
@@ -420,25 +432,16 @@ agent-browser -p kernel session list
 
 ## Common Gotchas
 
-1. **Refs change after navigation**: Always re-snapshot after clicking links or submitting forms.
-
-2. **Wait after actions**: Add waits after clicks/submits that trigger page loads or AJAX.
-
-3. **Profile not saving**: Make sure to run `agent-browser -p kernel close` to save the profile state.
-
-4. **Timeout too short**: Increase `KERNEL_TIMEOUT_SECONDS` for workflows with user pauses or slow pages.
-
-5. **Stealth not working**: Some sites detect bots despite stealth. Use manual login fallback.
-
-6. **eval for stubborn elements**: If `fill` or `click` don't work, try `eval` with direct DOM manipulation.
-
-7. **Cross-origin iframes**: Can't interact via agent-browser commands. Use Kernel's Playwright execution.
+1. **Refs change after navigation**: Re-snapshot after links, submissions, or major DOM updates.
+2. **Wait for outcomes**: Use URL, text, load-state, or JavaScript conditions after asynchronous actions.
+3. **Provider settings are launch-time settings**: Close the current session before changing `KERNEL_HEADLESS`, `KERNEL_STEALTH`, or timeout.
+4. **Profile persistence needs the CDP workaround**: `KERNEL_PROFILE_NAME` is currently broken. Close agent-browser, then delete the CLI-created Kernel session to finalize `--save-changes`.
+5. **Stealth is not sufficient for every site**: Compare proxy routing, use manual login, or fall back to direct Playwright for difficult frames.
 
 ## Quick Reference
 
 ```bash
-# Start session with profile persistence
-export KERNEL_PROFILE_NAME=mysite
+# Start a standard provider session (for persistence, use the CDP workflow above)
 export KERNEL_TIMEOUT_SECONDS=600
 agent-browser -p kernel open https://example.com
 
@@ -454,11 +457,17 @@ agent-browser -p kernel snapshot -i
 agent-browser -p kernel fill @eN "text"
 agent-browser -p kernel click @eM
 
-# Get session info for manual intervention
-kernel browsers list
-kernel browsers view <session-id>
+# Resolve the underlying session before manual intervention
+CDP_URL="$(agent-browser -p kernel get cdp-url)"
+CDP_ENDPOINT="${CDP_URL%%\?*}"
+SESSION_ID="$(kernel browsers list --status active --limit 100 -o json |
+  jq -r --arg endpoint "$CDP_ENDPOINT" \
+    '.[] | select((.cdp_ws_url | split("?")[0]) == $endpoint) | .session_id' |
+  head -n 1)"
+test -n "$SESSION_ID"
+kernel browsers view "$SESSION_ID"
 
-# Cleanup
+# Cleanup (delete by ID only if close fails)
 agent-browser -p kernel close
 ```
 

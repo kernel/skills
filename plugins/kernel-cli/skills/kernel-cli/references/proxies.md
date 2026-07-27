@@ -121,7 +121,24 @@ kernel proxies list
 ### Get Proxy Details
 
 ```bash
-kernel proxies get proxy_abc123xyz
+kernel proxies get proxy_abc123xyz -o json
+```
+
+### Rename a Proxy
+
+Only the name is mutable. Recreate the proxy to change its type, location, protocol, or credentials.
+
+```bash
+kernel proxies update proxy_abc123xyz --name "Renamed Proxy" -o json
+```
+
+### Check Proxy Health
+
+A check verifies reachability and updates the stored proxy status. Omit `--url` for the default health target, or provide a public HTTP(S) URL.
+
+```bash
+kernel proxies check proxy_abc123xyz -o json
+kernel proxies check proxy_abc123xyz --url https://example.com -o json
 ```
 
 ### Delete Proxy
