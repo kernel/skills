@@ -1,6 +1,6 @@
 ---
 name: kernel-auth
-description: Create, update, inspect, and troubleshoot Kernel managed auth connections, login and submit flows, profiles, telemetry, health checks, and automatic reauthentication for any website.
+description: Use Kernel managed auth whenever an agent needs to do something on a website as a logged-in user, including browsing, operating, automating, testing, debugging, or inspecting authenticated content. Reuse or create auth connections, complete hosted login without abandoning the task, launch profile-backed browsers with telemetry, and handle reauthentication safely.
 metadata:
   {
     "openclaw":
@@ -12,15 +12,30 @@ metadata:
 
 # Kernel Managed Auth
 
-Use `kernel auth connections` to keep a named browser profile authenticated to a website. Use the same connection for initial login, later human-assisted login, and automatic reauthentication.
+Use a managed auth connection to acquire a reusable authenticated browser profile, then continue the original website task with the browser-control method that fits it. This skill owns authentication and the handoff to a profile-backed browser; it does not assume the task is QA.
+
+## Core workflow
+
+1. Scope resources to the intended Kernel project and identify the exact site domain, target URL, and account context.
+2. List every connection for the exact domain, following pagination. Reuse a relevant connection instead of creating a duplicate. If several accounts are plausible and the task does not identify one, ask which to use.
+3. If no relevant connection exists, create one with a concise, stable profile name. A request to perform a task that clearly requires the user's site account is consent to check authentication and start a hosted login; do not ask a redundant preliminary question.
+4. If the connection is `AUTHENTICATED`, create a browser from its profile and verify by loading the target page. A stale status or redirect to login requires reauthentication.
+5. If authentication is required, call `login`, expose the hosted URL through the host's user-visible mid-turn message mechanism, and immediately wait for the login in the same turn. Do not end the task or require the user to reply before waiting.
+6. Continue waiting until `flow_status=SUCCESS` and `status=AUTHENTICATED`. If the flow expires, start a replacement flow, publish the new URL mid-turn, and resume waiting.
+7. Create an ordinary browser from the verified profile with browser telemetry enabled. Preserve any proxy required by the connection.
+8. Continue the original task using Playwright, computer actions, agent-browser, an SDK, or another site-specific skill. Use Playwright for semantic control and assertions; use computer actions when actual pointer, keyboard, focus, selection, drag, compositor, or visual behavior matters.
+9. Delete the temporary browser when finished. Retain a reusable connection and profile unless the user asked for disposable authentication.
+
+If Kernel MCP tools are available, prefer their typed operations: list/create/login/wait with the managed-auth tool, create/delete with the browser tool, Playwright for DOM-level control, and computer actions for OS-level input. Use the CLI workflow below as the fallback or when CLI-specific functionality is needed.
 
 ## Safe defaults
 
-1. Scope every resource to the intended project. Set `KERNEL_PROJECT` once or pass global `--project <id-or-name>` to every command.
-2. Reuse an existing connection for the same domain and profile instead of creating duplicates.
+1. Set `KERNEL_PROJECT` once or pass global `--project <id-or-name>` to every command.
+2. Reuse an existing connection for the same domain, account, and profile instead of creating duplicates.
 3. Prefer credential references over putting secrets in command arguments, logs, chat, or shell history.
-4. Keep profile downloads outside repositories; they can contain cookies and authenticated browser state.
-5. Delete temporary browsers, connections, profiles, and downloaded state after testing.
+4. Treat hosted, live-view, and CDP URLs as sensitive. Suppress link unfurls and never expose them beyond the intended user.
+5. Keep profile downloads outside repositories; they can contain cookies and authenticated browser state.
+6. Delete temporary browsers and downloaded state. Do not delete a reusable connection or profile as routine cleanup or recovery.
 
 Check for an existing connection:
 
@@ -116,13 +131,21 @@ Start a login or reauthentication flow with the existing connection:
 kernel auth connections login "$CONNECTION_ID" -o json
 ```
 
-The response tells you whether Kernel started a `LOGIN` or `REAUTH` flow and includes `hosted_url`, `live_view_url`, and `flow_expires_at`. Treat these URLs as sensitive and open the hosted URL directly rather than sending it through link-previewing chat or email clients.
+The response tells you whether Kernel started a `LOGIN` or `REAUTH` flow and includes `hosted_url`, `live_view_url`, and `flow_expires_at`.
 
-Track the flow in another terminal:
+When a human must act, publish `hosted_url` as a user-visible mid-turn message such as:
+
+> Login is needed to continue: `<hosted_url>`. I will continue automatically when it completes.
+
+Keep the current turn active and begin following or waiting immediately after publishing the message. Do not put the URL only in the final response, ask the user to reply after login, or split the original task into a separate run. Suppress link unfurls and do not expose the live-view or CDP URL unless the intended user needs it.
+
+Track the flow until it reaches a terminal state:
 
 ```bash
 kernel auth connections follow "$CONNECTION_ID"
 ```
+
+With a typed tool that offers bounded long-polling, repeatedly call its wait action until success, failure, or expiry. Preserve any returned flow checkpoint unchanged between calls. Do not infer completion from a successful submit or one non-terminal wait response.
 
 Or poll the current state and canonical prompts:
 
@@ -187,7 +210,32 @@ kernel auth connections login "$CONNECTION_ID" --telemetry=screenshot,network
 
 Settable categories are `console`, `network`, `page`, `interaction`, `control`, `connection`, `system`, `screenshot`, and `captcha`. `all` means the default category set, not every category. A category list on create selects that list; on update it merges into the current selection. To remove selected categories, reset with `off`, then enable the desired set in a second update.
 
-This setting applies to managed-auth browser sessions. Configure telemetry separately on ordinary sessions created later with `kernel browsers create`.
+This setting applies only to managed-auth browser sessions. Configure browser telemetry again on every ordinary profile-backed browser.
+
+For general authenticated work, enable the default operational categories before navigation:
+
+```bash
+kernel browsers create \
+  --profile-name example-main \
+  --telemetry=all \
+  -o json
+```
+
+For debugging, monitoring, or interaction-sensitive work, select the richer categories explicitly:
+
+```bash
+kernel browsers create \
+  --profile-name example-main \
+  --telemetry=console,network,page,interaction,control,connection,system,screenshot,captcha \
+  -o json
+```
+
+`all` means Kernel's default operational set, not every category. Rich telemetry can contain sensitive site metadata, so enable the categories needed for the task and do not paste raw telemetry into chat or repositories. Inspect live telemetry while monitoring when practical, and inspect archived telemetry after an error or unexpected redirect:
+
+```bash
+kernel browsers telemetry stream <browser-id>
+kernel browsers telemetry events <browser-id>
+```
 
 ## Diagnose reauthentication
 
@@ -235,15 +283,28 @@ kernel auth connections timeline "$CONNECTION_ID" -o json |
 
 Use `login` events for human/initial attempts, `reauth` for automatic or subsequent authentication attempts, and `health_check` to see when session validity changed between `AUTHENTICATED` and `NEEDS_AUTH`.
 
-## Use and protect the profile
+## Use the authenticated browser
 
-Create an ordinary browser from the authenticated profile:
+Create an ordinary browser from the authenticated profile with telemetry enabled. Add stealth, a proxy, profile saving, or a longer timeout only when the site or task needs them:
 
 ```bash
-kernel browsers create --profile-name example-main --stealth -o json
+kernel browsers create \
+  --profile-name example-main \
+  --start-url https://example.com/account \
+  --telemetry=all \
+  -o json
 ```
 
-Delete that browser when finished:
+Load the target page and verify authenticated state before doing consequential work. If the page redirects to login, reauthenticate the existing connection rather than creating another profile.
+
+Choose controls based on the task:
+
+- Use Playwright for navigation, semantic locators, DOM state, extraction, and repeatable assertions.
+- Use computer actions for real mouse and keyboard input, caret/focus behavior, text selection, drag and drop, native dialogs, compositor behavior, or visual reproduction. End action batches with a screenshot when the interface supports it.
+- Combine them when useful: use Playwright to reach and inspect a state, computer actions to reproduce real input, then Playwright and telemetry to verify the result.
+- Use a site-specific or QA skill for domain logic or test planning; this skill remains responsible for authentication, profile reuse, and the browser handoff.
+
+Delete the temporary browser when finished. Browser telemetry remains available for later inspection:
 
 ```bash
 kernel browsers delete <browser-id-or-name>
