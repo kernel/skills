@@ -1,6 +1,6 @@
 # Kernel Skills
 
-Official AI agent skills from the Kernel for installing useful skills for our CLI and SDKs that you can load into popular coding agents.
+Official AI agent skills from [Kernel](https://kernel.sh) for installing useful skills for our CLI and SDKs that you can load into popular coding agents.
 
 ## Installation
 
@@ -86,6 +86,7 @@ Command-line interface skills for using Kernel CLI commands.
 | **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
 | **kernel-agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
 | **kernel-auth** | Setup and manage Kernel authentication connections for any website with safety checks and reauthentication support |
+| **cua-cli** | Drive a Kernel browser from shell via the `cua` binary: one-shot subcommands, named sessions, TUI, profile persistence, transcripts, live-view handoff |
 | **profile-website-bot-detection** | Profile a website for bot detection vendors using stealth vs non-stealth Kernel browsers; compare effectiveness and identify vendor products |
 | **debug-browser-session** | Systematically debug a Kernel browser session — VM issues, network errors, Chrome crashes, page-load failures, and live-view problems — using the Kernel CLI |
 
@@ -97,6 +98,7 @@ SDK skills for building browser automation with TypeScript and Python.
 |-------|-------------|
 | **typescript-sdk** | Build automation with Kernel's Typescript SDK |
 | **python-sdk** | Build automation with kernel's Python SDK |
+| **cua-agent** | Build TypeScript apps that embed Kernel cua's loop with `CuaAgent` / `CuaAgentHarness`: provider switching, custom tools, session repos, event-stream debugging |
 
 ### generate-video
 
