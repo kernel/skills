@@ -210,32 +210,16 @@ kernel auth connections login "$CONNECTION_ID" --telemetry=screenshot,network
 
 Settable categories are `console`, `network`, `page`, `interaction`, `control`, `connection`, `system`, `screenshot`, and `captcha`. `all` means the default category set, not every category. A category list on create selects that list; on update it merges into the current selection. To remove selected categories, reset with `off`, then enable the desired set in a second update.
 
-This setting applies only to managed-auth browser sessions. Configure browser telemetry again on every ordinary profile-backed browser.
-
-For general authenticated work, enable the default operational categories before navigation:
+Browser telemetry is opt-in and cannot backfill an earlier failure. Connection telemetry applies only to managed-auth sessions, so enable telemetry again when creating every ordinary profile-backed browser. For authenticated work that the agent may need to monitor or diagnose, capture the site-facing categories from the start:
 
 ```bash
 kernel browsers create \
   --profile-name example-main \
-  --telemetry=all \
+  --telemetry=console,network,page,interaction \
   -o json
 ```
 
-For debugging, monitoring, or interaction-sensitive work, select the richer categories explicitly:
-
-```bash
-kernel browsers create \
-  --profile-name example-main \
-  --telemetry=console,network,page,interaction,control,connection,system,screenshot,captcha \
-  -o json
-```
-
-`all` means Kernel's default operational set, not every category. Rich telemetry can contain sensitive site metadata, so enable the categories needed for the task and do not paste raw telemetry into chat or repositories. Inspect live telemetry while monitoring when practical, and inspect archived telemetry after an error or unexpected redirect:
-
-```bash
-kernel browsers telemetry stream <browser-id>
-kernel browsers telemetry events <browser-id>
-```
+`all` means Kernel's default operational set and omits the debug-critical `console`, `network`, and `page` categories. Telemetry can contain sensitive site metadata; enable only what the task needs and do not paste raw events into chat or repositories. When a browser fails or behaves unexpectedly, load the `debug-browser-session` skill for event retrieval, category selection, telemetry gaps, and post-delete inspection.
 
 ## Diagnose reauthentication
 
@@ -291,7 +275,7 @@ Create an ordinary browser from the authenticated profile with telemetry enabled
 kernel browsers create \
   --profile-name example-main \
   --start-url https://example.com/account \
-  --telemetry=all \
+  --telemetry=console,network,page,interaction \
   -o json
 ```
 
@@ -304,7 +288,7 @@ Choose controls based on the task:
 - Combine them when useful: use Playwright to reach and inspect a state, computer actions to reproduce real input, then Playwright and telemetry to verify the result.
 - Use a site-specific or QA skill for domain logic or test planning; this skill remains responsible for authentication, profile reuse, and the browser handoff.
 
-Delete the temporary browser when finished. Browser telemetry remains available for later inspection:
+Delete the temporary browser when finished. Telemetry captured before deletion remains available for later inspection:
 
 ```bash
 kernel browsers delete <browser-id-or-name>
