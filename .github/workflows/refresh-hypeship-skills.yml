@@ -1,0 +1,32 @@
+name: Refresh Hypeship agent skills
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/**/skills/**"
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Generate Hypeship token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.ADMIN_APP_ID }}
+          private-key: ${{ secrets.ADMIN_APP_PRIVATE_KEY }}
+          owner: kernel
+          repositories: hypeship
+
+      - name: Refresh the Hypeship agent image
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          gh api --method POST repos/kernel/hypeship/dispatches \
+            -f event_type=skills-updated \
+            -f "client_payload[source]=kernel/skills" \
+            -f "client_payload[sha]=${SOURCE_SHA}"
