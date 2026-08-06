@@ -23,7 +23,7 @@ Use a managed auth connection to acquire a reusable authenticated browser profil
 5. If authentication is required, call `login`, expose the hosted URL through the host's user-visible mid-turn message mechanism, and immediately wait for the login in the same turn. Do not end the task or require the user to reply before waiting.
 6. Continue waiting until `flow_status=SUCCESS` and `status=AUTHENTICATED`. If the flow expires, start a replacement flow, publish the new URL mid-turn, and resume waiting.
 7. Create an ordinary browser from the verified profile with browser telemetry enabled. Preserve any proxy required by the connection.
-8. Continue the original task using Playwright, computer actions, agent-browser, an SDK, or another site-specific skill. Use Playwright for semantic control and assertions; use computer actions when actual pointer, keyboard, focus, selection, drag, compositor, or visual behavior matters.
+8. Continue the original task with whichever browser agent or control framework is already appropriate. Reuse an existing browser-agent stack by attaching it to the authenticated session when possible; managed auth does not require switching to Playwright or Kernel-native controls. Use semantic automation for structured control and assertions, and computer actions when actual pointer, keyboard, focus, selection, drag, compositor, or visual behavior matters.
 9. Delete the temporary browser when finished. Retain a reusable connection and profile unless the user asked for disposable authentication.
 
 If Kernel MCP tools are available, prefer their typed operations: list/create/login/wait with the managed-auth tool, create/delete with the browser tool, Playwright for DOM-level control, and computer actions for OS-level input. Use the CLI workflow below as the fallback or when CLI-specific functionality is needed.
@@ -283,6 +283,7 @@ Load the target page and verify authenticated state before doing consequential w
 
 Choose controls based on the task:
 
+- If the task already uses a browser agent or automation framework, keep using it and attach it to the authenticated browser through its supported session or CDP integration. Do not switch control stacks solely because authentication came from Kernel.
 - Use Playwright for navigation, semantic locators, DOM state, extraction, and repeatable assertions.
 - Use computer actions for real mouse and keyboard input, caret/focus behavior, text selection, drag and drop, native dialogs, compositor behavior, or visual reproduction. End action batches with a screenshot when the interface supports it.
 - Combine them when useful: use Playwright to reach and inspect a state, computer actions to reproduce real input, then Playwright and telemetry to verify the result.
