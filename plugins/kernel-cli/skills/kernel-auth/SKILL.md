@@ -1,6 +1,6 @@
 ---
 name: kernel-auth
-description: Use Kernel managed auth whenever an agent needs to do something on a website as a logged-in user, including browsing, operating, automating, testing, debugging, or inspecting authenticated content. Reuse or create auth connections, complete hosted login without abandoning the task, launch profile-backed browsers with telemetry, and handle reauthentication safely.
+description: Use Kernel managed auth after choosing a browser path that genuinely requires an authenticated website UI or authenticated browser behavior. Prefer a dedicated API, CLI, MCP server, or authoritative local records for operations they support; a URL alone does not require browser auth. Reuse or create auth connections, complete hosted login without abandoning the task, launch profile-backed browsers with telemetry, and handle reauthentication safely.
 metadata:
   {
     "openclaw":
@@ -14,13 +14,24 @@ metadata:
 
 Use a managed auth connection to acquire a reusable authenticated browser profile, then continue the original website task with the browser-control method that fits it. This skill owns authentication and the handoff to a profile-backed browser; it does not assume the task is QA.
 
+## Decide whether managed auth is needed
+
+Make this decision before listing or creating managed-auth connections:
+
+1. Treat a URL as a resource identifier, not as evidence that the task requires browser access.
+2. For structured reads and writes, prefer authoritative local records or a dedicated, service-specific API, CLI, MCP server, or other first-party integration when it supports the operation. Search the host's tool catalog, including deferred MCP tools, before concluding that no integration is available.
+3. Choose a browser only when the task genuinely requires the authenticated website UI, the dedicated integration lacks the needed capability, or browser behavior itself is under test.
+4. After choosing a browser, start hosted login only when the target operation requires authenticated state. Public or unauthenticated pages should not trigger managed auth.
+
+If a dedicated integration can complete the task, use it and do not continue with this skill. If the decision selects an authenticated browser path, follow the workflow below; authenticated browser tasks must still use managed auth.
+
 ## Core workflow
 
 1. Scope resources to the intended Kernel project and identify the exact site domain, target URL, and account context.
 2. List every connection for the exact domain, following pagination. Reuse a relevant connection instead of creating a duplicate. If several accounts are plausible and the task does not identify one, ask which to use.
-3. If no relevant connection exists, create one with a concise, stable profile name. A request to perform a task that clearly requires the user's site account is consent to check authentication and start a hosted login; do not ask a redundant preliminary question.
+3. If no relevant connection exists and the selected browser operation requires authentication, create one with a concise, stable profile name. A request to perform a task that clearly requires the user's site account is consent to check authentication; do not ask a redundant preliminary question.
 4. If the connection is `AUTHENTICATED`, create a browser from its profile and verify by loading the target page. A stale status or redirect to login requires reauthentication.
-5. If authentication is required, call `login`, expose the hosted URL through the host's user-visible mid-turn message mechanism, and immediately wait for the login in the same turn. Do not end the task or require the user to reply before waiting.
+5. If the selected browser operation requires authentication and no valid authenticated profile is available, call `login`, expose the hosted URL through the host's user-visible mid-turn message mechanism, and immediately wait for the login in the same turn. Do not end the task or require the user to reply before waiting.
 6. Continue waiting until `flow_status=SUCCESS` and `status=AUTHENTICATED`. If the flow expires, start a replacement flow, publish the new URL mid-turn, and resume waiting.
 7. Create an ordinary browser from the verified profile with browser telemetry enabled. Preserve any proxy required by the connection.
 8. Continue the original task with whichever browser agent or control framework is already appropriate. Reuse an existing browser-agent stack by attaching it to the authenticated session when possible; managed auth does not require switching to Playwright or Kernel-native controls. Use semantic automation for structured control and assertions, and computer actions when actual pointer, keyboard, focus, selection, drag, compositor, or visual behavior matters.
