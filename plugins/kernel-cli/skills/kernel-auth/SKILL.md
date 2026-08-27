@@ -25,17 +25,28 @@ Make this decision before listing or creating managed-auth connections:
 
 If a dedicated integration can complete the task, use it and do not continue with this skill. If the decision selects an authenticated browser path, follow the workflow below; authenticated browser tasks must still use managed auth.
 
+## Browser handoff model
+
+A managed-auth login runs in its own temporary browser. It does not take over or authenticate an existing task browser in place. If an ordinary browser encounters a login wall:
+
+1. Pause all automation against that task browser. Its page and live view may continue to show the logged-out site while managed auth advances elsewhere.
+2. Start one managed-auth flow and keep all authentication interactions attached to that flow until it completes.
+3. Follow or wait on the active flow. Do not call `login` to poll: another `login` call supersedes the current flow.
+4. After `flow_status=SUCCESS` and `status=AUTHENTICATED`, create a new ordinary browser from the connection's saved profile, attach the existing browser-control stack to that new session, and resume the task. Switch any live view to the new task browser.
+
+The original task browser's transient page state does not move into the managed-auth browser or the replacement profile-backed browser. Preserve the target URL and any task state needed to resume, and delete the old task browser when it is no longer needed.
+
 ## Core workflow
 
-1. Scope resources to the intended Kernel project and identify the exact site domain, target URL, and account context.
-2. List every connection for the exact domain, following pagination. Reuse a relevant connection instead of creating a duplicate. If several accounts are plausible and the task does not identify one, ask which to use.
+1. Scope resources to the intended Kernel project and identify the canonical site, current hostname, target URL, account context, and any task state needed after authentication.
+2. List every connection for the exact domain, following pagination. If none matches, inspect connections for the same profile and account before creating another: a site may redirect among sibling, tenant, or dedicated login hostnames. Reuse a known connection ID when the account context is unambiguous; do not assume arbitrary sibling subdomains belong to the same account.
 3. If no relevant connection exists and the selected browser operation requires authentication, create one with a concise, stable profile name. A request to perform a task that clearly requires the user's site account is consent to check authentication; do not ask a redundant preliminary question.
-4. If the connection is `AUTHENTICATED`, create a browser from its profile and verify by loading the target page. A stale status or redirect to login requires reauthentication.
-5. If the selected browser operation requires authentication and no valid authenticated profile is available, call `login`, expose the hosted URL through the host's user-visible mid-turn message mechanism, and immediately wait for the login in the same turn. Do not end the task or require the user to reply before waiting.
+4. If the connection is `AUTHENTICATED`, create a browser from its profile and verify by loading the target page. Do not keep using an unprofiled task browser. A stale status or redirect to login requires reauthentication.
+5. If the selected browser operation requires authentication and no valid authenticated profile is available, call `login` once, expose the hosted URL through the host's user-visible mid-turn message mechanism, and immediately wait for the login in the same turn. Do not end the task or require the user to reply before waiting.
 6. Continue waiting until `flow_status=SUCCESS` and `status=AUTHENTICATED`. If the flow expires, start a replacement flow, publish the new URL mid-turn, and resume waiting.
-7. Create an ordinary browser from the verified profile with browser telemetry enabled. Preserve any proxy required by the connection.
-8. Continue the original task with whichever browser agent or control framework is already appropriate. Reuse an existing browser-agent stack by attaching it to the authenticated session when possible; managed auth does not require switching to Playwright or Kernel-native controls. Use semantic automation for structured control and assertions, and computer actions when actual pointer, keyboard, focus, selection, drag, compositor, or visual behavior matters.
-9. Delete the temporary browser when finished. Retain a reusable connection and profile unless the user asked for disposable authentication.
+7. Create a new ordinary browser from the verified profile with browser telemetry enabled. Preserve any proxy required by the connection.
+8. Continue the original task with whichever browser agent or control framework is already appropriate. Reuse the existing browser-agent stack by attaching it to the new authenticated session; managed auth does not require switching to Playwright or Kernel-native controls. Use semantic automation for structured control and assertions, and computer actions when actual pointer, keyboard, focus, selection, drag, compositor, or visual behavior matters.
+9. Delete temporary and superseded task browsers when finished. Retain a reusable connection and profile unless the user asked for disposable authentication.
 
 If Kernel MCP tools are available, prefer their typed operations: list/create/login/wait with the managed-auth tool, create/delete with the browser tool, Playwright for DOM-level control, and computer actions for OS-level input. Use the CLI workflow below as the fallback or when CLI-specific functionality is needed.
 
@@ -142,7 +153,7 @@ Start a login or reauthentication flow with the existing connection:
 kernel auth connections login "$CONNECTION_ID" -o json
 ```
 
-The response tells you whether Kernel started a `LOGIN` or `REAUTH` flow and includes `hosted_url`, `live_view_url`, and `flow_expires_at`.
+The response tells you whether Kernel started a `LOGIN` or `REAUTH` flow and includes `hosted_url`, `live_view_url`, and `flow_expires_at`. The `live_view_url` belongs to the managed-auth browser, not any ordinary browser that triggered the login. Custom interfaces must keep the rendered live view and submitted interaction state bound to this active flow.
 
 When a human must act, publish `hosted_url` as a user-visible mid-turn message such as:
 
@@ -199,7 +210,7 @@ kernel auth connections submit "$CONNECTION_ID" --sso-button-selector '<xpath>'
 
 A successful `submit` means the input was accepted for processing, not that authentication has completed. Wait for `flow_status=SUCCESS` and `status=AUTHENTICATED`.
 
-If a stale flow is past `flow_expires_at`, call `login` again to supersede it. Do not delete the connection or profile just to refresh an expired flow.
+Do not call `login` again while the current flow is non-terminal; use `follow`, wait, or get to observe progress. A new login supersedes the active flow and can invalidate input the user was about to submit. If a stale flow is past `flow_expires_at`, call `login` again to replace it. Do not delete the connection or profile just to refresh an expired flow.
 
 ## Telemetry
 
