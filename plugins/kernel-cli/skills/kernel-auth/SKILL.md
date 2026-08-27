@@ -30,7 +30,7 @@ If a dedicated integration can complete the task, use it and do not continue wit
 A managed-auth login runs in its own temporary browser. It does not take over or authenticate an existing task browser in place. If an ordinary browser encounters a login wall:
 
 1. Pause all automation against that task browser. Its page and live view may continue to show the logged-out site while managed auth advances elsewhere.
-2. Start one managed-auth flow. Bind its prompts, submissions, status, and `live_view_url` to that same flow and browser. A custom UI that shows the login should switch to this live view rather than continue showing the task browser.
+2. Start one managed-auth flow and keep all authentication interactions attached to that flow until it completes.
 3. Follow or wait on the active flow. Do not call `login` to poll: another `login` call supersedes the current flow.
 4. After `flow_status=SUCCESS` and `status=AUTHENTICATED`, create a new ordinary browser from the connection's saved profile, attach the existing browser-control stack to that new session, and resume the task. Switch any live view to the new task browser.
 
