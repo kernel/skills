@@ -45,7 +45,7 @@ kernel profiles create --name <site-name>   # once, if you want persistent login
 SESSION=$(kernel browsers create --profile-name <site-name> --save-changes --stealth -o json | jq -r '.session_id')
 ```
 
-`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. `--stealth` is opt-in and launch-time-only — set it here rather than adding it later, since a stealth-sensitive site needs the flag on before the first navigation, not after login already fails.
+`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. `--stealth` only takes effect at launch — set it now rather than after a failed login shows it was needed.
 
 ### Step 2: Explore the Login Flow
 
