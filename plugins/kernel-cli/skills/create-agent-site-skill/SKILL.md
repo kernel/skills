@@ -27,7 +27,7 @@ Start with raw Kernel primitives: drive the page directly with Playwright's own 
 
 Load a heavier framework instead when:
 
-- The site needs many rounds of accessibility-snapshot-and-click across a long interactive session → load the `kernel-agent-browser` skill (wraps `agent-browser -p kernel` / CDP).
+- The site needs many rounds of accessibility-snapshot-and-click across a long interactive session → load the `kernel-agent-browser` skill (attaches `agent-browser` over CDP to a kernel-cli-created browser).
 - The task already runs inside a browser-use / `browser-harness`-driven agent, or needs that tool's multi-call daemon session reuse → load the `kernel-browser-harness` skill.
 
 Whichever you pick, name it explicitly in the produced skill's Configuration section — it's a real dependency for whoever runs the skill later, not an implementation detail to leave out.
@@ -40,10 +40,10 @@ Do the task for real, against a live Kernel browser, before writing anything dow
 
 ```bash
 kernel profiles create --name <site-name>   # once, if you want persistent login
-SESSION=$(kernel browsers create --profile-name <site-name> --save-changes -o json | jq -r '.session_id')
+SESSION=$(kernel browsers create --profile-name <site-name> --save-changes --stealth -o json | jq -r '.session_id')
 ```
 
-`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login.
+`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. `--stealth` is opt-in and launch-time-only — set it here rather than adding it later, since a stealth-sensitive site needs the flag on before the first navigation, not after login already fails.
 
 ### Step 2: Explore the Login Flow
 
@@ -71,7 +71,7 @@ kernel browsers playwright execute "$SESSION" '
 - **Two-step form**: username first, then password (e.g. Veracross)
 - **OAuth redirect**: site redirects to an identity provider
 
-If the site has aggressive bot detection or the login page behaves strangely, fall back to a human: fetch the live view URL and ask the user to complete login manually.
+If the site has aggressive bot detection or the login page behaves strangely and the session wasn't started with `--stealth`, don't debug further on the current session — `--stealth` only takes effect at launch. Delete it, recreate with `--stealth` added, and retry the login from Step 2. If it's still blocked (or was already running with `--stealth`), fall back to a human: fetch the live view URL and ask the user to complete login manually.
 
 ```bash
 kernel browsers view "$SESSION" -o json   # browser_live_view_url
@@ -205,7 +205,7 @@ https://www.kroger.com/mypurchases/pending/{order_id}
 
 If you decided in "Choosing a Tool" that raw Kernel primitives aren't enough, load the framework's skill and follow its conventions for the automation commands themselves — everything else in this guide (naming, discovery order, credential handling, template shape) stays the same:
 
-- **`kernel-agent-browser`** — snapshot/ref-based interaction via `agent-browser -p kernel`. Use its own "Creating Site-Specific Browser Automation Skills" reference for the login/workflow command shapes, and note the dependency in the produced skill's Configuration section.
+- **`kernel-agent-browser`** — snapshot/ref-based interaction via `agent-browser`. Reuse the browser you already created in Step 1 rather than minting a second one: fetch its `cdp_ws_url` with `kernel browsers get "$SESSION" -o json` and attach with `agent-browser --session <name> --cdp "$CDP_URL"` (its own skill documents why — as of agent-browser 0.33.0, `-p kernel` combined with `KERNEL_PROFILE_NAME` returns HTTP 400). Use its "Creating Site-Specific Browser Automation Skills" reference for the login/workflow command shapes, and note the dependency in the produced skill's Configuration section.
 - **`kernel-browser-harness`** — drives the browser via `browser-harness`'s `BU_CDP_WS`/`BU_NAME` env vars against a Kernel-minted CDP URL. Use when the task is already running inside a browser-harness-driven agent.
 
 ## Credential Management
