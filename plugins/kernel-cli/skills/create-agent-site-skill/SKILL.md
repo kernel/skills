@@ -1,15 +1,17 @@
 ---
 name: create-agent-site-skill
-description: Guide for creating a new site-specific browser automation skill for a website, backed by a Kernel cloud browser and driven by Kernel's own CLI primitives (playwright execute, computer screenshots) by default. Use when asked to build or package a skill for automating a specific website with Kernel, to turn a one-off browser automation into a reusable SKILL.md, or to decide whether a site needs a heavier automation framework (agent-browser, browser-harness) layered on top of Kernel.
+description: Guide for creating a new site-specific browser automation skill for a website, backed by a Kernel cloud browser and driven by Kernel's own CLI primitives (playwright execute, computer screenshots) by default. Use when asked to build or package a skill for automating a specific website with Kernel, to turn a one-off browser automation into a reusable SKILL.md, or to decide whether to build the skill around Kernel's own primitives or the customer's preferred agent harness (agent-browser, browser-harness, or another custom harness).
 ---
 
 # Creating Site-Specific Browser Automation Skills
 
-This guide walks through building a new automation skill for a specific website, backed by a Kernel cloud browser. Default to Kernel's own primitives from the `kernel-cli` skill — `playwright execute` and `computer screenshot` — which need no extra dependency. Only load a heavier framework when the site's interaction pattern genuinely calls for it (see "Choosing a Tool" below).
+This guide walks through building a new automation skill for a specific website, backed by a Kernel cloud browser. Default to Kernel's own primitives from the `kernel-cli` skill — `playwright execute` and `computer screenshot` — which need no extra dependency. Only reach for the customer's own primitives when they already have a preferred way to drive browsers (see "Choosing Other Primitives" at the end).
 
 ## Prerequisites
 
 Load the `kernel-cli` skill for CLI installation, authentication, and the full command reference used throughout this guide.
+
+This skill requires a headful (non-headless) session — Kernel's default — since the computer-use fallback below needs a GUI environment. Don't add `--headless` when creating the browser.
 
 ## Naming Convention
 
@@ -21,52 +23,70 @@ Load the `kernel-cli` skill for CLI installation, authentication, and the full c
 
 Examples: `kroger.com/`, `amazon.com/`. Use the primary domain where automation occurs.
 
-## Choosing a Tool
-
-Start with raw Kernel primitives: drive the page directly with Playwright's own locator API (`page.getByRole`, `page.getByLabel`, `page.getByText`, CSS/XPath fallback) via `kernel browsers playwright execute`, and confirm state with `kernel browsers computer screenshot`. This covers most sites and keeps the produced skill dependency-free.
-
-Some interactions don't work over the DOM no matter what selector you try — drag-and-drop on pointer-sensor libraries (dnd-kit, SortableJS), canvas/WebGL widgets, or sites that flag CDP-driven input specifically. For those, fall back to `kernel browsers computer` (mouse/keyboard driven by pixel coordinates off a screenshot) for just the step that needs it — see "Computer-Use Fallback" under Key Techniques. [Kernel's docs](https://www.kernel.sh/docs/browsers/playwright-computer-use-fallback) cover the same fallback built as a bounded, model-driven agent loop (`@onkernel/browser-loop`); reach for that instead of this guide's plain CLI recipe if you're building an autonomous tool-calling agent rather than a scripted skill.
-
-Load a heavier framework instead when:
-
-- The site needs many rounds of accessibility-snapshot-and-click across a long interactive session → load the `kernel-agent-browser` skill (attaches `agent-browser` over CDP to a kernel-cli-created browser).
-- The task already runs inside a browser-use / `browser-harness`-driven agent, or needs that tool's multi-call daemon session reuse → load the `kernel-browser-harness` skill.
-
-Whichever you pick, name it explicitly in the produced skill's Configuration section — it's a real dependency for whoever runs the skill later, not an implementation detail to leave out.
+The skill file itself is per-site and shared across whoever runs it. The vault it uses for login (see Step 1/2) is per-user — the skill resolves `<user-id>` from whatever identifies the calling user at runtime (a passed-in parameter, session context, etc.), not a value baked into the skill file, so each user's credentials for the site stay in their own vault.
 
 ## Workflow Discovery Process
 
-Do the task for real, against a live Kernel browser, before writing anything down.
+Do the task for real, against a live Kernel browser, before writing anything down. The steps below use Kernel's own primitives — that's the default unless the customer's prompt names another harness or set of primitives to control the browser with (see "Choosing Other Primitives" at the end).
 
 ### Step 1: Start a Kernel Browser Session
 
 ```bash
 kernel profiles create --name <site-name>   # once, if you want persistent login
-SESSION=$(kernel browsers create --profile-name <site-name> --save-changes --stealth -o json | jq -r '.session_id')
+VAULT_NAME="<site-name>-<user-id>"
+kernel vaults create --name "$VAULT_NAME"   # once per user, if the site needs login — see Step 2
+SESSION=$(kernel browsers create --profile-name <site-name> --save-changes --stealth --vault "$VAULT_NAME" -o json | jq -r '.session_id')
 ```
 
-`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. `--stealth` only takes effect at launch — set it now rather than after a failed login shows it was needed.
+`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. `--stealth` only takes effect at launch — set it now rather than after a failed login shows it was needed. `--vault` attaches at create time too and can't be added later, so create the vault first if the site needs login, even before you've explored the login form.
 
 ### Step 2: Explore the Login Flow
 
-Most sites require authentication. Document the login process as you go:
+Most sites require authentication. Default to vault-backed credentials — never ask the user for raw credentials or fill them in yourself. Define the credential's fields without values, which returns a private collection URL for the human to fill in:
+
+```bash
+kernel vaults credentials create "$VAULT_NAME" <site-name>-login --spec-file - <<'JSON'
+{
+  "description": "<Site Name>",
+  "fields": {
+    "username": {"type": "text", "required": true, "sensitive": false},
+    "password": {"type": "password", "required": true, "sensitive": true}
+  }
+}
+JSON
+```
+
+Share the returned collection URL with the user directly — never open it yourself in the agent-controlled browser. While they fill it in, find the field selectors:
 
 ```bash
 kernel browsers playwright execute "$SESSION" 'await page.goto("<login-url>")'
 kernel browsers computer screenshot "$SESSION" --to /tmp/login.png   # look at it
 ```
 
-Try filling and submitting, using `return` to get a value back:
+Once the item is ready, fill the form by field name and selector — the agent never sees the actual username or password — then submit with plain Playwright:
 
 ```bash
+kernel vaults items get "$VAULT_NAME" <site-name>-login --wait 60 -o json   # confirm status is "ready" and fill is available
+
+kernel vaults items invoke "$VAULT_NAME" <site-name>-login fill --spec-file - <<JSON
+{
+  "browser_id": "$SESSION",
+  "page_url": "<login-url>",
+  "fields": [
+    {"field": "username", "selector": "input[name='username']"},
+    {"field": "password", "selector": "input[name='password']"}
+  ]
+}
+JSON
+
 kernel browsers playwright execute "$SESSION" '
-  await page.getByLabel("Username").fill("<username>");
-  await page.getByLabel("Password").fill("<password>");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("networkidle", { timeout: 5000 });
   return page.url();
 '
 ```
+
+If the fill reports anything other than `"completed"`, stop and reconcile rather than retrying blind — see Credential Management for the full rules.
 
 **Common login patterns:**
 - **Single-page form**: username and password on the same page (e.g. Kroger)
@@ -91,7 +111,7 @@ For each workflow the user wants:
 2. **Screenshot** to see current state
 3. **Try locators** — prefer `page.getByRole` / `getByLabel` / `getByText` over raw CSS where the site's semantics allow it; these tend to survive markup changes better than brittle selectors
 4. **Confirm** with a `return` (URL, extracted text, element count)
-5. **Fall back to computer-use** (see below) if a Playwright action reports success but the page state doesn't actually change after 1-2 attempts — don't keep retrying the same DOM approach
+5. **Fall back to computer-use** (see below) if Playwright can't complete the step after 2-3 attempts — whether it errors outright or reports success without the page state actually changing — don't keep retrying the same DOM approach
 6. **Test** the full workflow end-to-end in one `playwright execute` call
 7. **Record** the exact selectors (or coordinates, if computer-use was needed) and waits that worked
 
@@ -99,12 +119,15 @@ For each workflow the user wants:
 
 For each workflow, record:
 - URL patterns (direct links when available)
-- The Playwright snippet that performs it
+- The Playwright snippet(s) that performs it
+- Coordinates and viewport size, if a step needed computer-use
 - Wait conditions needed between steps
 - Verification checks (how to confirm success)
 - Edge cases and error handling
 
 ## SKILL.md Template
+
+This assumes Kernel's own primitives; if "Choosing Other Primitives" applies, swap the Configuration, Login Workflow, and Cleanup blocks for that harness's commands instead.
 
 ```markdown
 ---
@@ -114,7 +137,7 @@ description: <what the skill does>. Use when <trigger conditions>.
 
 # <Site Name>
 
-Uses a Kernel cloud browser driven by `kernel browsers playwright execute`. See the `kernel-cli` skill for CLI installation and the full command reference.
+Uses a Kernel cloud browser driven by `kernel browsers playwright execute`, with login credentials handled by a Kernel vault. See the `kernel-cli` skill for CLI installation and the full command reference.
 
 ## Configuration
 
@@ -122,22 +145,36 @@ Uses a Kernel cloud browser driven by `kernel browsers playwright execute`. See 
 export KERNEL_API_KEY="your-api-key"   # required
 \`\`\`
 
-Create the browser with the options this site needs:
+Create the vault and browser with the options this site needs:
 
 \`\`\`bash
 kernel profiles create --name <site-name>   # once, to persist login
-SESSION=$(kernel browsers create --profile-name <site-name> --save-changes --stealth --timeout 600 -o json | jq -r '.session_id')
+VAULT_NAME="<site-name>-<user-id>"
+kernel vaults create --name "$VAULT_NAME"   # once per user, if not already created
+SESSION=$(kernel browsers create --profile-name <site-name> --save-changes --stealth --vault "$VAULT_NAME" --timeout 600 -o json | jq -r '.session_id')
 \`\`\`
 
 ## Login Workflow
 
 \`\`\`bash
+kernel browsers playwright execute "$SESSION" 'await page.goto("<login-url>")'
+
+kernel vaults items get "$VAULT_NAME" <site-name>-login --wait 60 -o json   # confirm status is "ready" and fill is available
+
+kernel vaults items invoke "$VAULT_NAME" <site-name>-login fill --spec-file - <<JSON
+{
+  "browser_id": "$SESSION",
+  "page_url": "<login-url>",
+  "fields": [
+    {"field": "username", "selector": "input[name='username']"},
+    {"field": "password", "selector": "input[name='password']"}
+  ]
+}
+JSON
+
 kernel browsers playwright execute "$SESSION" '
-  await page.goto("<login-url>");
-  await page.getByLabel("Username").fill("<username>");
-  await page.getByLabel("Password").fill("<password>");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("networkidle", { timeout: 5000 });
   return page.url();
 '
 \`\`\`
@@ -146,7 +183,7 @@ If bot detection blocks this, get the live view and ask the user to log in manua
 
 ## <Workflow Name>
 
-<The Playwright snippet, URL patterns, and verification for each requested workflow. If a step needed the computer-use fallback, give the coordinates and the viewport size they were recorded at instead of a selector.>
+<The Playwright snippet(s), URL patterns, and verification for each requested workflow. If a step needed the computer-use fallback, give the coordinates and the viewport size they were recorded at instead of a selector.>
 
 ## Cleanup
 
@@ -175,7 +212,7 @@ Reach for Playwright's own locator API first: `page.getByRole(...)`, `page.getBy
 
 ### Computer-Use Fallback
 
-When a Playwright action reports success but nothing actually happens on the page — the usual symptom on custom drag-and-drop, canvas/WebGL, or CDP-fingerprinting sites — stop retrying the DOM approach and drive that one step by pixel coordinates instead:
+When Playwright can't complete a step after a few attempts — it errors or times out finding a selector, or it reports success but nothing actually happens on the page (the usual symptom on custom drag-and-drop, canvas/WebGL, or CDP-fingerprinting sites) — stop retrying the DOM approach and drive that one step by pixel coordinates instead:
 
 ```bash
 kernel browsers computer screenshot "$SESSION" --to /tmp/state.png   # read coordinates off this
@@ -189,7 +226,7 @@ Notes:
 - Requires a headful session — this is `kernel browsers create`'s default, so this works as long as the workflow didn't add `--headless`.
 - A drag needs waypoints between the two `--point` values, not just the endpoints, or the page's pointer-sensor library won't register movement.
 - Coordinates are screenshot-pixel-space and specific to the viewport size the session was created with — record that alongside the coordinates in the produced skill's Notes section.
-- Switch back to `playwright execute` for the next step once the fallback step is done; there's no session-level lock like the bounded agent-loop pattern in Kernel's docs — the constraint here is just "don't mix DOM and OS-level actions within the same gesture."
+- Switch back to `playwright execute` for the next step once the fallback step is done — the only constraint is "don't mix DOM and OS-level actions within the same gesture."
 
 ### Handling iframes
 
@@ -204,11 +241,15 @@ kernel browsers playwright execute "$SESSION" '
 
 ### Waiting Strategies
 
-```javascript
-await page.waitForURL("**/dashboard");
-await page.waitForLoadState("networkidle");
-await page.waitForSelector("text=Success");
-await page.waitForTimeout(2000);   // fixed wait, last resort
+Set an explicit, short `timeout` rather than relying on Playwright's default (30s) — failing fast and retrying (or falling back to computer-use) beats waiting out a long default for something that was never going to happen:
+
+```bash
+kernel browsers playwright execute "$SESSION" '
+  await page.waitForURL("**/dashboard", { timeout: 5000 });
+  await page.waitForLoadState("networkidle", { timeout: 5000 });
+  await page.waitForSelector("text=Success", { timeout: 5000 });
+  await page.waitForTimeout(2000);   // fixed wait, last resort
+'
 ```
 
 ### URL Patterns
@@ -222,25 +263,17 @@ https://www.kroger.com/mypurchases
 https://www.kroger.com/mypurchases/pending/{order_id}
 ```
 
-## Loading Another Framework
-
-If you decided in "Choosing a Tool" that raw Kernel primitives aren't enough, load the framework's skill and follow its conventions for the automation commands themselves — everything else in this guide (naming, discovery order, credential handling, template shape) stays the same:
-
-- **`kernel-agent-browser`** — snapshot/ref-based interaction via `agent-browser`. Reuse the browser you already created in Step 1 rather than minting a second one: fetch its `cdp_ws_url` with `kernel browsers get "$SESSION" -o json` and attach with `agent-browser --session <name> --cdp "$CDP_URL"` (its own skill documents why — as of agent-browser 0.33.0, `-p kernel` combined with `KERNEL_PROFILE_NAME` returns HTTP 400). Use its "Creating Site-Specific Browser Automation Skills" reference for the login/workflow command shapes, and note the dependency in the produced skill's Configuration section.
-- **`kernel-browser-harness`** — drives the browser via `browser-harness`'s `BU_CDP_WS`/`BU_NAME` env vars against a Kernel-minted CDP URL. Use when the task is already running inside a browser-harness-driven agent.
-
 ## Credential Management
 
-Prompt the user if they want to store credentials in their agent configuration file (e.g. `AGENTS.md`):
+Don't ask the user for raw credentials or store them in `AGENTS.md`. Every login flow in this guide (Step 1/2, the SKILL.md Template, the Example) is vault-first by default: create a vault, attach it to the browser at creation time, define the credential's fields without ever holding the values yourself, and let the human fill them in through a private link. The agent fills the login form by field name and CSS selector — it never sees the actual username or password.
 
-```markdown
-### <Site Name>
-- **URL**: <login-url>
-- **Username**: <username>
-- **Password**: <password>
-```
-
-Reference credentials from the skill but don't duplicate the actual values in SKILL.md if they're already stored elsewhere.
+Rules that apply everywhere the guide uses a vault:
+- The vault is per-user, not per-site — the skill file is shared, but each user gets their own vault (`<site-name>-<user-id>`) so their credentials never mix with another user's.
+- The vault attachment happens at `browsers create` time and can't be added later — decide up front whether the site needs one.
+- Keep the vault and the browser in the same Kernel project.
+- Share the collection URL with the user directly; never open it yourself in the agent-controlled browser.
+- Never read, print, screenshot, or return the filled values.
+- If a fill errors, comes back with an unexpected status, or times out, stop and reconcile rather than retrying blind.
 
 ## Common Patterns by Site Type
 
@@ -266,7 +299,7 @@ Reference credentials from the skill but don't duplicate the actual values in SK
 
 1. **Test each step individually** before combining into one `playwright execute` call
 2. **Prefer role/label/text locators** but note where a site forces brittle CSS
-3. **Add wait conditions** generously, then trim to what's actually needed
+3. **Add a wait after every step at first** — with the short, explicit timeouts from Waiting Strategies, not Playwright's default — then remove the ones that turn out to be unnecessary once you've seen the site's real timing
 4. **Capture screenshots** of key states for reference
 5. **Note failures** — document what doesn't work and the workaround
 
@@ -286,23 +319,35 @@ User request: "Create a skill for example.com to check my account balance"
 
 2. **Start a browser and explore**:
    ```bash
-   SESSION=$(kernel browsers create --profile-name example.com --save-changes -o json | jq -r '.session_id')
+   VAULT_NAME="example.com-<user-id>"
+   kernel vaults create --name "$VAULT_NAME"
+   SESSION=$(kernel browsers create --profile-name example.com --save-changes --stealth --vault "$VAULT_NAME" -o json | jq -r '.session_id')
    kernel browsers playwright execute "$SESSION" 'await page.goto("https://example.com/login")'
    kernel browsers computer screenshot "$SESSION" --to /tmp/example-login.png
    ```
 
-3. **Document the login flow** (selectors, credentials, verification)
+3. **Document the login flow** using the vault-backed credential flow from Step 2 (selectors, verification)
 
 4. **Find the account balance page** (navigate, screenshot, document the path and selector)
 
 5. **Write SKILL.md** with:
    - Configuration section
-   - Login workflow with the actual Playwright snippet
+   - Login workflow with the vault fill invocation and the actual selectors
    - Account balance workflow
    - Notes on any quirks discovered
 
-6. **Ask the user if they want credentials stored**
+6. **Share the vault collection URL** with the user so they can fill in their credentials
 
 7. **Test the complete workflow** end-to-end
 
 8. **Commit to git**
+
+## Choosing Other Primitives
+
+Everything above defaults to Kernel's own primitives — `kernel browsers playwright execute` and `kernel browsers computer`. If the customer already drives browsers through their own agent harness or a set of user-provided primitives, build the produced skill around those instead — the goal is to match how the calling agent already talks to browsers, not to force Kernel's shape onto it. Load the framework's skill and follow its conventions for the automation commands themselves; everything else in this guide (naming, discovery order, credential handling, template shape) stays the same:
+
+- **`agent-browser`'s snapshot/ref model** → load the `kernel-agent-browser` skill. Reuse the browser you already created in Step 1 rather than minting a second one: fetch its `cdp_ws_url` with `kernel browsers get "$SESSION" -o json` and attach with `agent-browser --session <name> --cdp "$CDP_URL"` (its own skill documents why — as of agent-browser 0.33.0, `-p kernel` combined with `KERNEL_PROFILE_NAME` returns HTTP 400). Use its "Creating Site-Specific Browser Automation Skills" reference for the login/workflow command shapes.
+- **`browser-harness`'s `BU_CDP_WS`/`BU_NAME` model** → load the `kernel-browser-harness` skill. Use when the task is already running inside a browser-harness-driven agent.
+- **Anything else** → mint the browser with `kernel browsers create` and hand its `cdp_ws_url` straight to that harness; Kernel only needs to supply the browser, not drive it.
+
+Whichever primitives you land on, name them explicitly in the produced skill's Configuration section — it's a real dependency for whoever runs the skill later, not an implementation detail to leave out.
