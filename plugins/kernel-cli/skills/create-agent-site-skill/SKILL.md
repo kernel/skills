@@ -36,10 +36,10 @@ PROFILE_NAME="<site-name>-<user-id>"
 kernel profiles create --name "$PROFILE_NAME"   # once per user, if you want persistent login
 VAULT_NAME="<site-name>-<user-id>"
 kernel vaults create --name "$VAULT_NAME"   # once per user, if the site needs login — see Step 2
-SESSION=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes --stealth --vault "$VAULT_NAME" -o json | jq -r '.session_id')
+SESSION=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes --stealth --vault "$VAULT_NAME" --timeout 600 -o json | jq -r '.session_id')
 ```
 
-`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. The profile has to be per-user too, not just the vault — it's what actually holds the authenticated session, so sharing one profile across users would leak one user's login to the next. `--stealth` only takes effect at launch — set it now rather than after a failed login shows it was needed. `--vault` attaches at create time too and can't be added later, so create the vault first if the site needs login, even before you've explored the login form.
+`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. The profile has to be per-user too, not just the vault — it's what actually holds the authenticated session, so sharing one profile across users would leak one user's login to the next. `--stealth` only takes effect at launch — set it now rather than after a failed login shows it was needed. `--vault` attaches at create time too and can't be added later, so create the vault first if the site needs login, even before you've explored the login form. `--timeout 600` avoids hitting the CLI's 60s default mid-exploration, since discovery spans many steps.
 
 ### Step 2: Explore the Login Flow
 
@@ -80,7 +80,7 @@ kernel vaults items invoke "$VAULT_NAME" <site-name>-login fill --spec-file - <<
 }
 JSON
 
-kernel browsers playwright execute "$SESSION" '
+kernel browsers playwright execute "$SESSION" -o json '
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.waitForLoadState("networkidle", { timeout: 5000 });
   return page.url();
@@ -111,7 +111,7 @@ For each workflow the user wants:
 1. **Navigate** to the relevant section
 2. **Screenshot** to see current state
 3. **Try locators** — prefer `page.getByRole` / `getByLabel` / `getByText` over raw CSS where the site's semantics allow it; these tend to survive markup changes better than brittle selectors
-4. **Confirm** with a `return` (URL, extracted text, element count)
+4. **Confirm** with a `return` (URL, extracted text, element count) — add `-o json` when the returned value needs parsing, since the default text output pretty-prints long strings across multiple lines
 5. **Fall back to computer-use** (see below) if Playwright can't complete the step after 2-3 attempts — whether it errors outright or reports success without the page state actually changing — don't keep retrying the same DOM approach
 6. **Test** the full workflow end-to-end in one `playwright execute` call
 7. **Record** the exact selectors (or coordinates, if computer-use was needed) and waits that worked
@@ -186,7 +186,7 @@ kernel vaults items invoke "$VAULT_NAME" <site-name>-login fill --spec-file - <<
 }
 JSON
 
-kernel browsers playwright execute "$SESSION" '
+kernel browsers playwright execute "$SESSION" -o json '
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.waitForLoadState("networkidle", { timeout: 5000 });
   return page.url();
@@ -218,7 +218,7 @@ kernel browsers delete "$SESSION"
 kernel browsers computer screenshot "$SESSION" --to /tmp/state.png
 ```
 
-Use this to confirm page state instead of relying on element refs — there are none to track here, since every `playwright execute` call takes a fresh page.
+Use this to confirm page state instead of relying on element refs — there are none to track here, since each `playwright execute` call is a fresh script context with no carried-over variables or element handles. The underlying page itself isn't reset: the same tab, URL, and DOM persist across calls in a session, so you don't need to re-navigate just because it's a new call.
 
 ### Selectors
 
