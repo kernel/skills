@@ -25,6 +25,8 @@ Examples: `kroger.com/`, `amazon.com/`. Use the primary domain where automation 
 
 Start with raw Kernel primitives: drive the page directly with Playwright's own locator API (`page.getByRole`, `page.getByLabel`, `page.getByText`, CSS/XPath fallback) via `kernel browsers playwright execute`, and confirm state with `kernel browsers computer screenshot`. This covers most sites and keeps the produced skill dependency-free.
 
+Some interactions don't work over the DOM no matter what selector you try — drag-and-drop on pointer-sensor libraries (dnd-kit, SortableJS), canvas/WebGL widgets, or sites that flag CDP-driven input specifically. For those, fall back to `kernel browsers computer` (mouse/keyboard driven by pixel coordinates off a screenshot) for just the step that needs it — see "Computer-Use Fallback" under Key Techniques. [Kernel's docs](https://www.kernel.sh/docs/browsers/playwright-computer-use-fallback) cover the same fallback built as a bounded, model-driven agent loop (`@onkernel/browser-loop`); reach for that instead of this guide's plain CLI recipe if you're building an autonomous tool-calling agent rather than a scripted skill.
+
 Load a heavier framework instead when:
 
 - The site needs many rounds of accessibility-snapshot-and-click across a long interactive session → load the `kernel-agent-browser` skill (attaches `agent-browser` over CDP to a kernel-cli-created browser).
@@ -89,8 +91,9 @@ For each workflow the user wants:
 2. **Screenshot** to see current state
 3. **Try locators** — prefer `page.getByRole` / `getByLabel` / `getByText` over raw CSS where the site's semantics allow it; these tend to survive markup changes better than brittle selectors
 4. **Confirm** with a `return` (URL, extracted text, element count)
-5. **Test** the full workflow end-to-end in one `playwright execute` call
-6. **Record** the exact selectors, URL patterns, and waits that worked
+5. **Fall back to computer-use** (see below) if a Playwright action reports success but the page state doesn't actually change after 1-2 attempts — don't keep retrying the same DOM approach
+6. **Test** the full workflow end-to-end in one `playwright execute` call
+7. **Record** the exact selectors (or coordinates, if computer-use was needed) and waits that worked
 
 ### Step 5: Document Findings
 
@@ -143,7 +146,7 @@ If bot detection blocks this, get the live view and ask the user to log in manua
 
 ## <Workflow Name>
 
-<The Playwright snippet, URL patterns, and verification for each requested workflow>
+<The Playwright snippet, URL patterns, and verification for each requested workflow. If a step needed the computer-use fallback, give the coordinates and the viewport size they were recorded at instead of a selector.>
 
 ## Cleanup
 
@@ -169,6 +172,24 @@ Use this to confirm page state instead of relying on element refs — there are 
 ### Selectors
 
 Reach for Playwright's own locator API first: `page.getByRole(...)`, `page.getByLabel(...)`, `page.getByText(...)`. Fall back to CSS or `page.locator('xpath=...')` only when the site has no usable semantics. Because each call re-resolves selectors against the live page, there's no ref-invalidation-after-navigation problem to work around.
+
+### Computer-Use Fallback
+
+When a Playwright action reports success but nothing actually happens on the page — the usual symptom on custom drag-and-drop, canvas/WebGL, or CDP-fingerprinting sites — stop retrying the DOM approach and drive that one step by pixel coordinates instead:
+
+```bash
+kernel browsers computer screenshot "$SESSION" --to /tmp/state.png   # read coordinates off this
+kernel browsers computer drag-mouse "$SESSION" --point 100,200 --point 250,200 --point 400,200 --button left
+kernel browsers computer click-mouse "$SESSION" --x 250 --y 60
+kernel browsers computer type "$SESSION" --text "some text"
+kernel browsers computer press-key "$SESSION" --key Return
+```
+
+Notes:
+- Requires a headful session — this is `kernel browsers create`'s default, so this works as long as the workflow didn't add `--headless`.
+- A drag needs waypoints between the two `--point` values, not just the endpoints, or the page's pointer-sensor library won't register movement.
+- Coordinates are screenshot-pixel-space and specific to the viewport size the session was created with — record that alongside the coordinates in the produced skill's Notes section.
+- Switch back to `playwright execute` for the next step once the fallback step is done; there's no session-level lock like the bounded agent-loop pattern in Kernel's docs — the constraint here is just "don't mix DOM and OS-level actions within the same gesture."
 
 ### Handling iframes
 
