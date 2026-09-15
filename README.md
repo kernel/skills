@@ -85,6 +85,7 @@ Command-line interface skills for using Kernel CLI commands.
 |-------|-------------|
 | **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
 | **kernel-agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
+| **create-agent-site-skill** | Build a new site-specific automation skill backed by a Kernel cloud browser, using Kernel's own CLI primitives by default |
 | **kernel-auth** | Setup and manage Kernel authentication connections for any website with safety checks and reauthentication support |
 | **profile-website-bot-detection** | Profile a website for bot detection vendors using stealth vs non-stealth Kernel browsers; compare effectiveness and identify vendor products |
 | **debug-browser-session** | Systematically debug a Kernel browser session — VM issues, network errors, Chrome crashes, page-load failures, and live-view problems — using the Kernel CLI |
