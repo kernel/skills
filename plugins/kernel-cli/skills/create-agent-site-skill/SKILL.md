@@ -32,13 +32,14 @@ Do the task for real, against a live Kernel browser, before writing anything dow
 ### Step 1: Start a Kernel Browser Session
 
 ```bash
-kernel profiles create --name <site-name>   # once, if you want persistent login
+PROFILE_NAME="<site-name>-<user-id>"
+kernel profiles create --name "$PROFILE_NAME"   # once per user, if you want persistent login
 VAULT_NAME="<site-name>-<user-id>"
 kernel vaults create --name "$VAULT_NAME"   # once per user, if the site needs login — see Step 2
-SESSION=$(kernel browsers create --profile-name <site-name> --save-changes --stealth --vault "$VAULT_NAME" -o json | jq -r '.session_id')
+SESSION=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes --stealth --vault "$VAULT_NAME" -o json | jq -r '.session_id')
 ```
 
-`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. `--stealth` only takes effect at launch — set it now rather than after a failed login shows it was needed. `--vault` attaches at create time too and can't be added later, so create the vault first if the site needs login, even before you've explored the login form.
+`--save-changes` writes cookies and storage back to the profile when the session ends, so a later run can reuse the login. The profile has to be per-user too, not just the vault — it's what actually holds the authenticated session, so sharing one profile across users would leak one user's login to the next. `--stealth` only takes effect at launch — set it now rather than after a failed login shows it was needed. `--vault` attaches at create time too and can't be added later, so create the vault first if the site needs login, even before you've explored the login form.
 
 ### Step 2: Explore the Login Flow
 
@@ -148,15 +149,28 @@ export KERNEL_API_KEY="your-api-key"   # required
 Create the vault and browser with the options this site needs:
 
 \`\`\`bash
-kernel profiles create --name <site-name>   # once, to persist login
+PROFILE_NAME="<site-name>-<user-id>"
+kernel profiles create --name "$PROFILE_NAME"   # once per user, to persist login
 VAULT_NAME="<site-name>-<user-id>"
 kernel vaults create --name "$VAULT_NAME"   # once per user, if not already created
-SESSION=$(kernel browsers create --profile-name <site-name> --save-changes --stealth --vault "$VAULT_NAME" --timeout 600 -o json | jq -r '.session_id')
+SESSION=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes --stealth --vault "$VAULT_NAME" --timeout 600 -o json | jq -r '.session_id')
 \`\`\`
 
 ## Login Workflow
 
 \`\`\`bash
+# First time for this user, the vault has no credential item yet — define it, which returns a
+# collection URL. Share that with the user and wait for them to fill it in before continuing.
+kernel vaults items get "$VAULT_NAME" <site-name>-login -o json || kernel vaults credentials create "$VAULT_NAME" <site-name>-login --spec-file - <<'JSON'
+{
+  "description": "<Site Name>",
+  "fields": {
+    "username": {"type": "text", "required": true, "sensitive": false},
+    "password": {"type": "password", "required": true, "sensitive": true}
+  }
+}
+JSON
+
 kernel browsers playwright execute "$SESSION" 'await page.goto("<login-url>")'
 
 kernel vaults items get "$VAULT_NAME" <site-name>-login --wait 60 -o json   # confirm status is "ready" and fill is available
@@ -268,7 +282,7 @@ https://www.kroger.com/mypurchases/pending/{order_id}
 Don't ask the user for raw credentials or store them in `AGENTS.md`. Every login flow in this guide (Step 1/2, the SKILL.md Template, the Example) is vault-first by default: create a vault, attach it to the browser at creation time, define the credential's fields without ever holding the values yourself, and let the human fill them in through a private link. The agent fills the login form by field name and CSS selector — it never sees the actual username or password.
 
 Rules that apply everywhere the guide uses a vault:
-- The vault is per-user, not per-site — the skill file is shared, but each user gets their own vault (`<site-name>-<user-id>`) so their credentials never mix with another user's.
+- The vault is per-user, not per-site — the skill file is shared, but each user gets their own vault (`<site-name>-<user-id>`) so their credentials never mix with another user's. The browser profile has to be scoped the same way: a shared profile persists whichever user's cookies were saved last, which would leak one user's authenticated session to the next.
 - The vault attachment happens at `browsers create` time and can't be added later — decide up front whether the site needs one.
 - Keep the vault and the browser in the same Kernel project.
 - Share the collection URL with the user directly; never open it yourself in the agent-controlled browser.
@@ -321,7 +335,7 @@ User request: "Create a skill for example.com to check my account balance"
    ```bash
    VAULT_NAME="example.com-<user-id>"
    kernel vaults create --name "$VAULT_NAME"
-   SESSION=$(kernel browsers create --profile-name example.com --save-changes --stealth --vault "$VAULT_NAME" -o json | jq -r '.session_id')
+   SESSION=$(kernel browsers create --profile-name "$VAULT_NAME" --save-changes --stealth --vault "$VAULT_NAME" -o json | jq -r '.session_id')
    kernel browsers playwright execute "$SESSION" 'await page.goto("https://example.com/login")'
    kernel browsers computer screenshot "$SESSION" --to /tmp/example-login.png
    ```
