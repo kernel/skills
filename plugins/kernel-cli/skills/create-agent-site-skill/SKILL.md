@@ -15,13 +15,13 @@ This skill requires a headful (non-headless) session — Kernel's default — si
 
 ## Naming Convention
 
-**Use the website's domain as the skill folder name:**
+Use the website's domain as the skill folder name inside the target agent's registered skill directory:
 
 ```
-.claude/skills/<domain>/SKILL.md
+<skills-directory>/<domain>/SKILL.md
 ```
 
-Examples: `kroger.com/`, `amazon.com/`. Use the primary domain where automation occurs.
+Examples: `<skills-directory>/kroger.com/SKILL.md`, `<skills-directory>/amazon.com/SKILL.md`. Resolve `<skills-directory>` from the target environment's skill-management instructions rather than assuming a particular agent. Use the primary domain where automation occurs.
 
 The skill file itself is per-site and shared across whoever runs it. The vault it uses for login (see Step 1/2) is per-user — the skill resolves `<user-id>` from whatever identifies the calling user at runtime (a passed-in parameter, session context, etc.), not a value baked into the skill file, so each user's credentials for the site stay in their own vault.
 
@@ -33,7 +33,8 @@ Do the task for real, against a live Kernel browser, before writing anything dow
 
 ```bash
 PROFILE_NAME="<site-name>-<user-id>"
-kernel profiles create --name "$PROFILE_NAME"   # once per user, if you want persistent login
+kernel profiles get "$PROFILE_NAME" -o json >/dev/null 2>&1 || \
+  kernel profiles create --name "$PROFILE_NAME"   # create once per user, then reuse it
 VAULT_NAME="<site-name>-<user-id>"
 kernel vaults create --name "$VAULT_NAME"   # once per user, if the site needs login — see Step 2
 SESSION=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes --stealth --vault "$VAULT_NAME" --timeout 600 -o json | jq -r '.session_id')
@@ -104,23 +105,24 @@ kernel browsers view "$SESSION" -o json   # browser_live_view_url
 
 Check the returned URL or page content against the expected logged-in state.
 
-### Step 4: Explore Each Requested Workflow
+### Step 4: Explore Each Requested Task Sequence
 
-For each workflow the user wants:
+Treat each requested workflow as an independently runnable task sequence. Share setup and login prerequisites where useful, but don't make callers run unrelated sequences for a single task. For each task sequence:
 
 1. **Navigate** to the relevant section
 2. **Screenshot** to see current state
 3. **Try locators** — prefer `page.getByRole` / `getByLabel` / `getByText` over raw CSS where the site's semantics allow it; these tend to survive markup changes better than brittle selectors
 4. **Confirm** with a `return` (URL, extracted text, element count) — add `-o json` when the returned value needs parsing, since the default text output pretty-prints long strings across multiple lines
 5. **Fall back to computer-use** (see below) if Playwright can't complete the step after 2-3 attempts — whether it errors outright or reports success without the page state actually changing — don't keep retrying the same DOM approach
-6. **Test** the full workflow end-to-end in one `playwright execute` call
+6. **Test** the complete task sequence end-to-end using the same ordered mix of Playwright and computer-use commands that the produced skill will document
 7. **Record** the exact selectors (or coordinates, if computer-use was needed) and waits that worked
 
 ### Step 5: Document Findings
 
-For each workflow, record:
+For each task sequence, record:
+- Required inputs and starting state
 - URL patterns (direct links when available)
-- The Playwright snippet(s) that performs it
+- The ordered Playwright and computer-use commands that perform it
 - Coordinates and viewport size, if a step needed computer-use
 - Wait conditions needed between steps
 - Verification checks (how to confirm success)
@@ -150,7 +152,8 @@ Create the vault and browser with the options this site needs:
 
 \`\`\`bash
 PROFILE_NAME="<site-name>-<user-id>"
-kernel profiles create --name "$PROFILE_NAME"   # once per user, to persist login
+kernel profiles get "$PROFILE_NAME" -o json >/dev/null 2>&1 || \
+  kernel profiles create --name "$PROFILE_NAME"   # create once per user, then reuse it
 VAULT_NAME="<site-name>-<user-id>"
 kernel vaults create --name "$VAULT_NAME"   # once per user, if not already created
 SESSION=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes --stealth --vault "$VAULT_NAME" --timeout 600 -o json | jq -r '.session_id')
@@ -195,9 +198,9 @@ kernel browsers playwright execute "$SESSION" -o json '
 
 If bot detection blocks this, get the live view and ask the user to log in manually: `kernel browsers view "$SESSION" -o json`.
 
-## <Workflow Name>
+## <Task Sequence Name>
 
-<The Playwright snippet(s), URL patterns, and verification for each requested workflow. If a step needed the computer-use fallback, give the coordinates and the viewport size they were recorded at instead of a selector.>
+<The required inputs and starting state, ordered Playwright and computer-use commands, URL patterns, and outcome verification for this task sequence. If a step needed the computer-use fallback, give the coordinates and the viewport size they were recorded at instead of a selector. Keep this sequence independently runnable so callers don't need to execute unrelated tasks.>
 
 ## Cleanup
 
@@ -311,7 +314,7 @@ Rules that apply everywhere the guide uses a vault:
 
 ## Testing and Iteration
 
-1. **Test each step individually** before combining into one `playwright execute` call
+1. **Test each step individually** before running the complete task sequence end-to-end
 2. **Prefer role/label/text locators** but note where a site forces brittle CSS
 3. **Add a wait after every step at first** — with the short, explicit timeouts from Waiting Strategies, not Playwright's default — then remove the ones that turn out to be unnecessary once you've seen the site's real timing
 4. **Capture screenshots** of key states for reference
@@ -329,30 +332,33 @@ kernel browsers delete "$SESSION"
 
 User request: "Create a skill for example.com to check my account balance"
 
-1. **Create skill folder**: `.claude/skills/example.com/`
+1. **Create the site skill folder**: `<skills-directory>/example.com/`, using the target agent's registered skill directory
 
 2. **Start a browser and explore**:
    ```bash
+   PROFILE_NAME="example.com-<user-id>"
+   kernel profiles get "$PROFILE_NAME" -o json >/dev/null 2>&1 || \
+     kernel profiles create --name "$PROFILE_NAME"
    VAULT_NAME="example.com-<user-id>"
    kernel vaults create --name "$VAULT_NAME"
-   SESSION=$(kernel browsers create --profile-name "$VAULT_NAME" --save-changes --stealth --vault "$VAULT_NAME" -o json | jq -r '.session_id')
+   SESSION=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes --stealth --vault "$VAULT_NAME" --timeout 600 -o json | jq -r '.session_id')
    kernel browsers playwright execute "$SESSION" 'await page.goto("https://example.com/login")'
    kernel browsers computer screenshot "$SESSION" --to /tmp/example-login.png
    ```
 
 3. **Document the login flow** using the vault-backed credential flow from Step 2 (selectors, verification)
 
-4. **Find the account balance page** (navigate, screenshot, document the path and selector)
+4. **Build the account balance task sequence** (navigate, screenshot, document its inputs, ordered commands, and verification)
 
 5. **Write SKILL.md** with:
    - Configuration section
    - Login workflow with the vault fill invocation and the actual selectors
-   - Account balance workflow
+   - Independently runnable account balance task sequence
    - Notes on any quirks discovered
 
 6. **Share the vault collection URL** with the user so they can fill in their credentials
 
-7. **Test the complete workflow** end-to-end
+7. **Test the complete account balance task sequence** end-to-end
 
 8. **Commit to git**
 
