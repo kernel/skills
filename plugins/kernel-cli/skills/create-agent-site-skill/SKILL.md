@@ -68,13 +68,17 @@ kernel vaults credentials create "$VAULT_NAME" <site-name>-login --spec-file - <
 JSON
 ```
 
-Share the returned private collection URL directly with the user; never open it in the agent-controlled browser. Wait for the user to supply credentials:
+Share the returned private collection URL directly with the user. Never open it in the agent-controlled browser. `--wait 60` is a single bounded observation, not a retry — poll it while the item is pending and stop once it reaches a terminal state:
 
 ```bash
-kernel vaults items get "$VAULT_NAME" <site-name>-login --wait 60 -o json
+STATUS="pending"
+while [ "$STATUS" = "pending" ]; do
+  ITEM=$(kernel vaults items get "$VAULT_NAME" <site-name>-login --wait 60 -o json)
+  STATUS=$(jq -r '.state.status' <<<"$ITEM")
+done
 ```
 
-Wait for status `ready` and the fill action to become available, then fill by field name and selector. Adapt the fields and sequence to the observed form:
+If `$STATUS` is `ready`, the fill action is available — fill by field name and selector, adapting the fields and sequence to the observed form. For any other terminal status, stop and reconcile before proceeding.
 
 ```bash
 kernel vaults items invoke "$VAULT_NAME" <site-name>-login fill --spec-file - <<JSON
