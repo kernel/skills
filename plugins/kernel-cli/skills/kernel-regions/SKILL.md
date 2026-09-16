@@ -51,10 +51,10 @@ print(browser.region, browser.cdp_ws_url)
 ```
 
 ```bash
-# TODO-VERIFY: --region on `kernel browsers create` is not yet listed in the CLI reference.
-# It is documented for `kernel auth connections create|update|login --region <region>`.
-# Until confirmed, create regional browsers from the SDK or dashboard, or check `kernel browsers create --help`.
+# Requires Kernel CLI v0.30.0 or later (`kernel --version`).
 kernel browsers create --region eu-west --stealth -o json
+kernel browsers list --region eu-west            # omit --region to list all regions
+kernel browser-pools create apac-pool --size 5 --region ap-southeast   # pools take --region too
 ```
 
 Connect with `cdp_ws_url` exactly as before. Existing Playwright or CDP code does not change, and live view connects to the selected region. The returned browser object includes its `region`; `get` and `delete` by ID need no region parameter.
@@ -141,7 +141,7 @@ const browser = await kernel.browsers.create({
 
 ```bash
 PROXY_ID=$(kernel proxies create --type residential --country SG --name "SG Residential" -o json | jq -r '.id')
-# then create the browser with --proxy-id "$PROXY_ID" and the region (see TODO-VERIFY above)
+kernel browsers create --region ap-southeast --proxy-id "$PROXY_ID" --stealth -o json
 ```
 
 Notes:
