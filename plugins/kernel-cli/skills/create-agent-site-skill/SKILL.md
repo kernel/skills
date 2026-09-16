@@ -82,8 +82,10 @@ kernel vaults items invoke "$VAULT_NAME" <site-name>-login fill --spec-file - <<
 JSON
 
 kernel browsers playwright execute "$SESSION" -o json '
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForLoadState("networkidle", { timeout: 5000 });
+  await Promise.all([
+    page.waitForURL("<logged-in-url-pattern>", { timeout: 5000 }),
+    page.getByRole("button", { name: "Sign in" }).click()
+  ]);
   return page.url();
 '
 ```
@@ -190,8 +192,10 @@ kernel vaults items invoke "$VAULT_NAME" <site-name>-login fill --spec-file - <<
 JSON
 
 kernel browsers playwright execute "$SESSION" -o json '
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForLoadState("networkidle", { timeout: 5000 });
+  await Promise.all([
+    page.waitForURL("<logged-in-url-pattern>", { timeout: 5000 }),
+    page.getByRole("button", { name: "Sign in" }).click()
+  ]);
   return page.url();
 '
 \`\`\`
@@ -258,13 +262,18 @@ kernel browsers playwright execute "$SESSION" '
 
 ### Waiting Strategies
 
-Set an explicit, short `timeout` rather than relying on Playwright's default (30s) — failing fast and retrying (or falling back to computer-use) beats waiting out a long default for something that was never going to happen:
+Wait for the observable condition that proves an asynchronous step completed — such as a URL change, visible state, completed response, or extracted value — using the selected browser primitive. Don't use `networkidle` as a default success condition: ads, analytics, and long-lived connections can prevent otherwise-complete pages from reaching it.
+
+With the default Playwright primitive, set explicit, short timeouts on those conditions rather than relying on Playwright's 30-second default:
 
 ```bash
 kernel browsers playwright execute "$SESSION" '
   await page.waitForURL("**/dashboard", { timeout: 5000 });
-  await page.waitForLoadState("networkidle", { timeout: 5000 });
-  await page.waitForSelector("text=Success", { timeout: 5000 });
+  await page.getByText("Success", { exact: true }).waitFor({ state: "visible", timeout: 5000 });
+  await Promise.all([
+    page.waitForResponse(response => response.url().includes("/api/orders") && response.ok(), { timeout: 5000 }),
+    page.getByRole("button", { name: "Refresh orders" }).click()
+  ]);
   await page.waitForTimeout(2000);   // fixed wait, last resort
 '
 ```
@@ -316,7 +325,7 @@ Rules that apply everywhere the guide uses a vault:
 
 1. **Test each step individually** before running the complete task sequence end-to-end
 2. **Prefer role/label/text locators** but note where a site forces brittle CSS
-3. **Add a wait after every step at first** — with the short, explicit timeouts from Waiting Strategies, not Playwright's default — then remove the ones that turn out to be unnecessary once you've seen the site's real timing
+3. **Add an explicit wait when the next step depends on an asynchronous transition** — wait for the URL, visible state, response, or extracted value that discovery showed proves completion
 4. **Capture screenshots** of key states for reference
 5. **Note failures** — document what doesn't work and the workaround
 
