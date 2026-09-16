@@ -47,7 +47,14 @@ SESSION=$(kernel browsers create --profile-name "$PROFILE_NAME" --save-changes -
 
 Check whether the saved profile is already authenticated. If login is needed, use vault-backed credentials. Never request raw credentials or store them in the skill or `AGENTS.md`.
 
-Reuse the user's existing credential item. If absent, define its fields without values:
+Inspect the login flow before defining its credential schema. Record credential fields, types, required/sensitive flags, login stages, and field-to-selector mappings; refine these as additional stages become visible.
+
+```bash
+kernel browsers playwright execute "$SESSION" 'await page.goto("<login-url>")'
+kernel browsers computer screenshot "$SESSION" --to /tmp/login.png
+```
+
+Reuse the user's existing credential item and its field names. If absent, define it from the discovered schema without values; adapt this username/password example:
 
 ```bash
 kernel vaults credentials create "$VAULT_NAME" <site-name>-login --spec-file - <<'JSON'
@@ -61,11 +68,9 @@ kernel vaults credentials create "$VAULT_NAME" <site-name>-login --spec-file - <
 JSON
 ```
 
-Share the returned private collection URL directly with the user; never open it in the agent-controlled browser. While the user supplies credentials, navigate to the login page and identify selectors:
+Share the returned private collection URL directly with the user; never open it in the agent-controlled browser. Wait for the user to supply credentials:
 
 ```bash
-kernel browsers playwright execute "$SESSION" 'await page.goto("<login-url>")'
-kernel browsers computer screenshot "$SESSION" --to /tmp/login.png
 kernel vaults items get "$VAULT_NAME" <site-name>-login --wait 60 -o json
 ```
 
@@ -134,7 +139,9 @@ Read coordinates from the screenshot and record the viewport size alongside them
 
 Use the primary automation domain as the folder name: `<skills-directory>/<domain>/SKILL.md`. Resolve the registered skill directory from the target agent's instructions.
 
-Adapt the template below using the verified commands and site-specific findings. Include the chosen controls, setup, login if needed, and cleanup; replace placeholders with working details. Keep generic CLI documentation in the linked dependency skill.
+Adapt the template below using the verified commands and site-specific findings. Include the chosen controls, setup, login if needed, and cleanup. Keep generic CLI documentation in the linked dependency skill.
+
+Save the discovered credential schema, field-to-selector mappings, login sequence, waits, and success checks in the shared skill. Replace site-specific placeholders with verified details, but keep user IDs, vault/item references, profile references, and account-specific URL components as runtime inputs or resolve them from the current user's context. Never hard-code the discovery user's values.
 
 ````markdown
 ---
