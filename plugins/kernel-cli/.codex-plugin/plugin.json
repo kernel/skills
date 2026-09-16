@@ -1,6 +1,6 @@
 {
   "name": "kernel-cli",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "CLI skills for managing Kernel cloud browsers, apps, authentication, and browser automation",
   "author": {
     "name": "Kernel",
@@ -15,13 +15,16 @@
     "cloud-browser",
     "web-scraping",
     "playwright",
-    "managed-auth"
+    "managed-auth",
+    "vault",
+    "payments",
+    "regional-browsers"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Kernel CLI",
     "shortDescription": "Manage cloud browsers and browser automations with the Kernel CLI",
-    "longDescription": "Installs Kernel CLI skills for creating and debugging cloud browsers, automating websites, managing authentication, profiling bot detection, and deploying browser apps.",
+    "longDescription": "Installs Kernel CLI skills for creating and debugging cloud browsers, automating websites, managing authentication, using Vault for credentials and payment cards, choosing browser regions, profiling bot detection, and deploying browser apps.",
     "developerName": "Kernel",
     "category": "Developer Tools",
     "capabilities": [
@@ -35,7 +38,8 @@
     "defaultPrompt": [
       "Use Kernel to automate a website in a cloud browser.",
       "Use Kernel to debug a browser session.",
-      "Use Kernel to set up managed authentication for a website."
+      "Use Kernel to set up managed authentication for a website.",
+      "Use Kernel Vault to complete a checkout without exposing the card to the agent."
     ]
   }
 }

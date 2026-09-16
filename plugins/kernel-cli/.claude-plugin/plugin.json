@@ -1,7 +1,7 @@
 {
   "name": "kernel-cli",
-  "version": "1.0.0",
-  "description": "CLI commands for managing browsers, deploying apps, and controlling browser instances with Kernel",
+  "version": "1.1.0",
+  "description": "CLI commands for managing browsers, deploying apps, controlling browser instances, Vault credentials and payments, and regional browsers with Kernel",
   "author": {
     "name": "Kernel",
     "url": "www.kernel.sh"

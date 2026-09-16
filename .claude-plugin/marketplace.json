@@ -12,7 +12,7 @@
       "author": {
         "name": "Kernel"
       },
-      "description": "CLI commands for managing browsers, deploying apps, and controlling browser instances. Use when working with the kernel command-line tool.",
+      "description": "CLI commands for managing browsers, deploying apps, controlling browser instances, Vault credentials and payments, and regional browsers. Use when working with the kernel command-line tool.",
       "source": "./plugins/kernel-cli"
     },
     {

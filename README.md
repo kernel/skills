@@ -1,42 +1,80 @@
 # Kernel Skills
 
-Official AI agent skills from the Kernel for installing useful skills for our CLI and SDKs that you can load into popular coding agents.
+Official agent skills for [Kernel](https://www.kernel.sh), the cloud browser platform for AI agents. Install them once and your coding agent knows how to create browsers, run Playwright, handle auth, use Vault, pick regions, record replays, and deploy apps with the Kernel CLI and SDKs.
 
-## Installation
+## Get started in two steps
 
-### Claude Code
+**1. Add the skills to your agent**
 
 ```bash
-# Add the Kernel skills marketplace
+npx skills add kernel/skills
+```
+
+Works with any agent that supports the [skills.sh](https://skills.sh) format (Claude Code, Codex, Cursor, OpenClaw, and others).
+
+**2. Set up Kernel**
+
+```bash
+brew install kernel/tap/kernel        # or: npm install -g @onkernel/cli
+kernel login                          # or: export KERNEL_API_KEY=<api-key>
+```
+
+Then ask your agent for something like "create a stealth Kernel browser in eu-west and check out with the card in vault user-12345". The relevant skills load automatically.
+
+Looking for end-to-end examples? See [kernel/cookbooks](https://github.com/kernel/cookbooks); every cookbook lists the skills it uses.
+
+## Available skills
+
+### kernel-cli plugin
+
+| Skill | Use it when |
+| --- | --- |
+| **kernel-cli** | Any `kernel ...` command: browsers, profiles, proxies, pools, extensions, replays, computer controls, filesystem, process execution, app deployment |
+| **kernel-agent-browser** | Automating sites with `agent-browser -p kernel`: selectors, waits, iframes, stealth, live view, session cleanup |
+| **kernel-auth** | A task needs an authenticated website session. Managed auth connections, hosted login, reauth, profile-backed browsers |
+| **kernel-vault** | A task needs a credential or payment card the agent must never see. Vaults, credential fill, wallet/card items, HITL collection and approval, alias-based checkout |
+| **kernel-regions** | Latency matters. `region` on browsers and pools (`us-east`, `eu-west`, `ap-southeast`), choosing a region, pairing with proxies, what stays global |
+| **kernel-browser-harness** | Building a repeatable harness around Kernel browsers |
+| **profile-website-bot-detection** | Profiling a site's bot-detection vendors with stealth vs non-stealth browsers |
+| **debug-browser-session** | A browser session misbehaves: VM, network, Chrome crash, page load, live view issues |
+| **diff-profile-archives** | Comparing two downloaded profile archives |
+
+### kernel-sdks plugin
+
+| Skill | Use it when |
+| --- | --- |
+| **kernel-typescript-sdk** | Writing automation with `@onkernel/sdk` |
+| **kernel-python-sdk** | Writing automation with the `kernel` Python package |
+
+### generate-video plugin
+
+| Skill | Use it when |
+| --- | --- |
+| **generate-video** | Rendering judder-free MP4s from web pages or animations with headless Chromium and ffmpeg. No Kernel account required |
+
+## Other install methods
+
+### Claude Code plugin marketplace
+
+```bash
 /plugin marketplace add kernel/skills
-
-# Install the CLI skill (includes kernel-auth)
-/plugin install kernel-cli
-
-# Install the SDK skills (TypeScript & Python)
+/plugin install kernel-cli        # includes kernel-auth, kernel-vault, kernel-regions
 /plugin install kernel-sdks
-
-# Install the video generation skill
 /plugin install generate-video
 ```
 
 ### Codex
 
 ```bash
-# Add the Kernel plugin marketplace
 codex plugin marketplace add kernel/skills
-
-# Install one or more plugins
 codex plugin add kernel-cli@kernel
 codex plugin add kernel-sdks@kernel
 codex plugin add generate-video@kernel
 ```
 
-You can also install them from the Plugins Directory in the ChatGPT desktop app. Restart the app after adding the marketplace, open **Plugins** in Codex, and find the Kernel plugins under **Public**.
+You can also install from the Plugins Directory in the ChatGPT desktop app. Restart the app after adding the marketplace, open **Plugins** in Codex, and find the Kernel plugins under **Public**.
 
 ### Cursor
-
-Install from the Cursor Marketplace:
 
 1. Open Cursor Settings > Plugins
 2. Search for "Kernel"
@@ -44,12 +82,7 @@ Install from the Cursor Marketplace:
 
 The Cursor plugin includes all skills, an MCP server for cloud browser management, and best-practice rules.
 
-### Any Agent
-```bash
-npx skills add kernel/skills
-```
-
-### Manual Installation
+### Manual
 
 ```bash
 git clone https://github.com/kernel/skills.git
@@ -58,60 +91,14 @@ cp -r skills/plugins/kernel-sdks ~/.claude/skills/
 cp -r skills/plugins/generate-video ~/.claude/skills/
 ```
 
-## Prerequisites
-
-Before using these skills, ensure you have:
-
-1. **Kernel CLI installed**:
-   ```bash
-   brew install kernel/tap/kernel
-   ```
-
-2. **Authenticated with Kernel**:
-   ```bash
-   export KERNEL_API_KEY=<api-key> or
-   kernel login
-   ```
-
-Once installed, your coding agent will automatically know how to use Kernel.
-
-## Available Skills
-
-### kernel-cli
-
-Command-line interface skills for using Kernel CLI commands.
-
-| Skill | Description |
-|-------|-------------|
-| **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
-| **kernel-agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
-| **kernel-auth** | Setup and manage Kernel authentication connections for any website with safety checks and reauthentication support |
-| **profile-website-bot-detection** | Profile a website for bot detection vendors using stealth vs non-stealth Kernel browsers; compare effectiveness and identify vendor products |
-| **debug-browser-session** | Systematically debug a Kernel browser session — VM issues, network errors, Chrome crashes, page-load failures, and live-view problems — using the Kernel CLI |
-
-### kernel-sdks
-
-SDK skills for building browser automation with TypeScript and Python.
-
-| Skill | Description |
-|-------|-------------|
-| **typescript-sdk** | Build automation with Kernel's Typescript SDK |
-| **python-sdk** | Build automation with kernel's Python SDK |
-
-### generate-video
-
-Render smooth, deterministic MP4s from web scenes. No Kernel account required — just Chromium, Node, and ffmpeg.
-
-| Skill | Description |
-|-------|-------------|
-| **generate-video** | Generate judder-free MP4 videos from web pages and animated visualizations: drive headless Chromium over CDP with an injected virtual clock, capture exact per-frame PNGs, encode with ffmpeg |
-
 ## Documentation
 
 - [Kernel Documentation](https://www.kernel.sh/docs)
+- [Agent-readable docs index](https://kernel.sh/docs/llms.txt)
 - [CLI Reference](https://www.kernel.sh/docs/reference/cli)
 - [API Reference](https://www.kernel.sh/docs/api-reference)
 - [Quickstart Guide](https://www.kernel.sh/docs/quickstart)
+- [Cookbooks](https://github.com/kernel/cookbooks)
 
 ## Support
 
