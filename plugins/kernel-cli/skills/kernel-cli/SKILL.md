@@ -26,7 +26,7 @@ Verify with `kernel --version`. Use `kernel <command> --help` as the source of t
 export KERNEL_API_KEY=your_api_key
 
 # Create a browser session
-kernel browsers create -o json
+kernel browsers create --telemetry=console,network,page -o json
 
 # Run Playwright automation (use `return` to get a value back)
 kernel browsers playwright execute <session_id> '
@@ -47,6 +47,7 @@ kernel browsers delete <session_id>
 - Use `--project <id-or-name>` or `KERNEL_PROJECT` when an API key can access multiple projects.
 - Keep confirmation prompts for destructive operations unless non-interactive execution is intentional.
 - Delete created browser sessions and pools after testing. Never echo, log, commit, or share API keys, credentials, or proxy passwords.
+- Check telemetry first, and reach for a screenshot only when you need to *see* something telemetry can't tell you. `kernel browsers telemetry events <id>` (or `telemetry stream`) gives structured, timestamped confirmation (`page_load`, `network_idle`, `console_error`, `captcha_solve_result`) — faster, cheaper on tokens, and more reliable than a screenshot, since it's exact status codes and error text instead of pixels you have to interpret. Only screenshot for layout/visual bugs, CAPTCHA appearance, or confirming a coordinate-based click landed correctly — things telemetry structurally can't express.
 
 ## Project, API Key, and Organization Administration
 
@@ -81,3 +82,4 @@ Rotate an API key interactively with `kernel api-keys rotate <id>`. Use `--days-
 - [Extensions](./references/extensions.md) - Upload and manage Chrome extensions
 - [Replays](./references/replays.md) - Record and download video replays
 - [Filesystem Operations](./references/filesystem-ops.md) - Read, write, upload, and download files
+- [Browser Telemetry](../kernel-browser-telemetry/SKILL.md) - Console, network, page, and interaction events for faster session introspection
