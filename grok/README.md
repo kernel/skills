@@ -1,30 +1,30 @@
-# Kernel plugin for Grok Build
+# KERNEL plugin for grok build
 
-Gives Grok Build cloud browsers through Kernel's hosted MCP server. Grok can launch stealth Chromium sessions, drive them with Playwright, the Browser REPL, or computer-use actions, reuse logged-in profiles and managed auth connections, and record replays.
+cloud browsers for grok build, served over KERNEL's hosted mcp server. grok launches stealth chromium sessions in <30ms, drives them with playwright, a persistent browser repl, or computer-use actions, reuses logged-in profiles and managed auth connections, and records replays.
 
-## Install
+## install
 
-In Grok Build, run `/plugin`, search for **kernel**, and install it. Or from a shell:
+in grok build, run `/plugin`, search for **kernel**, and install it. or from a shell:
 
 ```bash
 grok plugin install kernel --trust
 ```
 
-## What it contains
+## what's inside
 
-| Component | Path | Purpose |
+| component | path | purpose |
 |---|---|---|
-| MCP server | `.mcp.json` | Kernel's hosted MCP server at `https://mcp.onkernel.com/mcp` (streamable HTTP) |
-| Skill | `skills/kernel-mcp/SKILL.md` | When and how to use the Kernel MCP tools |
+| mcp server | `.mcp.json` | our hosted mcp server at `https://mcp.onkernel.com/mcp` (streamable http) |
+| skill | `skills/kernel-mcp/SKILL.md` | when and how grok should use the KERNEL mcp tools |
 
-## Authentication and network access
+## auth and network access
 
-The plugin carries no API key. On first connection Grok opens a browser window to sign in to Kernel over OAuth 2.1. During authorization you can grant org-wide access or limit it to one Kernel project.
+the plugin carries no api key. on first connection, grok opens a browser window so you can sign in to KERNEL over oauth 2.1. during authorization you can grant org-wide access or limit it to one KERNEL project.
 
-The plugin only talks to `https://mcp.onkernel.com`. It runs no local code, hooks, or install scripts. Browsers run in Kernel's cloud and are billed to the Kernel account you sign in with.
+the plugin only talks to `https://mcp.onkernel.com`. it runs no local code, hooks, or install scripts. browsers run in our cloud and bill to the KERNEL account you sign in with.
 
-The MCP server is open source: [kernel/kernel-mcp-server](https://github.com/kernel/kernel-mcp-server).
+the mcp server is open source: [kernel/kernel-mcp-server](https://github.com/kernel/kernel-mcp-server).
 
-## License
+## license
 
-MIT
+mit
