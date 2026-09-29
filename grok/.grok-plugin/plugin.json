@@ -1,0 +1,19 @@
+{
+  "name": "kernel",
+  "version": "1.0.0",
+  "description": "Cloud browsers for Grok. Launch stealth Chromium sessions, drive them with Playwright or computer-use actions, reuse logged-in profiles and managed auth, and record replays through Kernel's hosted MCP server.",
+  "author": {
+    "name": "Kernel",
+    "url": "https://kernel.sh"
+  },
+  "homepage": "https://kernel.sh",
+  "repository": "https://github.com/kernel/skills",
+  "license": "MIT",
+  "keywords": [
+    "kernel",
+    "kernel browser",
+    "kernel browsers",
+    "kernel mcp",
+    "onkernel"
+  ]
+}

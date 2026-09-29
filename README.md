@@ -44,6 +44,16 @@ Install from the Cursor Marketplace:
 
 The Cursor plugin includes all skills, an MCP server for cloud browser management, and best-practice rules.
 
+### Grok Build
+
+Install from the Grok Build plugin marketplace:
+
+```bash
+/plugin  # search "kernel" and install
+```
+
+The Grok plugin lives in [`grok/`](grok) and bundles Kernel's hosted MCP server with a skill for using its tools.
+
 ### Any Agent
 ```bash
 npx skills add kernel/skills
