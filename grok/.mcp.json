@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "kernel": {
+      "type": "http",
+      "url": "https://mcp.onkernel.com/mcp"
+    }
+  }
+}
