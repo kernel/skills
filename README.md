@@ -36,13 +36,7 @@ You can also install them from the Plugins Directory in the ChatGPT desktop app.
 
 ### Cursor
 
-Install from the Cursor Marketplace:
-
-1. Open Cursor Settings > Plugins
-2. Search for "Kernel"
-3. Install the plugin
-
-The Cursor plugin includes all skills, an MCP server for cloud browser management, and best-practice rules.
+The Kernel plugin for Cursor lives in [kernel/cursor-plugin](https://github.com/kernel/cursor-plugin). It bundles Kernel's hosted MCP server with a skill for using its tools. See that repo's README for install steps.
 
 ### Grok Build
 
