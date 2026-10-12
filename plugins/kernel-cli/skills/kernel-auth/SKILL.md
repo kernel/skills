@@ -354,7 +354,7 @@ use `--yes` only in automation after verifying the exact connection id or profil
 
 ## vault credentials
 
-a vault holds one end user's credentials. name it after that user (for example `user-123`) and never mix unrelated users in one vault. vaults store credentials, not browser sessions: attach the vault when creating the browser, because the binding cannot change later, and add a profile with saved changes if the signed-in state must persist.
+a vault holds one end user's credentials. name it after that user (for example `user-123`) and never mix unrelated users in one vault. vaults store credentials, not browser sessions: attach the vault when creating the browser, because the binding cannot change later. if the signed-in state must persist, also pass `--save-changes` with a per-user `--profile-name` that matches the vault's user (for example `user-123`). a shared profile would give other users one user's cookies.
 
 ### two credential paths
 
