@@ -3,7 +3,7 @@ name: kernel-app-deployment
 description: deploy TypeScript/Python apps, invoke actions, and monitor logs in KERNEL environment
 ---
 
-# App Deployment and Invocation
+# app deployment and invocation
 
 deploy serverless apps to KERNEL and invoke them with payloads.
 

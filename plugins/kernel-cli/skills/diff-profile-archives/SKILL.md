@@ -3,7 +3,7 @@ name: diff-profile-archives
 description: compare two KERNEL profile snapshots to investigate behavioral differences. use when an issue (e.g. login failure, captcha, broken automation, vendor mismatch) reproduces on one profile but not another, or when a "good" vs "bad" profile needs to be diffed. takes two profile ids/names plus an issue description, downloads and extracts both profiles via the KERNEL cli, and surfaces differences in cookies, storage, preferences, extensions, and login state that could explain the issue.
 ---
 
-# Diff Kernel Profile Archives
+# diff KERNEL profile archives
 
 compare the actual contents of two KERNEL browser profiles to identify state differences that could explain a reported issue. the skill downloads and extracts both profiles via the KERNEL cli, then produces a structured diff focused on the surfaces most likely to drive divergent behavior: cookies, local/session storage, preferences, extension state, login data, and history.
 

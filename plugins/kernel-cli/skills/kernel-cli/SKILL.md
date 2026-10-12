@@ -3,7 +3,7 @@ name: kernel-cli
 description: use the KERNEL cli to manage cloud browsers, apps, profiles, proxies, managed auth, api keys, projects, and organization limits. use when installing or authenticating the cli, looking up current command syntax, or choosing the right command group.
 ---
 
-# Kernel CLI
+# KERNEL cli
 
 the KERNEL cli provides command-line access to KERNEL's cloud browser platform for browser automation, serverless app deployment, and infrastructure management.
 

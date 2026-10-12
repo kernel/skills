@@ -3,7 +3,7 @@ name: profile-website-bot-detection
 description: profile a website for bot detection vendors using stealth vs non-stealth KERNEL browsers. use when analyzing bot detection on a website, comparing stealth effectiveness, identifying anti-bot vendors and products, or detecting challenge types.
 ---
 
-# Profile Website for Bot Detection Vendors
+# profile website for bot detection vendors
 
 analyzes a target website to identify bot detection vendors, their specific products, and challenge types. supports comparative analysis between stealth and non-stealth browser modes.
 

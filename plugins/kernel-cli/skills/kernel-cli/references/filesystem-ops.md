@@ -3,7 +3,7 @@ name: kernel-filesystem-ops
 description: read, write, upload, and download files in browser vm filesystems
 ---
 
-# Filesystem Operations
+# filesystem operations
 
 interact with the browser vm's filesystem to upload, download, read, and write files.
 

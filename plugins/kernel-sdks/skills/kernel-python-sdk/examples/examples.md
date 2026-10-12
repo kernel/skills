@@ -1,4 +1,4 @@
-# Kernel Python SDK - Examples
+# KERNEL python sdk - examples
 
 concise patterns extracted from production templates showing how to integrate the KERNEL sdk with popular libraries and frameworks.
 

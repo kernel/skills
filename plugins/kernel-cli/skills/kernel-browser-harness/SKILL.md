@@ -3,7 +3,7 @@ name: kernel-browser-harness
 description: best practices for using browser-use's open-source browser-harness with KERNEL cloud browsers over cdp. use when driving a KERNEL browser from browser-harness, extracting a cdp url from `kernel browsers create`, or running multi-step or parallel harness sessions against KERNEL.
 ---
 
-# Browser-Harness with Kernel Cloud Browsers
+# browser-harness with KERNEL cloud browsers
 
 this skill documents how to drive a KERNEL cloud browser with [`browser-harness`](https://github.com/browser-use/browser-harness) (browser-use's open-source cdp harness). `browser-harness` already supports any cdp endpoint via the `BU_CDP_WS` env var — the work this skill covers is extracting that url from the KERNEL cli, picking the right `kernel browsers create` flags, and using the KERNEL session id as the harness daemon name so sessions don't collide.
 

@@ -3,7 +3,7 @@ name: kernel-browser-pools
 description: manage pre-warmed browser pools for fast acquisition and release of browser instances
 ---
 
-# Browser Pools
+# browser pools
 
 pre-warmed browser instances for fast acquisition. ideal for high-throughput automation.
 

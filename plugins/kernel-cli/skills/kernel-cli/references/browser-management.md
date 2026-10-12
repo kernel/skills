@@ -3,7 +3,7 @@ name: kernel-browser-management
 description: create, list, view, and delete KERNEL browser sessions with various configuration options
 ---
 
-# Browser Management
+# browser management
 
 create and manage sandboxed Chrome browser instances in the cloud.
 

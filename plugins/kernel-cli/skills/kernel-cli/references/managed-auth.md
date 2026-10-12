@@ -1,4 +1,4 @@
-# Managed Auth CLI Commands
+# managed auth cli commands
 
 all commands live under `kernel auth connections`.
 

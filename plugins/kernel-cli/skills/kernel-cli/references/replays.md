@@ -3,7 +3,7 @@ name: kernel-replays
 description: record, manage, and download video replays of browser sessions
 ---
 
-# Replays (Video Recording)
+# replays (video recording)
 
 record browser sessions as videos for debugging, demos, or compliance.
 

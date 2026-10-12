@@ -1,4 +1,4 @@
-# Kernel Skills
+# KERNEL skills
 
 official ai agent skills from the KERNEL for installing useful skills for our cli and sdks that you can load into popular coding agents.
 

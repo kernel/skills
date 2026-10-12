@@ -1,4 +1,4 @@
-# Creating Site-Specific Browser Automation Skills
+# creating site-specific browser automation skills
 
 this guide walks through creating website automation skills using agent-browser with KERNEL cloud browsers.
 

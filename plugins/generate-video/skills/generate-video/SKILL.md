@@ -3,7 +3,7 @@ name: generate-video
 description: generate crisp, perfectly smooth mp4 videos from a web page or animated visualization by driving headless Chromium over the Chrome DevTools Protocol (cdp) with deterministic frame-stepping, then encoding with ffmpeg and (if remote) sharing via a cloudflared tunnel. use when asked to make/generate a demo video, explainer clip, launch/marketing animation, social teaser, or any short rendered video from a web scene — especially animated stat/timeline/diagram visualizations — and when you need to iterate on it (tweak, re-render, compare). solves the common "the recording has hitches / judder / dropped frames" problem.
 ---
 
-# Generate Video
+# generate video
 
 turn a web page (usually a small Next.js/React scene you build) into a **smooth, deterministic mp4**. the core trick: don't screen-capture whatever the browser happens to paint — drive the animation off an **injected virtual clock** and render exactly N evenly-spaced frames per second as lossless pngs, then encode with ffmpeg. every frame is an exact point in time, so there is zero judder.
 

@@ -3,7 +3,7 @@ name: kernel-agent-browser
 description: best practices for using agent-browser with KERNEL cloud browsers. use when automating websites with agent-browser -p kernel, tuning stealth or proxy behavior, persisting profiles, handling iframes, discovering KERNEL session ids or live views, or cleaning up cloud sessions.
 ---
 
-# Agent-Browser with Kernel Cloud Browsers
+# agent-browser with KERNEL cloud browsers
 
 this skill documents best practices for using agent-browser's built-in KERNEL provider (`-p kernel`) for cloud browser automation.
 

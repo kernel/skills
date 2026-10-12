@@ -3,7 +3,7 @@ name: debug-browser-session
 description: systematically debug a KERNEL cloud browser session — vm issues, network errors, Chrome crashes, page-load failures, and live-view problems. use when a browser session misbehaves (e.g. ERR_HTTP2_PROTOCOL_ERROR, "browser not responding", blank/error pages, captcha or "checking your browser" blocks, live view not loading) and you have the session id. drives the KERNEL cli to inspect session status, screenshots, page state, vm logs, network connectivity, and telemetry events (which remain readable even after the session is deleted).
 ---
 
-# Debug a Kernel Browser Session
+# debug a KERNEL browser session
 
 diagnose a misbehaving KERNEL cloud browser session using the KERNEL cli. the cli has full access to the session's vm — status, screenshots, Playwright execution, log files, and in-vm command execution — which is everything you need to localize a failure to bot detection, a Chrome crash, a network/dns problem, or live-view/WebRTC issues.
 

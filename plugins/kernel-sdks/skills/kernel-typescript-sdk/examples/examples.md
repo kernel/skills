@@ -1,4 +1,4 @@
-# Kernel TypeScript SDK - Examples
+# KERNEL typescript sdk - examples
 
 concise patterns extracted from production templates showing how to integrate the KERNEL sdk with popular libraries and frameworks.
 

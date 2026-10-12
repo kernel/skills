@@ -3,7 +3,7 @@ name: kernel-extensions
 description: upload, manage, and download Chrome extensions for KERNEL browsers
 ---
 
-# Extensions
+# extensions
 
 manage Chrome extensions for your KERNEL browsers.
 

@@ -4,7 +4,7 @@ description: build KERNEL browser automation in TypeScript with server-side Play
 context: fork
 ---
 
-# Kernel TypeScript SDK
+# KERNEL typescript sdk
 
 ## when to use this skill
 

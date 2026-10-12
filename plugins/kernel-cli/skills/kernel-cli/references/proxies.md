@@ -3,7 +3,7 @@ name: kernel-proxies
 description: create and manage datacenter, isp, residential, mobile, and custom proxies for browsers
 ---
 
-# Proxies
+# proxies
 
 route browser traffic through proxies for geo-location, privacy, or testing.
 

@@ -3,7 +3,7 @@ name: create-agent-site-skill
 description: create reusable skills for automating specific websites with KERNEL cloud browsers. use when building a new site skill or turning an existing browser workflow into one.
 ---
 
-# Create Site-Specific Browser Skills
+# create site-specific browser skills
 
 capture working browser workflows as independently runnable tasks in a reusable skill. reuse existing verified workflows; explore missing steps in a live browser within the user's authorized scope.
 

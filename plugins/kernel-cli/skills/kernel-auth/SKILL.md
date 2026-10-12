@@ -10,7 +10,7 @@ metadata:
   }
 ---
 
-# Kernel Auth
+# KERNEL auth
 
 use a managed auth connection to acquire a reusable authenticated browser profile, or a vault credential to sign in from the agent's own browser, then continue the original website task with the browser-control method that fits it. this skill owns authentication and the handoff to an authenticated browser; it does not assume the task is qa.
 

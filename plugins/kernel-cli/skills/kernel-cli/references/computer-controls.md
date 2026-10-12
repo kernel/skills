@@ -3,7 +3,7 @@ name: kernel-computer-controls
 description: os-level mouse, keyboard, screen control, and screenshots for browser automation
 ---
 
-# Computer Controls
+# computer controls
 
 os-level mouse, keyboard, and screen control for precise browser interaction.
 

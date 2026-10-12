@@ -3,7 +3,7 @@ name: kernel-profiles
 description: create and manage persistent browser profiles to preserve cookies, local storage, and session state
 ---
 
-# Profiles
+# profiles
 
 profiles store persistent browser state including cookies, local storage, and browser history.
 

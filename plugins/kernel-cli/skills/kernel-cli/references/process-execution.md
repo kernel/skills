@@ -3,7 +3,7 @@ name: kernel-process-execution
 description: execute and manage processes inside browser vm environments
 ---
 
-# Process Execution
+# process execution
 
 run arbitrary commands inside the browser vm for advanced control.
 
