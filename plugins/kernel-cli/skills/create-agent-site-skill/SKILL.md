@@ -93,7 +93,7 @@ kernel vaults items invoke "$VAULT_NAME" <site-name>-login fill --spec-file - <<
 JSON
 ```
 
-Never read, print, screenshot, or return filled credential values. If the fill errors, times out, or returns a status other than `completed`, stop and reconcile before retrying or submitting.
+Never read, print, screenshot, or return filled credential values. If the fill errors, times out, or returns a status other than `completed`, stop and reconcile before submitting. `fill` never submits, so a retry is safe. Retry only after checking the page, and never in an automatic loop.
 
 After a completed fill, submit and verify the expected logged-in state:
 

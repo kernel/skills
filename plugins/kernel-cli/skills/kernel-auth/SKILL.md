@@ -391,7 +391,7 @@ With Kernel MCP tools:
 | `1pw_fill` | 1Password brokered approval | the 1Password extension fills and submits | explicit user approval |
 | `1pw_recover` | 1Password brokered approval | recovers a failed account link on its `credential_account` | explicit user approval |
 
-Invoke only operations listed in the item's `available_operations`. Never automatically retry an uncertain `fill`, an unknown `webmcp_invoke` or `1pw_fill` outcome, or an access request; inspect the item, its events, and the page first. Confirm with the user before deleting a vault or item.
+Invoke only operations listed in the item's `available_operations`. `fill` never submits, so a retry is safe. Retry only after checking the page, and never in an automatic loop. Never automatically retry an unknown `webmcp_invoke` or `1pw_fill` outcome, or an access request; inspect the item, its events, and the page first. Confirm with the user before deleting a vault or item.
 
 The CLI equivalents are `kernel vaults` (`create`, `list`, `get`, `delete`), `kernel vaults credentials` (`create`, `update`, `connect`), `kernel vaults items` (`list`, `get`, `invoke`, `events`, `delete`), and `kernel vaults items webmcp invoke`. Attach a vault with `kernel browsers create --vault <id-or-name>`.
 
