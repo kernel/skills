@@ -391,7 +391,7 @@ With Kernel MCP tools:
 | `1pw_fill` | 1Password brokered approval | the 1Password extension fills and submits | explicit user approval |
 | `1pw_recover` | 1Password brokered approval | recovers a failed account link on its `credential_account` | explicit user approval |
 
-Invoke only operations listed in the item's `available_operations`. `fill` never submits, so a retry is safe. Retry only after checking the page, and never in an automatic loop. Never automatically retry an unknown `webmcp_invoke` or `1pw_fill` outcome, or an access request; inspect the item, its events, and the page first. Confirm with the user before deleting a vault or item.
+Invoke only operations listed in the item's `available_operations`. `fill` never submits, so a retry is safe. Retry only after checking the page, and never in an automatic loop. `1pw_fill` can submit the form, so never retry automatically. Check the page first before retrying. Never automatically retry an unknown `webmcp_invoke` outcome or an access request; inspect the item, its events, and the page first. Confirm with the user before deleting a vault or item.
 
 The CLI equivalents are `kernel vaults` (`create`, `list`, `get`, `delete`), `kernel vaults credentials` (`create`, `update`, `connect`), `kernel vaults items` (`list`, `get`, `invoke`, `events`, `delete`), and `kernel vaults items webmcp invoke`. Attach a vault with `kernel browsers create --vault <id-or-name>`.
 
@@ -437,7 +437,7 @@ JSON
 3. Invoke `1pw_create_access_request`. It needs no browser. Give the returned `onepassword://` approval link unmodified only to the owner. Never open, decode, or approve it yourself.
 4. Invoke `1pw_access_request_status` until the credential is `ready`, `declined`, or `failed`. Ready means approved, not signed in.
 5. Create a browser with the vault attached, navigate to the page with the username and password form, and, with the user's approval, invoke `1pw_fill` with `browser_id` and the exact `page_url`. When several approved logins share the page origin, ask the owner which to use and pass its `entry_id`. The browser rejects other control connections while `1pw_fill` runs; reconnect afterward.
-6. Inspect the page. `fill_submitted` means the form was submitted, not that sign-in succeeded. After `fill_unknown`, inspect the page before doing anything else. On a multi-page sign-in, invoke `1pw_fill` again on each page.
+6. Inspect the page. `fill_submitted` means the form was submitted, not that sign-in succeeded. `1pw_fill` can submit the form, so never retry automatically. Check the page first before retrying. On a multi-page sign-in, invoke `1pw_fill` again on each page.
 
 An access request with an uncertain outcome stays blocked with no advertised operations. Stop and tell the user; do not delete and recreate the item on your own to retry it. Credentials backed by a developer-supplied 1Password access token are managed through the Kernel API, not through the agent; never ask for or accept those secrets in chat.
 
