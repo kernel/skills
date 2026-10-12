@@ -1,9 +1,9 @@
 {
   "name": "kernel-sdks",
   "version": "1.0.0",
-    "description": "TypeScript and Python SDK skills for building browser automation with Kernel's Typescript and Python SDKs",
+    "description": "TypeScript and Python sdk skills for building browser automation with KERNEL's TypeScript and Python sdks",
     "author": {
-    "name": "Kernel",
+    "name": "KERNEL",
     "url": "www.kernel.sh"
   },
   "repository": "https://github.com/kernel/skills",

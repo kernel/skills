@@ -1,9 +1,9 @@
 {
   "name": "kernel-cli",
   "version": "1.0.1",
-  "description": "CLI skills for managing Kernel cloud browsers, apps, authentication, and browser automation",
+  "description": "cli skills for managing KERNEL cloud browsers, apps, authentication, and browser automation",
   "author": {
-    "name": "Kernel",
+    "name": "KERNEL",
     "url": "https://kernel.sh"
   },
   "homepage": "https://kernel.sh",
@@ -19,10 +19,10 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Kernel CLI",
-    "shortDescription": "Manage cloud browsers and browser automations with the Kernel CLI",
-    "longDescription": "Installs Kernel CLI skills for creating and debugging cloud browsers, automating websites, managing authentication, profiling bot detection, and deploying browser apps.",
-    "developerName": "Kernel",
+    "displayName": "KERNEL CLI",
+    "shortDescription": "manage cloud browsers and browser automations with the KERNEL cli",
+    "longDescription": "installs KERNEL cli skills for creating and debugging cloud browsers, automating websites, managing authentication, profiling bot detection, and deploying browser apps.",
+    "developerName": "KERNEL",
     "category": "Developer Tools",
     "capabilities": [
       "Read",
@@ -33,9 +33,9 @@
     "composerIcon": "./assets/logo.svg",
     "logo": "./assets/logo.svg",
     "defaultPrompt": [
-      "Use Kernel to automate a website in a cloud browser.",
-      "Use Kernel to debug a browser session.",
-      "Use Kernel to set up managed authentication for a website."
+      "use KERNEL to automate a website in a cloud browser.",
+      "use KERNEL to debug a browser session.",
+      "use KERNEL to set up managed authentication for a website."
     ]
   }
 }

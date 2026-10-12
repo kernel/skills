@@ -1,12 +1,12 @@
 # Kernel TypeScript SDK - Examples
 
-Concise patterns extracted from production templates showing how to integrate the Kernel SDK with popular libraries and frameworks.
+concise patterns extracted from production templates showing how to integrate the KERNEL sdk with popular libraries and frameworks.
 
 ---
 
-## Stagehand Library Integration
+## Stagehand library integration
 
-Connect Stagehand to Kernel browsers for AI-powered browser automation with `act()` and `extract()`.
+connect Stagehand to KERNEL browsers for ai-powered browser automation with `act()` and `extract()`.
 
 ```typescript
 import { Stagehand } from "@browserbasehq/stagehand";
@@ -48,9 +48,9 @@ try {
 
 ---
 
-## Reusable Browser Session Manager
+## reusable browser session manager
 
-A class for managing browser lifecycle with optional replay recording.
+a class for managing browser lifecycle with optional replay recording.
 
 ```typescript
 import type { Kernel } from "@onkernel/sdk";
@@ -115,7 +115,7 @@ class KernelBrowserSession {
 }
 ```
 
-**Usage:**
+**usage:**
 
 ```typescript
 const session = new KernelBrowserSession(kernel, { recordReplay: true });
@@ -130,9 +130,9 @@ try {
 
 ---
 
-## CDP Connection Pattern
+## cdp connection pattern
 
-Connect local Playwright to a Kernel browser via CDP WebSocket.
+connect local Playwright to a KERNEL browser via cdp WebSocket.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -160,9 +160,9 @@ try {
 
 ---
 
-## Auto-CAPTCHA with Stealth Mode
+## auto-captcha with stealth mode
 
-Use stealth mode to leverage Kernel's automatic CAPTCHA solving.
+use stealth mode to leverage KERNEL's automatic captcha solving.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -191,9 +191,9 @@ try {
 
 ---
 
-## Server-Side Execution as LLM Tool
+## server-side execution as llm tool
 
-Wrap `playwright.execute` as a callable tool for LLM agent frameworks.
+wrap `playwright.execute` as a callable tool for llm agent frameworks.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -232,9 +232,9 @@ function createPlaywrightTool(sessionId: string) {
 
 ---
 
-## Magnitude Library Integration
+## Magnitude Library integration
 
-Connect Magnitude's browser agent to Kernel for AI-driven automation.
+connect Magnitude's browser agent to KERNEL for ai-driven automation.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -277,9 +277,9 @@ try {
 
 ---
 
-## Action Handler Pattern
+## action handler pattern
 
-Standard Kernel action pattern for deployable automation.
+standard KERNEL action pattern for deployable automation.
 
 ```typescript
 import { Kernel, type KernelContext } from "@onkernel/sdk";
@@ -326,9 +326,9 @@ app.action<Input, Output>("get-title", async (ctx: KernelContext, payload?: Inpu
 
 ---
 
-## Managed Auth - Hosted UI Flow
+## managed auth - hosted ui flow
 
-Create authenticated browser profiles via Kernel's hosted login page.
+create authenticated browser profiles via KERNEL's hosted login page.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -366,9 +366,9 @@ if (state.status === "AUTHENTICATED") {
 
 ---
 
-## Managed Auth - Programmatic Flow
+## managed auth - programmatic flow
 
-Submit credentials programmatically instead of using the hosted page.
+submit credentials programmatically instead of using the hosted page.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -420,9 +420,9 @@ while (state.flow_status === "IN_PROGRESS") {
 
 ---
 
-## Managed Auth - SSE Streaming
+## managed auth - sse streaming
 
-Stream login flow events in real time instead of polling.
+stream login flow events in real time instead of polling.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -452,9 +452,9 @@ for await (const evt of stream) {
 
 ---
 
-## Managed Auth - 1Password Credential Provider
+## managed auth - 1Password credential provider
 
-Use 1Password as an external credential source.
+use 1Password as an external credential source.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";

@@ -1,7 +1,7 @@
 {
   "name": "kernel",
   "interface": {
-    "displayName": "Kernel"
+    "displayName": "KERNEL"
   },
   "plugins": [
     {

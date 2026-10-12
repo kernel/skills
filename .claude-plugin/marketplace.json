@@ -1,34 +1,34 @@
 {
   "$schema": "https://plugins.claude.ai/schema/marketplace.json",
   "name": "kernel",
-  "description": "Automate web browsers in the cloud with Kernel. Create browsers, execute Playwright code, deploy web agents, and control browser instances via CLI. Use when building browser automations or web scraping workflows.",
+  "description": "automate web browsers in the cloud with KERNEL. create browsers, execute Playwright code, deploy web agents, and control browser instances via cli. use when building browser automations or web scraping workflows.",
   "owner": {
-    "name": "Kernel",
+    "name": "KERNEL",
     "url": "www.kernel.sh"
   },
   "plugins": [
     {
       "name": "kernel-cli",
       "author": {
-        "name": "Kernel"
+        "name": "KERNEL"
       },
-      "description": "CLI commands for managing browsers, deploying apps, and controlling browser instances. Use when working with the kernel command-line tool.",
+      "description": "cli commands for managing browsers, deploying apps, and controlling browser instances. use when working with the kernel command-line tool.",
       "source": "./plugins/kernel-cli"
     },
     {
       "name": "kernel-sdks",
       "author": {
-        "name": "Kernel"
+        "name": "KERNEL"
       },
-      "description": "TypeScript and Python SDK skills for building browser automation with Kernel's Typescript and Python SDKs. Use when writing code to control browsers programmatically.",
+      "description": "TypeScript and Python sdk skills for building browser automation with KERNEL's TypeScript and Python sdks. use when writing code to control browsers programmatically.",
       "source": "./plugins/kernel-sdks"
     },
     {
       "name": "generate-video",
       "author": {
-        "name": "Kernel"
+        "name": "KERNEL"
       },
-      "description": "Generate crisp, perfectly smooth MP4 videos from web pages and animated visualizations by driving headless Chromium over CDP with deterministic frame-stepping, then encoding with ffmpeg. Use when making demo videos, explainer clips, or launch animations.",
+      "description": "generate crisp, perfectly smooth mp4 videos from web pages and animated visualizations by driving headless Chromium over cdp with deterministic frame-stepping, then encoding with ffmpeg. use when making demo videos, explainer clips, or launch animations.",
       "source": "./plugins/generate-video"
     }
   ]

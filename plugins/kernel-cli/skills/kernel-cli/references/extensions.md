@@ -1,43 +1,43 @@
 ---
 name: kernel-extensions
-description: Upload, manage, and download Chrome extensions for Kernel browsers
+description: upload, manage, and download Chrome extensions for KERNEL browsers
 ---
 
 # Extensions
 
-Manage Chrome extensions for your Kernel browsers.
+manage Chrome extensions for your KERNEL browsers.
 
-## When to Use
+## when to use
 
-Use this skill when you need to:
-- **Block ads or trackers** during web scraping to improve performance
-- **Auto-login to websites** using authentication extensionsz
-- **Test browser extensions** in automated environments
-- **Add custom functionality** to browsers via extensions
-- **Download extensions** from Chrome Web Store for use with Kernel
-- **Manage extension lifecycle** (upload, list, download, delete)
+use this skill when you need to:
+- **block ads or trackers** during web scraping to improve performance
+- **auto-login to websites** using authentication extensionsz
+- **test browser extensions** in automated environments
+- **add custom functionality** to browsers via extensions
+- **download extensions** from Chrome Web Store for use with KERNEL
+- **manage extension lifecycle** (upload, list, download, delete)
 
-## Prerequisites
+## prerequisites
 
-See [prerequisites.md](../../reference/prerequisites.md) for Kernel CLI setup.
+see [prerequisites.md](../../reference/prerequisites.md) for KERNEL cli setup.
 
-## List Extensions
+## list extensions
 
-View all extensions in your organization:
+view all extensions in your organization:
 
 ```bash
 kernel extensions list
 ```
 
-With JSON output:
+with json output:
 
 ```bash
 kernel extensions list -o json
 ```
 
-## Upload Extension
+## upload extension
 
-Upload an unpacked extension directory:
+upload an unpacked extension directory:
 
 ```bash
 kernel extensions upload ./my-extension
@@ -49,9 +49,9 @@ kernel extensions upload ./my-extension --name my-ext
 kernel extensions upload ./my-extension --name my-ext -o json
 ```
 
-## Download Extension from Chrome Web Store
+## download extension from Chrome Web Store
 
-Download and unpack an extension directly from the Chrome Web Store:
+download and unpack an extension directly from the Chrome Web Store:
 
 ```bash
 kernel extensions download-web-store "https://chromewebstore.google.com/detail/extension-id" --to ./my-extension
@@ -61,17 +61,17 @@ kernel extensions download-web-store "https://chromewebstore.google.com/detail/e
 kernel extensions download-web-store "https://chromewebstore.google.com/detail/extension-id" --to ./my-extension --os mac
 ```
 
-## Download Extension
+## download extension
 
-Download and extract an extension by ID or name to a directory:
+download and extract an extension by id or name to a directory:
 
 ```bash
 kernel extensions download my-ext --to ./downloaded
 ```
 
-**Note:** The extension will be extracted to the specified directory (not saved as a zip file).
+**note:** the extension will be extracted to the specified directory (not saved as a zip file).
 
-## Delete Extension
+## delete extension
 
 ```bash
 # Delete with confirmation prompt
@@ -81,7 +81,7 @@ kernel extensions delete my-ext
 kernel extensions delete my-ext --yes
 ```
 
-## Example: Download and Upload AdGuard Extension
+## example: download and upload AdGuard extension
 ```bash
 # 1. Download AdGuard from Chrome Web Store
 kernel extensions download-web-store \
@@ -98,9 +98,9 @@ kernel browsers create --extension adguard -o json
 kernel extensions list
 ```
 
-## Example: Use Extension with Browser
+## example: use extension with browser
 
-After uploading an extension, you can use it with browsers. See the browser management commands for details on loading extensions into browser sessions.
+after uploading an extension, you can use it with browsers. see the browser management commands for details on loading extensions into browser sessions.
 
 ```bash
 # Create browser with extension
@@ -110,11 +110,11 @@ SESSION=$(kernel browsers create -o json | jq -r '.session_id')
 kernel browsers playwright execute $SESSION 'await page.goto("https://example.com")'
 ```
 
-**MCP Tool:** Use `kernel:execute_playwright_code` for playwright execution.
+**mcp tool:** use `kernel:execute_playwright_code` for Playwright execution.
 
-## Use Cases
+## use cases
 
-- **Ad blocking**: Block ads during web scraping
-- **Authentication**: Use auto-login extensions
-- **Testing**: Test browser extension functionality
-- **Custom automation**: Deploy custom extensions
+- **ad blocking**: block ads during web scraping
+- **authentication**: use auto-login extensions
+- **testing**: test browser extension functionality
+- **custom automation**: deploy custom extensions

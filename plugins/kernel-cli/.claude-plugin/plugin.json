@@ -1,9 +1,9 @@
 {
   "name": "kernel-cli",
   "version": "1.0.0",
-  "description": "CLI commands for managing browsers, deploying apps, and controlling browser instances with Kernel",
+  "description": "cli commands for managing browsers, deploying apps, and controlling browser instances with KERNEL",
   "author": {
-    "name": "Kernel",
+    "name": "KERNEL",
     "url": "www.kernel.sh"
   },
   "repository": "https://github.com/kernel/skills",

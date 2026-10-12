@@ -1,13 +1,13 @@
 ---
 name: kernel-mcp
-description: use KERNEL cloud browsers through the KERNEL mcp server. create stealth browser sessions, automate pages with playwright, the browser repl, or computer-use actions, reuse logged-in profiles and managed auth connections, and record replays. use whenever a task needs a real browser, a site that blocks bots, a logged-in session, or screenshots of a live page.
+description: use KERNEL cloud browsers through the KERNEL mcp server. create stealth browser sessions, automate pages with Playwright, the browser repl, or computer-use actions, reuse logged-in profiles and managed auth connections, and record replays. use whenever a task needs a real browser, a site that blocks bots, a logged-in session, or screenshots of a live page.
 ---
 
 # KERNEL mcp
 
-the KERNEL mcp server gives you hosted chromium sessions. nothing runs on the user's machine. every browser is a cloud vm that you create, drive, and delete through mcp tools.
+the KERNEL mcp server gives you hosted Chromium sessions. nothing runs on the user's machine. every browser is a cloud vm that you create, drive, and delete through mcp tools.
 
-on first use, grok opens a browser window so the user can sign in to KERNEL over oauth. during authorization the user can grant org-wide access or limit it to one KERNEL project.
+on first use, grok opens a browser window so the user can sign in to KERNEL over OAuth. during authorization the user can grant org-wide access or limit it to one KERNEL project.
 
 ## tools
 
@@ -16,10 +16,10 @@ on first use, grok opens a browser window so the user can sign in to KERNEL over
 - **manage_browser_pools**: pre-warmed pools for high-throughput work. create a pool, `acquire` a browser, and `release` it when done.
 
 ### driving a browser
-- **execute_playwright_code**: run playwright typescript against an existing session. `page` is already in scope. return a value to get it back.
-- **browser_repl**: persistent javascript repl inside the browser vm with playwright, patchright, and raw cdp. state survives across calls. start with `repl.help()`.
+- **execute_playwright_code**: run Playwright TypeScript against an existing session. `page` is already in scope. return a value to get it back.
+- **browser_repl**: persistent JavaScript repl inside the browser vm with Playwright, patchright, and raw cdp. state survives across calls. start with `repl.help()`.
 - **computer_action**: mouse, keyboard, scroll, and screenshot actions. batch several actions per call and end with a screenshot.
-- **webmcp**: call structured tools a page exposes through webmcp. check for these before writing selectors for a site action.
+- **webmcp**: call structured tools a page exposes through WebMCP. check for these before writing selectors for a site action.
 - **browser_curl**: send http requests from inside the browser session, using its cookies and network path.
 - **exec_command**: run shell commands inside the browser vm, for example to check dns, files, or logs.
 
@@ -27,7 +27,7 @@ on first use, grok opens a browser window so the user can sign in to KERNEL over
 - **manage_profiles**: saved cookies and local storage. `setup` opens a guided session so the user can log in once. pass `profile_name` to `manage_browsers` `create` to reuse it.
 - **manage_auth_connections**: managed auth for third-party sites. before a task that needs an account, `list` connections for the domain. if none is authenticated, `login` starts a hosted sign-in flow the user completes in their own browser, so credentials and mfa stay out of chat.
 - **manage_proxies**: datacenter, isp, residential, mobile, or custom proxies with country, state, or city targeting.
-- **manage_extensions**: list and manage uploaded chrome extensions.
+- **manage_extensions**: list and manage uploaded Chrome extensions.
 
 ### other
 - **manage_replays**: `start` and `stop` mp4 recordings of a session (paid plans).

@@ -1,31 +1,31 @@
 ---
 name: kernel-proxies
-description: Create and manage datacenter, ISP, residential, mobile, and custom proxies for browsers
+description: create and manage datacenter, isp, residential, mobile, and custom proxies for browsers
 ---
 
 # Proxies
 
-Route browser traffic through proxies for geo-location, privacy, or testing.
+route browser traffic through proxies for geo-location, privacy, or testing.
 
-## When to Use
+## when to use
 
-Kernel proxies enable you to route browser traffic through different types of proxy servers, providing enhanced privacy, flexibility, and bot detection avoidance. Proxies can be created once and reused across multiple browser sessions.
+KERNEL proxies enable you to route browser traffic through different types of proxy servers, providing enhanced privacy, flexibility, and bot detection avoidance. proxies can be created once and reused across multiple browser sessions.
 
-## Prerequisites
+## prerequisites
 
-Load the `kernel-cli` skill for Kernel CLI installation and authentication.
+load the `kernel-cli` skill for KERNEL cli installation and authentication.
 
-## Proxy Types
+## proxy types
 
-1. **Datacenter** - Traffic routed through commercial data centers (fastest speed)
-2. **ISP** - Traffic routed through data centers, using residential IP addresses leased from ISPs (balance between speed and detection)
-3. **Residential** - Traffic routed through real residential IP addresses (least detectable)
-4. **Mobile** - Traffic routed through mobile carrier networks
-5. **Custom** - Your own proxy servers
+1. **datacenter** - traffic routed through commercial data centers (fastest speed)
+2. **isp** - traffic routed through data centers, using residential ip addresses leased from isps (balance between speed and detection)
+3. **residential** - traffic routed through real residential ip addresses (least detectable)
+4. **mobile** - traffic routed through mobile carrier networks
+5. **custom** - your own proxy servers
 
-## Create Proxies
+## create proxies
 
-### Datacenter Proxy
+### datacenter proxy
 
 ```bash
 # Create datacenter proxy
@@ -35,18 +35,18 @@ kernel proxies create --type datacenter --country US --name "US DC"
 kernel proxies create --type datacenter --country US --protocol https
 ```
 
-### ISP Proxy
+### isp proxy
 
-Balance of speed and legitimacy using ISP-assigned IPs.
+balance of speed and legitimacy using isp-assigned ips.
 
 ```bash
 # Create ISP proxy
 kernel proxies create --type isp --country US --name "US ISP"
 ```
 
-### Residential Proxy
+### residential proxy
 
-Real residential IP addresses with advanced targeting options.
+real residential ip addresses with advanced targeting options.
 
 ```bash
 # Basic residential proxy
@@ -65,11 +65,11 @@ kernel proxies create --type residential --country US --asn AS15169
 kernel proxies create --type residential --country US --os windows
 ```
 
-**Available OS values**: `windows`, `macos`, `android`
+**available os values**: `windows`, `macos`, `android`
 
-### Mobile Proxy
+### mobile proxy
 
-Useful for bot detection avoidance since they use real mobile network IPs
+useful for bot detection avoidance since they use real mobile network ips
 
 ```bash
 # Basic mobile proxy
@@ -82,9 +82,9 @@ kernel proxies create --type mobile --country US --carrier "T-Mobile"
 kernel proxies create --type mobile --country US --city sanfrancisco
 ```
 
-### Custom Proxy
+### custom proxy
 
-Use your own proxy servers.
+use your own proxy servers.
 
 ```bash
 # Basic custom proxy (host and port required)
@@ -110,50 +110,50 @@ kernel proxies create \
   --protocol http
 ```
 
-## Manage Proxies
+## manage proxies
 
-### List Proxies
+### list proxies
 
 ```bash
 kernel proxies list
 ```
 
-### Get Proxy Details
+### get proxy details
 
 ```bash
 kernel proxies get proxy_abc123xyz -o json
 ```
 
-### Rename a Proxy
+### rename a proxy
 
-Only the name is mutable. Recreate the proxy to change its type, location, protocol, or credentials.
+only the name is mutable. recreate the proxy to change its type, location, protocol, or credentials.
 
 ```bash
 kernel proxies update proxy_abc123xyz --name "Renamed Proxy" -o json
 ```
 
-### Check Proxy Health
+### check proxy health
 
-A check verifies reachability and updates the stored proxy status. Omit `--url` for the default health target, or provide a public HTTP(S) URL.
+a check verifies reachability and updates the stored proxy status. omit `--url` for the default health target, or provide a public http(s) url.
 
 ```bash
 kernel proxies check proxy_abc123xyz -o json
 kernel proxies check proxy_abc123xyz --url https://example.com -o json
 ```
 
-### Delete Proxy
+### delete proxy
 
 ```bash
 # Delete with confirmation prompt
 kernel proxies delete proxy_abc123xyz
 ```
 
-> **Info**: Deleting a proxy immediately reconfigures associated browsers to route directly to the internet.
+> **info**: deleting a proxy immediately reconfigures associated browsers to route directly to the internet.
 
-## Important Notes
+## important notes
 
-- **Country requirement**: `--city` requires `--country` to be specified
-- **Country format**: Use ISO 3166 or `EU`
-- **Custom proxies**: Both `--host` and `--port` are required
-- **Protocol**: Defaults to `https` if not specified
-- **Targeting specificity**: More specific targeting = fewer available IPs (may result in slower connections)
+- **country requirement**: `--city` requires `--country` to be specified
+- **country format**: use iso 3166 or `EU`
+- **custom proxies**: both `--host` and `--port` are required
+- **protocol**: defaults to `https` if not specified
+- **targeting specificity**: more specific targeting = fewer available ips (may result in slower connections)

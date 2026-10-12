@@ -1,6 +1,6 @@
 # KERNEL plugin for grok build
 
-cloud browsers for grok build, served over KERNEL's hosted mcp server. grok launches stealth chromium sessions in <30ms, drives them with playwright, a persistent browser repl, or computer-use actions, reuses logged-in profiles and managed auth connections, and records replays.
+cloud browsers for grok build, served over KERNEL's hosted mcp server. grok launches stealth Chromium sessions in <30ms, drives them with Playwright, a persistent browser repl, or computer-use actions, reuses logged-in profiles and managed auth connections, and records replays.
 
 ## install
 
@@ -19,7 +19,7 @@ grok plugin install kernel --trust
 
 ## auth and network access
 
-the plugin carries no api key. on first connection, grok opens a browser window so you can sign in to KERNEL over oauth 2.1. during authorization you can grant org-wide access or limit it to one KERNEL project.
+the plugin carries no api key. on first connection, grok opens a browser window so you can sign in to KERNEL over OAuth 2.1. during authorization you can grant org-wide access or limit it to one KERNEL project.
 
 the plugin only talks to `https://mcp.onkernel.com`. it runs no local code, hooks, or install scripts. browsers run in our cloud and bill to the KERNEL account you sign in with.
 

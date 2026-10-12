@@ -1,25 +1,25 @@
 ---
 name: kernel-cli
-description: Use the Kernel CLI to manage cloud browsers, apps, profiles, proxies, managed auth, API keys, projects, and organization limits. Use when installing or authenticating the CLI, looking up current command syntax, or choosing the right command group.
+description: use the KERNEL cli to manage cloud browsers, apps, profiles, proxies, managed auth, api keys, projects, and organization limits. use when installing or authenticating the cli, looking up current command syntax, or choosing the right command group.
 ---
 
 # Kernel CLI
 
-The Kernel CLI provides command-line access to Kernel's cloud browser platform for browser automation, serverless app deployment, and infrastructure management.
+the KERNEL cli provides command-line access to KERNEL's cloud browser platform for browser automation, serverless app deployment, and infrastructure management.
 
-## Installation
+## installation
 
 - Homebrew: `brew install kernel/tap/kernel`
 - npm: `npm install -g @onkernel/cli`
 
-Verify with `kernel --version`. Use `kernel <command> --help` as the source of truth for the installed version.
+verify with `kernel --version`. use `kernel <command> --help` as the source of truth for the installed version.
 
-## Authentication
+## authentication
 
-- **Preferred:** Set `KERNEL_API_KEY` environment variable
-- **Fallback:** Run `kernel login` for interactive OAuth
+- **preferred:** set `KERNEL_API_KEY` environment variable
+- **fallback:** run `kernel login` for interactive OAuth
 
-## Quick Start
+## quick start
 
 ```bash
 # Authenticate
@@ -41,14 +41,14 @@ kernel browsers computer screenshot <session_id> --to screenshot.png
 kernel browsers delete <session_id>
 ```
 
-## Safe Operation
+## safe operation
 
-- Prefer `-o json` plus `jq` for scripts; deploy and invoke emit JSONL rather than one JSON object.
-- Use `--project <id-or-name>` or `KERNEL_PROJECT` when an API key can access multiple projects.
-- Keep confirmation prompts for destructive operations unless non-interactive execution is intentional.
-- Delete created browser sessions and pools after testing. Never echo, log, commit, or share API keys, credentials, or proxy passwords.
+- prefer `-o json` plus `jq` for scripts; deploy and invoke emit jsonl rather than one json object.
+- use `--project <id-or-name>` or `KERNEL_PROJECT` when an api key can access multiple projects.
+- keep confirmation prompts for destructive operations unless non-interactive execution is intentional.
+- delete created browser sessions and pools after testing. never echo, log, commit, or share api keys, credentials, or proxy passwords.
 
-## Project, API Key, and Organization Administration
+## project, api key, and organization administration
 
 ```bash
 # Rename, archive, or reactivate a project (provide at least one update)
@@ -64,20 +64,20 @@ kernel org limits get -o json
 kernel org limits set --default-project-max-concurrent-sessions <n> -o json
 ```
 
-For `org limits set`, `0` removes the default cap; the value cannot exceed the organization concurrency limit.
+for `org limits set`, `0` removes the default cap; the value cannot exceed the organization concurrency limit.
 
-Rotate an API key interactively with `kernel api-keys rotate <id>`. Use `--days-to-expire <1-3650>` to set the replacement key lifetime and `--expire-in-days <n>` to set the old key's grace period (default 7 days; `0` revokes it immediately). The output contains the replacement plaintext key once: keep it out of logs, migrate callers during the grace period, and then verify the old key no longer works.
+rotate an api key interactively with `kernel api-keys rotate <id>`. use `--days-to-expire <1-3650>` to set the replacement key lifetime and `--expire-in-days <n>` to set the old key's grace period (default 7 days; `0` revokes it immediately). the output contains the replacement plaintext key once: keep it out of logs, migrate callers during the grace period, and then verify the old key no longer works.
 
-## References
+## references
 
-- [Browser Management](./references/browser-management.md) - Create, list, view, and delete browser sessions
-- [App Deployment](./references/app-deployment.md) - Deploy TypeScript/Python apps and invoke actions
-- [Computer Controls](./references/computer-controls.md) - OS-level mouse, keyboard, and screenshot capabilities
-- [Process Execution](./references/process-execution.md) - Execute and manage processes in browser VMs
-- [Profiles](./references/profiles.md) - Manage persistent browser profiles
-- [Managed Auth](./references/managed-auth.md) - Auth connections, login sessions, credential providers, auto re-authentication
-- [Proxies](./references/proxies.md) - Create and manage datacenter, ISP, residential, and mobile proxies
-- [Browser Pools](./references/browser-pools.md) - Manage pre-warmed browser pools
-- [Extensions](./references/extensions.md) - Upload and manage Chrome extensions
-- [Replays](./references/replays.md) - Record and download video replays
-- [Filesystem Operations](./references/filesystem-ops.md) - Read, write, upload, and download files
+- [browser management](./references/browser-management.md) - create, list, view, and delete browser sessions
+- [app deployment](./references/app-deployment.md) - deploy TypeScript/Python apps and invoke actions
+- [computer controls](./references/computer-controls.md) - os-level mouse, keyboard, and screenshot capabilities
+- [process execution](./references/process-execution.md) - execute and manage processes in browser vms
+- [profiles](./references/profiles.md) - manage persistent browser profiles
+- [managed auth](./references/managed-auth.md) - auth connections, login sessions, credential providers, auto re-authentication
+- [proxies](./references/proxies.md) - create and manage datacenter, isp, residential, and mobile proxies
+- [browser pools](./references/browser-pools.md) - manage pre-warmed browser pools
+- [extensions](./references/extensions.md) - upload and manage Chrome extensions
+- [replays](./references/replays.md) - record and download video replays
+- [filesystem operations](./references/filesystem-ops.md) - read, write, upload, and download files

@@ -1,47 +1,47 @@
 ---
 name: kernel-agent-browser
-description: Best practices for using agent-browser with Kernel cloud browsers. Use when automating websites with agent-browser -p kernel, tuning stealth or proxy behavior, persisting profiles, handling iframes, discovering Kernel session IDs or live views, or cleaning up cloud sessions.
+description: best practices for using agent-browser with KERNEL cloud browsers. use when automating websites with agent-browser -p kernel, tuning stealth or proxy behavior, persisting profiles, handling iframes, discovering KERNEL session ids or live views, or cleaning up cloud sessions.
 ---
 
 # Agent-Browser with Kernel Cloud Browsers
 
-This skill documents best practices for using agent-browser's built-in Kernel provider (`-p kernel`) for cloud browser automation.
+this skill documents best practices for using agent-browser's built-in KERNEL provider (`-p kernel`) for cloud browser automation.
 
-## When to Use This Skill
+## when to use this skill
 
-Use this skill when you need to:
+use this skill when you need to:
 
-- **Automate websites** using `agent-browser -p kernel` commands
-- **Handle bot detection** on sites with aggressive anti-bot measures
-- **Persist login sessions** across automation runs using profiles
-- **Work with iframes** including cross-origin payment forms
-- **Get live view URLs** for debugging or manual intervention
-- **Find the underlying Kernel session ID** for advanced Playwright scripting
-- **Create site-specific automation skills** for new websites
+- **automate websites** using `agent-browser -p kernel` commands
+- **handle bot detection** on sites with aggressive anti-bot measures
+- **persist login sessions** across automation runs using profiles
+- **work with iframes** including cross-origin payment forms
+- **get live view urls** for debugging or manual intervention
+- **find the underlying KERNEL session id** for advanced Playwright scripting
+- **create site-specific automation skills** for new websites
 
-## References
+## references
 
-- [Creating Site-Specific Skills](references/create-site-specific-skill.md) - Guide for building automation skills for specific websites
+- [creating site-specific skills](references/create-site-specific-skill.md) - guide for building automation skills for specific websites
 
-## Prerequisites
+## prerequisites
 
-Load the `kernel-cli` skill for Kernel CLI installation and authentication.
+load the `kernel-cli` skill for KERNEL cli installation and authentication.
 
-## Environment Variables
+## environment variables
 
-Set these before your first `agent-browser -p kernel` call. The CLI holds state between invocations.
+set these before your first `agent-browser -p kernel` call. the cli holds state between invocations.
 
-| Variable | Description | Default |
+| variable | description | default |
 |----------|-------------|---------|
-| `KERNEL_API_KEY` | **Required.** Your Kernel API key for authentication | (none) |
-| `KERNEL_HEADLESS` | Run browser in headless mode (`true`/`false`) | `true` |
-| `KERNEL_STEALTH` | Launch a stealth browser (`true`/`false`) | `false` |
-| `KERNEL_TIMEOUT_SECONDS` | Session timeout in seconds | `300` |
-| `KERNEL_PROFILE_NAME` | Currently unusable with `-p kernel` in agent-browser 0.33.0; use the CDP workaround below | (none) |
+| `KERNEL_API_KEY` | **required.** your KERNEL api key for authentication | (none) |
+| `KERNEL_HEADLESS` | run browser in headless mode (`true`/`false`) | `true` |
+| `KERNEL_STEALTH` | launch a stealth browser (`true`/`false`) | `false` |
+| `KERNEL_TIMEOUT_SECONDS` | session timeout in seconds | `300` |
+| `KERNEL_PROFILE_NAME` | currently unusable with `-p kernel` in agent-browser 0.33.0; use the cdp workaround below | (none) |
 
-### Recommended Configuration
+### recommended configuration
 
-Set options explicitly; agent-browser reads them when it creates the provider session.
+set options explicitly; agent-browser reads them when it creates the provider session.
 
 ```bash
 export KERNEL_API_KEY="your-api-key"
@@ -51,11 +51,11 @@ export KERNEL_STEALTH=true            # Opt in for bot-sensitive sites
 # Do not set KERNEL_PROFILE_NAME with -p kernel; use the workaround below.
 ```
 
-### Profile Persistence
+### profile persistence
 
-> **Warning:** `KERNEL_PROFILE_NAME` doesn't work with `-p kernel` in agent-browser 0.33.0. It sends `profile` as a string instead of the object required by Kernel, so session creation fails with HTTP 400. It also doesn't set `save_changes`. Profiles must be pre-created.
+> **warning:** `KERNEL_PROFILE_NAME` doesn't work with `-p kernel` in agent-browser 0.33.0. it sends `profile` as a string instead of the object required by KERNEL, so session creation fails with http 400. it also doesn't set `save_changes`. profiles must be pre-created.
 
-Until this is fixed upstream, create the browser with the Kernel CLI and attach agent-browser over CDP. Don't combine `-p kernel` with `--cdp`.
+until this is fixed upstream, create the browser with the KERNEL cli and attach agent-browser over cdp. don't combine `-p kernel` with `--cdp`.
 
 ```bash
 PROFILE_NAME=mysite  # Create once with: kernel profiles create --name mysite
@@ -73,9 +73,9 @@ kernel browsers delete "$SESSION_ID"
 trap - EXIT
 ```
 
-Don't print or share `CDP_URL`; it grants browser access. Deleting the CLI-created session finalizes `--save-changes`, so later sessions can reuse the authenticated profile.
+don't print or share `CDP_URL`; it grants browser access. deleting the cli-created session finalizes `--save-changes`, so later sessions can reuse the authenticated profile.
 
-## Basic Usage
+## basic usage
 
 ```bash
 agent-browser -p kernel open <url>        # Navigate to page
@@ -85,11 +85,11 @@ agent-browser -p kernel fill @e2 "text"   # Fill input by ref
 agent-browser -p kernel close             # Close the provider session
 ```
 
-For provider-managed sessions, use `-p kernel` with each command. For the profile/CDP workaround, reuse the same `--session` name and don't add `-p kernel`.
+for provider-managed sessions, use `-p kernel` with each command. for the profile/cdp workaround, reuse the same `--session` name and don't add `-p kernel`.
 
-## Semantic Selectors (Recommended)
+## semantic selectors (recommended)
 
-Instead of ephemeral `@e` refs that change on every page load, use **semantic selectors** via the `find` command for more stable, readable automation:
+instead of ephemeral `@e` refs that change on every page load, use **semantic selectors** via the `find` command for more stable, readable automation:
 
 ```bash
 # By ARIA role + accessible name (most stable)
@@ -115,22 +115,22 @@ agent-browser -p kernel find first "li.item" click
 agent-browser -p kernel find nth 2 ".card" hover
 ```
 
-### When to Use Which Selector
+### when to use which selector
 
-| Selector Type | Best For | Stability |
+| selector type | best for | stability |
 |---------------|----------|-----------|
-| `find role --name` | Buttons, links, navigation | ⭐⭐⭐ Most stable |
-| `find label` | Form inputs with labels | ⭐⭐⭐ Most stable |
-| `find text` | Clickable text elements | ⭐⭐ Stable |
-| `find testid` | Sites with test attributes | ⭐⭐⭐ Most stable |
-| `find placeholder` | Search boxes, inputs | ⭐⭐ Stable |
-| `@e` refs | Unknown sites, quick iteration | ⭐ Ephemeral |
+| `find role --name` | buttons, links, navigation | ⭐⭐⭐ most stable |
+| `find label` | form inputs with labels | ⭐⭐⭐ most stable |
+| `find text` | clickable text elements | ⭐⭐ stable |
+| `find testid` | sites with test attributes | ⭐⭐⭐ most stable |
+| `find placeholder` | search boxes, inputs | ⭐⭐ stable |
+| `@e` refs | unknown sites, quick iteration | ⭐ ephemeral |
 
-**Recommendation**: Use `find` for production automation. Use `@e` refs for exploration and quick prototyping, then convert to semantic selectors.
+**recommendation**: use `find` for production automation. use `@e` refs for exploration and quick prototyping, then convert to semantic selectors.
 
-## Find the Kernel Session and Live View
+## find the KERNEL session and live view
 
-Match agent-browser's CDP endpoint to the active Kernel session. Compare the URL without its query string: the CLI and agent-browser can hold different short-lived `jwt` query values for the same session. The endpoint's scheme, host, and path remain stable. This is more reliable than guessing from creation time when several sessions share a profile. This workflow requires `jq`.
+match agent-browser's cdp endpoint to the active KERNEL session. compare the url without its query string: the cli and agent-browser can hold different short-lived `jwt` query values for the same session. the endpoint's scheme, host, and path remain stable. this is more reliable than guessing from creation time when several sessions share a profile. this workflow requires `jq`.
 
 ```bash
 CDP_URL="$(agent-browser -p kernel get cdp-url)"
@@ -146,15 +146,15 @@ test -n "$SESSION_ID"
 kernel browsers view "$SESSION_ID"
 ```
 
-Do not print or share the CDP URL; it grants browser access. Share a live view URL only with the intended user. A headless session has no live view. If you use `--session <name>`, include it on every agent-browser command, including `get cdp-url`.
+do not print or share the cdp url; it grants browser access. share a live view url only with the intended user. a headless session has no live view. if you use `--session <name>`, include it on every agent-browser command, including `get cdp-url`.
 
-## Handling Bot Detection
+## handling bot detection
 
-### Stealth and Proxy Routing
+### stealth and proxy routing
 
-Stealth is opt-in in current agent-browser releases. Set `KERNEL_STEALTH=true` before the first command for a session; changing it later does not reconfigure the running browser.
+stealth is opt-in in current agent-browser releases. set `KERNEL_STEALTH=true` before the first command for a session; changing it later does not reconfigure the running browser.
 
-A stealth browser can use Kernel's default stealth proxy. If that proxy causes a site-specific network or reputation failure and direct metro egress is acceptable, change the running session without disabling stealth:
+a stealth browser can use KERNEL's default stealth proxy. if that proxy causes a site-specific network or reputation failure and direct metro egress is acceptable, change the running session without disabling stealth:
 
 ```bash
 kernel browsers update "$SESSION_ID" --disable-default-proxy
@@ -164,20 +164,20 @@ kernel browsers update "$SESSION_ID" --disable-default-proxy
 kernel browsers update "$SESSION_ID" --disable-default-proxy=false
 ```
 
-Direct egress changes the public IP and can reduce anti-bot protection. Prefer the default proxy unless testing shows it is the problem. For a configured Kernel proxy, use `--proxy-id <proxy-id>`; remove it with `--clear-proxy`.
+direct egress changes the public ip and can reduce anti-bot protection. prefer the default proxy unless testing shows it is the problem. for a configured KERNEL proxy, use `--proxy-id <proxy-id>`; remove it with `--clear-proxy`.
 
-### Manual Login Fallback
+### manual login fallback
 
-If automated login fails:
+if automated login fails:
 
-1. Resolve `SESSION_ID` using the CDP-matching workflow above.
-2. Run `kernel browsers view "$SESSION_ID"` and give the URL only to the intended user.
-3. Ask the user to complete login, then continue in the same agent-browser session.
-4. To persist the login, use the CLI-created profile/CDP workflow above. Close agent-browser, then delete the Kernel session so `--save-changes` finalizes.
+1. resolve `SESSION_ID` using the cdp-matching workflow above.
+2. run `kernel browsers view "$SESSION_ID"` and give the url only to the intended user.
+3. ask the user to complete login, then continue in the same agent-browser session.
+4. to persist the login, use the cli-created profile/cdp workflow above. close agent-browser, then delete the KERNEL session so `--save-changes` finalizes.
 
-### JavaScript Fallback for Tricky Elements
+### JavaScript fallback for tricky elements
 
-Some elements (especially on bot-protected sites) don't respond to standard commands:
+some elements (especially on bot-protected sites) don't respond to standard commands:
 
 ```bash
 # Click by CSS selector
@@ -195,9 +195,9 @@ agent-browser -p kernel eval "
 agent-browser -p kernel eval "document.querySelector('[data-testid=\"submit\"]').click()"
 ```
 
-### Anti-Bot Form Fields
+### anti-bot form fields
 
-Some payment processors (e.g., Point and Pay) use decoy form fields. Only fill fields matching specific patterns:
+some payment processors (e.g., Point and Pay) use decoy form fields. only fill fields matching specific patterns:
 
 ```bash
 agent-browser -p kernel eval "
@@ -207,11 +207,11 @@ agent-browser -p kernel eval "
 "
 ```
 
-## Handling Iframes
+## handling iframes
 
-### Same-Origin Iframes
+### same-origin iframes
 
-Use the frame command to switch context:
+use the frame command to switch context:
 
 ```bash
 agent-browser -p kernel frame "#iframe-id"   # Switch to iframe
@@ -220,9 +220,9 @@ agent-browser -p kernel click @e1            # Interact within iframe
 agent-browser -p kernel frame main           # Return to main frame
 ```
 
-### Cross-Origin Iframes
+### cross-origin iframes
 
-Try `agent-browser frame` first; current releases can switch into iframe context, including many cross-origin frames. If an out-of-process or payment iframe still fails, resolve `SESSION_ID` and use Kernel's Playwright executor:
+try `agent-browser frame` first; current releases can switch into iframe context, including many cross-origin frames. if an out-of-process or payment iframe still fails, resolve `SESSION_ID` and use KERNEL's Playwright executor:
 
 ```bash
 kernel browsers playwright execute "$SESSION_ID" '
@@ -232,13 +232,13 @@ kernel browsers playwright execute "$SESSION_ID" '
 '
 ```
 
-Return to the main document with `agent-browser -p kernel frame main` after frame interactions.
+return to the main document with `agent-browser -p kernel frame main` after frame interactions.
 
-## Waiting Strategies
+## waiting strategies
 
-**Smart waits are critical for fast, reliable automation.** Using condition-based waits instead of fixed timeouts can reduce execution time by 50%+ while improving reliability.
+**smart waits are critical for fast, reliable automation.** using condition-based waits instead of fixed timeouts can reduce execution time by 50%+ while improving reliability.
 
-### Smart Waits (Recommended)
+### smart waits (recommended)
 
 ```bash
 # Wait for page load states
@@ -262,21 +262,21 @@ agent-browser -p kernel wait "#login-form"
 agent-browser -p kernel wait ".results-loaded"
 ```
 
-### Fixed Waits (Last Resort)
+### fixed waits (last resort)
 
 ```bash
 # Only when no condition is available
 agent-browser -p kernel wait 2000
 ```
 
-## Element Refs Best Practices
+## element refs best practices
 
-Element refs (`@e1`, `@e2`, etc.) are ephemeral and change:
-- After page navigation
-- After significant DOM updates
-- Between browser sessions
+element refs (`@e1`, `@e2`, etc.) are ephemeral and change:
+- after page navigation
+- after significant dom updates
+- between browser sessions
 
-**Always take a fresh snapshot before interacting:**
+**always take a fresh snapshot before interacting:**
 
 ```bash
 agent-browser -p kernel snapshot -i
@@ -284,7 +284,7 @@ agent-browser -p kernel snapshot -i
 agent-browser -p kernel click @e5
 ```
 
-### Filtering Snapshots
+### filtering snapshots
 
 ```bash
 # Filter for specific elements
@@ -294,11 +294,11 @@ agent-browser -p kernel snapshot -i | grep -i "button\|submit"
 agent-browser -p kernel snapshot -s "#main-content" -i
 ```
 
-## Login Patterns
+## login patterns
 
-### Single-Page Form (Optimized)
+### single-page form (optimized)
 
-Username and password on the same page:
+username and password on the same page:
 
 ```bash
 agent-browser -p kernel open https://example.com/login
@@ -313,9 +313,9 @@ agent-browser -p kernel find role button click --name "Sign In"
 agent-browser -p kernel wait --url "**/dashboard"
 ```
 
-### Two-Step Form (Optimized)
+### two-step form (optimized)
 
-Username first, then password on a second screen:
+username first, then password on a second screen:
 
 ```bash
 agent-browser -p kernel open https://example.com/login
@@ -336,9 +336,9 @@ agent-browser -p kernel press Enter
 agent-browser -p kernel wait --url "**/home"
 ```
 
-### Modal Login
+### modal login
 
-Login form appears in a modal overlay:
+login form appears in a modal overlay:
 
 ```bash
 # Click login link to open modal
@@ -352,9 +352,9 @@ agent-browser -p kernel find role button click --name "Sign In"
 agent-browser -p kernel wait --url "**/dashboard"
 ```
 
-### Fallback: JavaScript for Tricky Modals
+### fallback: JavaScript for tricky modals
 
-Some modals don't expose accessible labels:
+some modals don't expose accessible labels:
 
 ```bash
 agent-browser -p kernel eval "document.querySelector('.login-link').click()"
@@ -370,9 +370,9 @@ agent-browser -p kernel eval "
 agent-browser -p kernel wait --url "**/dashboard"
 ```
 
-## Handling New Tabs
+## handling new tabs
 
-Some links open in new tabs:
+some links open in new tabs:
 
 ```bash
 # Click link that opens new tab
@@ -382,7 +382,7 @@ agent-browser -p kernel wait 2000
 agent-browser -p kernel snapshot -i     # Interact with new tab
 ```
 
-## Screenshots and Debugging
+## screenshots and debugging
 
 ```bash
 # Take screenshot
@@ -401,28 +401,28 @@ agent-browser -p kernel errors
 agent-browser -p kernel get url
 ```
 
-## Session Management
+## session management
 
-### Cleanup
+### cleanup
 
-Close the same named agent-browser session you opened. This saves profile changes and deletes its Kernel browser:
+close the same named agent-browser session you opened. this saves profile changes and deletes its KERNEL browser:
 
 ```bash
 agent-browser -p kernel close
 # Named session: agent-browser -p kernel --session site1 close
 ```
 
-If agent-browser is unavailable or close fails, delete the orphan explicitly:
+if agent-browser is unavailable or close fails, delete the orphan explicitly:
 
 ```bash
 kernel browsers delete "$SESSION_ID"
 ```
 
-Do not use `close --all` when unrelated agent-browser sessions may be running.
+do not use `close --all` when unrelated agent-browser sessions may be running.
 
-### Multiple Sessions
+### multiple sessions
 
-Run parallel browser sessions with named sessions:
+run parallel browser sessions with named sessions:
 
 ```bash
 agent-browser -p kernel --session site1 open https://site1.com
@@ -430,15 +430,15 @@ agent-browser -p kernel --session site2 open https://site2.com
 agent-browser -p kernel session list
 ```
 
-## Common Gotchas
+## common gotchas
 
-1. **Refs change after navigation**: Re-snapshot after links, submissions, or major DOM updates.
-2. **Wait for outcomes**: Use URL, text, load-state, or JavaScript conditions after asynchronous actions.
-3. **Provider settings are launch-time settings**: Close the current session before changing `KERNEL_HEADLESS`, `KERNEL_STEALTH`, or timeout.
-4. **Profile persistence needs the CDP workaround**: `KERNEL_PROFILE_NAME` is currently broken. Close agent-browser, then delete the CLI-created Kernel session to finalize `--save-changes`.
-5. **Stealth is not sufficient for every site**: Compare proxy routing, use manual login, or fall back to direct Playwright for difficult frames.
+1. **refs change after navigation**: re-snapshot after links, submissions, or major dom updates.
+2. **wait for outcomes**: use url, text, load-state, or JavaScript conditions after asynchronous actions.
+3. **provider settings are launch-time settings**: close the current session before changing `KERNEL_HEADLESS`, `KERNEL_STEALTH`, or timeout.
+4. **profile persistence needs the cdp workaround**: `KERNEL_PROFILE_NAME` is currently broken. close agent-browser, then delete the cli-created KERNEL session to finalize `--save-changes`.
+5. **stealth is not sufficient for every site**: compare proxy routing, use manual login, or fall back to direct Playwright for difficult frames.
 
-## Quick Reference
+## quick reference
 
 ```bash
 # Start a standard provider session (for persistence, use the CDP workflow above)
@@ -471,7 +471,7 @@ kernel browsers view "$SESSION_ID"
 agent-browser -p kernel close
 ```
 
-### Selector Cheat Sheet
+### selector cheat sheet
 
 ```bash
 # Buttons and links

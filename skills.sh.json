@@ -3,8 +3,8 @@
   "notGrouped": "bottom",
   "groupings": [
     {
-      "title": "Kernel CLI",
-      "description": "Manage, debug, and automate Kernel cloud browsers from the CLI.",
+      "title": "KERNEL CLI",
+      "description": "manage, debug, and automate KERNEL cloud browsers from the cli.",
       "skills": [
         "kernel-cli",
         "kernel-agent-browser",
@@ -17,8 +17,8 @@
       ]
     },
     {
-      "title": "Kernel SDKs",
-      "description": "Build browser automations with the TypeScript and Python SDKs.",
+      "title": "KERNEL SDKs",
+      "description": "build browser automations with the TypeScript and Python sdks.",
       "skills": [
         "kernel-typescript-sdk",
         "kernel-python-sdk"
@@ -26,7 +26,7 @@
     },
     {
       "title": "Video",
-      "description": "Render smooth MP4 videos from web pages.",
+      "description": "render smooth mp4 videos from web pages.",
       "skills": [
         "generate-video"
       ]

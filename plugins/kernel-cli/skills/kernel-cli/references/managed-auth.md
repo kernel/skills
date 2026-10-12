@@ -1,33 +1,33 @@
 # Managed Auth CLI Commands
 
-All commands live under `kernel auth connections`.
+all commands live under `kernel auth connections`.
 
 ## create
 
-Create a managed auth connection for a profile + domain.
+create a managed auth connection for a profile + domain.
 
 ```bash
 kernel auth connections create --domain <domain> --profile-name <name> [flags]
 ```
 
-| Flag | Description |
+| flag | description |
 |------|-------------|
 | `--domain` | Target domain (required) |
-| `--profile-name` | Profile to manage (required) |
-| `--credential-name` | Kernel credential name |
-| `--credential-provider` | External provider name (e.g., 1Password) |
-| `--credential-path` | Provider-specific path (e.g., `VaultName/ItemName`) |
-| `--credential-auto` | Auto-lookup credential by domain from provider |
-| `--proxy-id` | Proxy ID |
-| `--proxy-name` | Proxy name |
-| `--login-url` | Custom login page URL |
-| `--allowed-domain` | Additional allowed domains (repeatable) |
-| `--health-check-interval` | Seconds between health checks (300-86400) |
-| `--no-save-credentials` | Don't save credentials after login |
-| `--telemetry=<value>` | Default telemetry (`all`, `off`, or category list) for this connection's browser sessions |
-| `-o json` | JSON output |
+| `--profile-name` | profile to manage (required) |
+| `--credential-name` | KERNEL credential name |
+| `--credential-provider` | external provider name (e.g., 1Password) |
+| `--credential-path` | provider-specific path (e.g., `VaultName/ItemName`) |
+| `--credential-auto` | auto-lookup credential by domain from provider |
+| `--proxy-id` | proxy id |
+| `--proxy-name` | proxy name |
+| `--login-url` | custom login page url |
+| `--allowed-domain` | additional allowed domains (repeatable) |
+| `--health-check-interval` | seconds between health checks (300-86400) |
+| `--no-save-credentials` | don't save credentials after login |
+| `--telemetry=<value>` | default telemetry (`all`, `off`, or category list) for this connection's browser sessions |
+| `-o json` | json output |
 
-### Credential source examples
+### credential source examples
 
 ```bash
 # Kernel credential
@@ -43,18 +43,18 @@ kernel auth connections create --domain github.com --profile-name gh \
   --credential-provider my-1p --credential-auto
 ```
 
-Telemetry is opt-in. On create, `--telemetry=all` enables the default set, `--telemetry=off` disables capture, and `--telemetry=console,network` captures exactly those categories.
+telemetry is opt-in. on create, `--telemetry=all` enables the default set, `--telemetry=off` disables capture, and `--telemetry=console,network` captures exactly those categories.
 
 ## update
 
-Update settings used by future login sessions:
+update settings used by future login sessions:
 
 ```bash
 kernel auth connections update <id> --telemetry=console,network -o json
 kernel auth connections update <id> --telemetry=off -o json
 ```
 
-Named categories merge into the current selection. `all` and `off` reset the complete telemetry config. Other update flags include login URL, health-check interval, credential source, proxy, allowed domains, and credential-saving behavior; run `kernel auth connections update --help` before changing them.
+named categories merge into the current selection. `all` and `off` reset the complete telemetry config. other update flags include login url, health-check interval, credential source, proxy, allowed domains, and credential-saving behavior; run `kernel auth connections update --help` before changing them.
 
 ## get
 
@@ -62,7 +62,7 @@ Named categories merge into the current selection. `all` and `off` reset the com
 kernel auth connections get <id> [-o json]
 ```
 
-Shows: ID, domain, profile, status, flow status/step, credential, health check interval, hosted URL, live view URL, error message, last auth time, allowed domains, fields, and choices.
+shows: id, domain, profile, status, flow status/step, credential, health check interval, hosted url, live view url, error message, last auth time, allowed domains, fields, and choices.
 
 ## list
 
@@ -78,17 +78,17 @@ kernel auth connections delete <id> [-y]
 
 ## login
 
-Start a login flow. Returns hosted URL, flow type, and expiry. A login telemetry override merges onto the connection default for this flow only.
+start a login flow. returns hosted url, flow type, and expiry. a login telemetry override merges onto the connection default for this flow only.
 
 ```bash
 kernel auth connections login <id> --telemetry=network,page -o json
 ```
 
-Use `--proxy-id` or `--proxy-name` to override the proxy for this login.
+use `--proxy-id` or `--proxy-name` to override the proxy for this login.
 
 ## submit
 
-Submit field values or select a choice from the active flow. Prefer canonical IDs returned in the connection's `fields` and `choices` lists; names accepted by legacy `--field` can be ambiguous.
+submit field values or select a choice from the active flow. prefer canonical ids returned in the connection's `fields` and `choices` lists; names accepted by legacy `--field` can be ambiguous.
 
 ```bash
 # Canonical field IDs; repeat for each requested field
@@ -100,11 +100,11 @@ kernel auth connections submit <id> \
 kernel auth connections submit <id> --choice-id <choice-id>
 ```
 
-Legacy selectors remain available (`--field`, `--mfa-option-id`, `--sign-in-option-id`, `--sso-button-selector`, and `--sso-provider`). Do not put real credential values in logs or committed shell scripts.
+legacy selectors remain available (`--field`, `--mfa-option-id`, `--sign-in-option-id`, `--sso-button-selector`, and `--sso-provider`). do not put real credential values in logs or committed shell scripts.
 
 ## timeline
 
-Inspect login, reauth, and health-check history, newest first:
+inspect login, reauth, and health-check history, newest first:
 
 ```bash
 kernel auth connections timeline <id> --page 1 --per-page 20 -o json
@@ -115,17 +115,17 @@ kernel auth connections timeline <id> --type reauth -o json
 
 ## follow
 
-Stream login flow events via SSE in real time.
+stream login flow events via sse in real time.
 
 ```bash
 kernel auth connections follow <id> [-o json]
 ```
 
-Human-readable output shows timestamped status/step updates, discovered fields, errors, and website errors. JSON output emits raw SSE events.
+human-readable output shows timestamped status/step updates, discovered fields, errors, and website errors. json output emits raw sse events.
 
 ## credential-providers
 
-Manage external credential providers (e.g., 1Password).
+manage external credential providers (e.g., 1Password).
 
 ```bash
 kernel credential-providers list [-o json]
@@ -136,29 +136,29 @@ kernel credential-providers list-items <id> [-o json]
 kernel credential-providers delete <id> [-y]
 ```
 
-## Connection Statuses
+## connection statuses
 
-| Status | Meaning |
+| status | meaning |
 |--------|---------|
-| `AUTHENTICATED` | Profile is logged in |
-| `NEEDS_AUTH` | Profile needs authentication |
+| `AUTHENTICATED` | profile is logged in |
+| `NEEDS_AUTH` | profile needs authentication |
 
-## Flow Statuses
+## flow statuses
 
-| Status | Meaning |
+| status | meaning |
 |--------|---------|
-| `IN_PROGRESS` | Login ongoing |
-| `SUCCESS` | Login completed |
-| `FAILED` | Login failed (check error_message) |
-| `EXPIRED` | Flow timed out (5 min) |
-| `CANCELED` | Flow was canceled |
+| `IN_PROGRESS` | login ongoing |
+| `SUCCESS` | login completed |
+| `FAILED` | login failed (check error_message) |
+| `EXPIRED` | flow timed out (5 min) |
+| `CANCELED` | flow was canceled |
 
-## Flow Steps
+## flow steps
 
-| Step | Meaning |
+| step | meaning |
 |------|---------|
-| `DISCOVERING` | Finding and analyzing login page |
-| `AWAITING_INPUT` | Waiting for field values, SSO, or MFA selection |
-| `SUBMITTING` | Processing submitted values |
-| `AWAITING_EXTERNAL_ACTION` | Waiting for push/security key |
-| `COMPLETED` | Flow finished |
+| `DISCOVERING` | finding and analyzing login page |
+| `AWAITING_INPUT` | waiting for field values, sso, or mfa selection |
+| `SUBMITTING` | processing submitted values |
+| `AWAITING_EXTERNAL_ACTION` | waiting for push/security key |
+| `COMPLETED` | flow finished |
