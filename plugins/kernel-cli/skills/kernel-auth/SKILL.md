@@ -417,6 +417,7 @@ kernel vaults credentials create user-123 example-login --spec-file - <<'JSON'
   ]
 }
 JSON
+# --wait returns a still-pending item as-is; repeat until state.status is ready before filling
 kernel vaults items get user-123 example-login --wait 60 -o json
 kernel vaults items invoke user-123 example-login fill --spec-file - <<JSON
 {
