@@ -101,7 +101,7 @@ sdk skills for building browser automation with TypeScript and Python.
 | skill | description |
 |-------|-------------|
 | **typescript-sdk** | build automation with KERNEL's TypeScript sdk |
-| **python-sdk** | build automation with kernel's Python sdk |
+| **python-sdk** | build automation with KERNEL's Python sdk |
 
 ### generate-video
 
