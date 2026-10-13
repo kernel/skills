@@ -1,27 +1,27 @@
 ---
 name: kernel-profiles
-description: Create and manage persistent browser profiles to preserve cookies, local storage, and session state
+description: create and manage persistent browser profiles to preserve cookies, local storage, and session state
 ---
 
-# Profiles
+# profiles
 
-Profiles store persistent browser state including cookies, local storage, and browser history.
+profiles store persistent browser state including cookies, local storage, and browser history.
 
-## When to Use
+## when to use
 
-Use profiles for:
-- **Persistent login state** - Stay logged into websites across browser sessions
-- **Site preferences** - Preserve user settings and configurations
-- **Testing with authentication** - Test authenticated flows without re-logging in
-- **Multi-account management** - Maintain separate profiles for different accounts
-- **Session reuse** - Avoid repeated authentication flows in automation
-- **Cookie management** - Preserve and reuse cookies across sessions
+use profiles for:
+- **persistent login state** - stay logged into websites across browser sessions
+- **site preferences** - preserve user settings and configurations
+- **testing with authentication** - test authenticated flows without re-logging in
+- **multi-account management** - maintain separate profiles for different accounts
+- **session reuse** - avoid repeated authentication flows in automation
+- **cookie management** - preserve and reuse cookies across sessions
 
-## Prerequisites
+## prerequisites
 
-Load the `kernel-cli` skill for Kernel CLI installation and authentication.
+load the `kernel-cli` skill for KERNEL cli installation and authentication.
 
-## Create Profile
+## create profile
 
 ```bash
 # Create with a unique name
@@ -31,15 +31,15 @@ kernel profiles create --name my-profile
 kernel profiles create
 ```
 
-## List Profiles
+## list profiles
 
 ```bash
 kernel profiles list -o json
 ```
 
-**MCP Tool:** Use `kernel:list_profiles`.
+**mcp tool:** use `kernel:list_profiles`.
 
-## Get and Rename a Profile
+## get and rename a profile
 
 ```bash
 # Get by name
@@ -49,7 +49,7 @@ kernel profiles get my-profile -o json
 kernel profiles update my-profile --name renamed-profile -o json
 ```
 
-## Download Profile
+## download profile
 
 ```bash
 # Request the default compressed tar.zst archive and extract it into a directory
@@ -59,13 +59,13 @@ kernel profiles download renamed-profile --to ./profile-data
 kernel profiles download renamed-profile --to ./profile-data-tar --format tar
 ```
 
-`--to` is an extraction directory, not an archive filename; the CLI creates it if needed. Supported request formats are `tar.zst` (default) and `tar`.
+`--to` is an extraction directory, not an archive filename; the cli creates it if needed. supported request formats are `tar.zst` (default) and `tar`.
 
-## Delete Profile
+## delete profile
 
 ```bash
 # Delete with confirmation prompt
 kernel profiles delete renamed-profile
 ```
 
-**MCP Tool:** Use `kernel:delete_profile`.
+**mcp tool:** use `kernel:delete_profile`.

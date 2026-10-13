@@ -1,18 +1,18 @@
 ---
 name: kernel-typescript-sdk
-description: Build Kernel browser automation in TypeScript with server-side Playwright or CDP, including profiles, proxies, and reliable session cleanup.
+description: build KERNEL browser automation in TypeScript with server-side Playwright or cdp, including profiles, proxies, and reliable session cleanup.
 context: fork
 ---
 
-# Kernel TypeScript SDK
+# KERNEL typescript sdk
 
-## When to Use This Skill
+## when to use this skill
 
-Use this skill to create and automate Kernel browser sessions from TypeScript, persist browser state with profiles, route sessions through proxies, or package automation as Kernel actions.
+use this skill to create and automate KERNEL browser sessions from TypeScript, persist browser state with profiles, route sessions through proxies, or package automation as KERNEL actions.
 
-For one-off `kernel ...` commands, use the `kernel-cli` skill instead.
+for one-off `kernel ...` commands, use the `kernel-cli` skill instead.
 
-## Install and Initialize
+## install and initialize
 
 ```bash
 npm install @onkernel/sdk
@@ -26,17 +26,17 @@ import { Kernel } from "@onkernel/sdk";
 const kernel = new Kernel(); // Reads KERNEL_API_KEY from the environment.
 ```
 
-Request and response fields use `snake_case` (`timeout_seconds`, `session_id`, `cdp_ws_url`). SDK methods use JavaScript casing (`deleteByID`, `captureScreenshot`).
+request and response fields use `snake_case` (`timeout_seconds`, `session_id`, `cdp_ws_url`). sdk methods use JavaScript casing (`deleteByID`, `captureScreenshot`).
 
-## Choose an Automation Path
+## choose an automation path
 
-Prefer **server-side Playwright** with `kernel.browsers.playwright.execute()` for most automation. Code runs beside the browser with low latency and does not require a local Playwright installation.
+prefer **server-side Playwright** with `kernel.browsers.playwright.execute()` for most automation. code runs beside the browser with low latency and does not require a local Playwright installation.
 
-Use a **CDP connection** when a local library must control Playwright directly or when debugging interactively. Connect with `browser.cdp_ws_url` and reuse the browser's existing context.
+use a **cdp connection** when a local library must control Playwright directly or when debugging interactively. connect with `browser.cdp_ws_url` and reuse the browser's existing context.
 
-## Server-Side Playwright Lifecycle
+## server-side Playwright lifecycle
 
-Always delete a created session in `finally`. The idle timeout is a safety net, not the normal cleanup path.
+always delete a created session in `finally`. the idle timeout is a safety net, not the normal cleanup path.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -66,11 +66,11 @@ try {
 }
 ```
 
-Use `return` inside `code` to populate `response.result`. Each call uses a fresh execution context, so keep dependent steps in one call or return the state needed by the next call.
+use `return` inside `code` to populate `response.result`. each call uses a fresh execution context, so keep dependent steps in one call or return the state needed by the next call.
 
-## CDP Lifecycle
+## cdp lifecycle
 
-Close the local CDP client, then delete the Kernel session even if connection or automation fails.
+close the local cdp client, then delete the KERNEL session even if connection or automation fails.
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
@@ -96,11 +96,11 @@ try {
 }
 ```
 
-Do not treat `browser.close()` as Kernel resource cleanup; always call `deleteByID()`.
+do not treat `browser.close()` as KERNEL resource cleanup; always call `deleteByID()`.
 
-## Profiles
+## profiles
 
-Create profiles before attaching them. Set `save_changes: true` only when changes from this session should persist when the session ends.
+create profiles before attaching them. set `save_changes: true` only when changes from this session should persist when the session ends.
 
 ```typescript
 const profile = await kernel.profiles.create({ name: "example-login" });
@@ -116,15 +116,15 @@ try {
 }
 ```
 
-Prefer profile IDs for long-running work. Do not rename a profile while a browser references it by name; that can prevent session changes from saving. Delete a profile only when it was created as temporary test data, and only after deleting its browser sessions:
+prefer profile ids for long-running work. do not rename a profile while a browser references it by name; that can prevent session changes from saving. delete a profile only when it was created as temporary test data, and only after deleting its browser sessions:
 
 ```typescript
 await kernel.profiles.delete(profile.id);
 ```
 
-## Proxies and Direct Connections
+## proxies and direct connections
 
-Attach an existing proxy by ID at creation:
+attach an existing proxy by id at creation:
 
 ```typescript
 const session = await kernel.browsers.create({
@@ -133,7 +133,7 @@ const session = await kernel.browsers.create({
 });
 ```
 
-Check a configured proxy against a public HTTP(S) target before use when target reachability matters:
+check a configured proxy against a public http(s) target before use when target reachability matters:
 
 ```typescript
 const checked = await kernel.proxies.check(process.env.KERNEL_PROXY_ID!, {
@@ -142,7 +142,7 @@ const checked = await kernel.proxies.check(process.env.KERNEL_PROXY_ID!, {
 if (checked.status === "unavailable") throw new Error("Proxy is unavailable");
 ```
 
-For a running stealth session, clear an explicit proxy and disable Kernel's default stealth proxy to connect directly:
+for a running stealth session, clear an explicit proxy and disable KERNEL's default stealth proxy to connect directly:
 
 ```typescript
 await kernel.browsers.update(session.session_id, {
@@ -151,11 +151,11 @@ await kernel.browsers.update(session.session_id, {
 });
 ```
 
-Set `disable_default_proxy: false` to re-enable the default stealth proxy. `kernel.proxies.update(id, { name })` only renames a proxy; recreate it to change its type or configuration. Delete temporary proxies only after all sessions using them are deleted.
+set `disable_default_proxy: false` to re-enable the default stealth proxy. `kernel.proxies.update(id, { name })` only renames a proxy; recreate it to change its type or configuration. delete temporary proxies only after all sessions using them are deleted.
 
-## Binary Data
+## binary data
 
-Do not return screenshots or file bytes from `playwright.execute`. Use the dedicated response endpoints:
+do not return screenshots or file bytes from `playwright.execute`. use the dedicated response endpoints:
 
 ```typescript
 const screenshot = await kernel.browsers.computer.captureScreenshot(session.session_id);
@@ -167,17 +167,17 @@ const file = await kernel.browsers.fs.readFile(session.session_id, {
 const fileBuffer = Buffer.from(await file.arrayBuffer());
 ```
 
-## Cleanup Rules
+## cleanup rules
 
-1. Wrap every created browser session in `try/finally` immediately after creation.
-2. Delete sessions with `kernel.browsers.deleteByID(session_id)` on success and failure.
-3. For CDP, close the local client before deleting the session.
-4. Delete temporary profiles and proxies only after dependent sessions are gone.
-5. Keep credentials and proxy passwords in environment variables; never embed them in source or logs.
+1. wrap every created browser session in `try/finally` immediately after creation.
+2. delete sessions with `kernel.browsers.deleteByID(session_id)` on success and failure.
+3. for cdp, close the local client before deleting the session.
+4. delete temporary profiles and proxies only after dependent sessions are gone.
+5. keep credentials and proxy passwords in environment variables; never embed them in source or logs.
 
-## References
+## references
 
-- **Kernel Documentation**: https://www.kernel.sh/docs
-- **Quickstart Guide**: https://www.kernel.sh/docs/quickstart
-- **TypeScript Types**: Use the declarations and hover docs shipped with `@onkernel/sdk`
-- **Additional integration examples**: [examples](./examples/examples.md)
+- **KERNEL documentation**: https://www.kernel.sh/docs
+- **quickstart guide**: https://www.kernel.sh/docs/quickstart
+- **TypeScript types**: use the declarations and hover docs shipped with `@onkernel/sdk`
+- **additional integration examples**: [examples](./examples/examples.md)

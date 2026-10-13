@@ -1,31 +1,31 @@
 ---
 name: kernel-replays
-description: Record, manage, and download video replays of browser sessions
+description: record, manage, and download video replays of browser sessions
 ---
 
-# Replays (Video Recording)
+# replays (video recording)
 
-Record browser sessions as videos for debugging, demos, or compliance.
+record browser sessions as videos for debugging, demos, or compliance.
 
-## When to Use
+## when to use
 
-Use replays when you need to:
-- **Debug automation failures**: Capture exactly what happened during a failed test or automation run
-- **Monitor automation**: Review automated processes to identify optimization opportunities
+use replays when you need to:
+- **debug automation failures**: capture exactly what happened during a failed test or automation run
+- **monitor automation**: review automated processes to identify optimization opportunities
 
-Replays give you full control over recording start/stop times and support multiple recordings per session.
+replays give you full control over recording start/stop times and support multiple recordings per session.
 
-## Prerequisites
+## prerequisites
 
-Load the `kernel-cli` skill for Kernel CLI installation and authentication.
+load the `kernel-cli` skill for KERNEL cli installation and authentication.
 
-## List Replays
+## list replays
 
 ```bash
 kernel browsers replays list <session_id> -o json
 ```
 
-## Start Recording
+## start recording
 
 ```bash
 # Start with default settings
@@ -35,13 +35,13 @@ kernel browsers replays start <session_id> -o json
 kernel browsers replays start <session_id> --framerate 30 --max-duration 300 -o json
 ```
 
-## Stop Recording
+## stop recording
 
 ```bash
 kernel browsers replays stop <session_id> <replay-id>
 ```
 
-## Download Recording
+## download recording
 
 ```bash
 kernel browsers replays download <session_id> <replay-id>

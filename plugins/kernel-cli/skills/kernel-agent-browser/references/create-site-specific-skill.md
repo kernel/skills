@@ -1,22 +1,22 @@
-# Creating Site-Specific Browser Automation Skills
+# creating site-specific browser automation skills
 
-This guide walks through creating website automation skills using agent-browser with Kernel cloud browsers.
+this guide walks through creating website automation skills using agent-browser with KERNEL cloud browsers.
 
-## Naming Convention
+## naming convention
 
-**Use the website's domain as the skill folder name:**
+**use the website's domain as the skill folder name:**
 
 ```
 .claude/skills/<domain>/SKILL.md
 ```
 
-Examples:
-- `kroger.com/` - For kroger.com automation
-- `amazon.com/` - For Amazon automation
+examples:
+- `kroger.com/` - for kroger.com automation
+- `amazon.com/` - for Amazon automation
 
-Use the primary domain where automation occurs.
+use the primary domain where automation occurs.
 
-## Skill Template
+## skill template
 
 ```markdown
 ---
@@ -108,55 +108,55 @@ agent-browser -p kernel close
 <Document quirks, gotchas, and special handling>
 ```
 
-## Workflow Discovery Process
+## workflow discovery process
 
-### Step 1: Start a Kernel Browser Session
+### step 1: start a KERNEL browser session
 
 ```bash
 export KERNEL_PROFILE_NAME=<site name>   # Persist login sessions across runs
 agent-browser -p kernel open <site-url>
 ```
 
-### Step 2: Explore the Login Flow
+### step 2: explore the login flow
 
-Most sites require authentication. Document the login process:
+most sites require authentication. document the login process:
 
-1. Navigate to login page
-2. Take snapshot: `agent-browser -p kernel snapshot -i`
-3. Identify form elements (username, password, submit button)
-4. Test filling credentials and submitting
-5. Verify successful login (check URL, page content)
+1. navigate to login page
+2. take snapshot: `agent-browser -p kernel snapshot -i`
+3. identify form elements (username, password, submit button)
+4. test filling credentials and submitting
+5. verify successful login (check url, page content)
 
-**Common login patterns:**
-- **Single-page form**: Username and password on same page (e.g., Kroger)
-- **Two-step form**: Username first, then password (e.g., Veracross)
-- **OAuth redirect**: Site redirects to identity provider
+**common login patterns:**
+- **single-page form**: username and password on same page (e.g., Kroger)
+- **two-step form**: username first, then password (e.g., Veracross)
+- **OAuth redirect**: site redirects to identity provider
 
-If the site has difficult bot detection or you are struggling and seeing strange behavior of the login page, then it is ok to fall back to asking the user to perform the log in by getting the live view URL of the Kernel browser. Since agent-browser creates the browser, you will need to find the live view URL by running `kernel browsers list`, finding the most recent browser with the profile name you used, and then `kernel browsers view <session id>` to get the live view URL.
+if the site has difficult bot detection or you are struggling and seeing strange behavior of the login page, then it is ok to fall back to asking the user to perform the log in by getting the live view url of the KERNEL browser. since agent-browser creates the browser, you will need to find the live view url by running `kernel browsers list`, finding the most recent browser with the profile name you used, and then `kernel browsers view <session id>` to get the live view url.
 
-### Step 3: Explore User-Requested Workflows
+### step 3: explore user-requested workflows
 
-For each workflow the user wants:
+for each workflow the user wants:
 
-1. **Navigate** to the relevant section
-2. **Snapshot** to understand available elements
-3. **Interact** - try clicks, fills, navigation
-4. **Document** the element refs and sequence
-5. **Test** the full workflow end-to-end
-6. **Record** optimal paths and gotchas
+1. **navigate** to the relevant section
+2. **snapshot** to understand available elements
+3. **interact** - try clicks, fills, navigation
+4. **document** the element refs and sequence
+5. **test** the full workflow end-to-end
+6. **record** optimal paths and gotchas
 
-### Step 4: Document Findings
+### step 4: document findings
 
-For each workflow, record:
-- URL patterns (direct links when available)
-- Element refs for key interactions
-- Wait times needed between steps
-- Verification checks (how to confirm success)
+for each workflow, record:
+- url patterns (direct links when available)
+- element refs for key interactions
+- wait times needed between steps
+- verification checks (how to confirm success)
 - Edge cases and error handling
 
-## Key Techniques
+## key techniques
 
-### Taking Snapshots
+### taking snapshots
 
 ```bash
 # Interactive elements only (recommended)
@@ -169,18 +169,18 @@ agent-browser -p kernel snapshot
 agent-browser -p kernel snapshot -i | grep -i "button|login"
 ```
 
-### Element Refs
+### element refs
 
-Element refs (`@e1`, `@e2`, etc.) are session-specific and change:
-- After page navigation
-- After significant DOM updates
-- Between browser sessions
+element refs (`@e1`, `@e2`, etc.) are session-specific and change:
+- after page navigation
+- after significant dom updates
+- between browser sessions
 
-**Always take a fresh snapshot before interacting.**
+**always take a fresh snapshot before interacting.**
 
-### Handling Tricky Elements
+### handling tricky elements
 
-Some elements don't respond to standard commands. Use JavaScript:
+some elements don't respond to standard commands. use JavaScript:
 
 ```bash
 # Click by selector
@@ -193,13 +193,13 @@ agent-browser -p kernel eval "document.querySelector('#email').value = 'user@exa
 agent-browser -p kernel eval "document.querySelector('[data-testid=\"submit\"]').click()"
 ```
 
-### Handling iframes
+### handling iframes
 
-If a site has cross-origin iframes, then you will need to execute a playwright script against the page.
-See the main kernel-agent-browser skill for more details on this.
-You will need to find the session ID for this to work, which you can find with `kernel browsers list`.
+if a site has cross-origin iframes, then you will need to execute a Playwright script against the page.
+see the main kernel-agent-browser skill for more details on this.
+you will need to find the session id for this to work, which you can find with `kernel browsers list`.
 
-### Waiting Strategies
+### waiting strategies
 
 ```bash
 agent-browser -p kernel wait --load networkidle  # Wait for network
@@ -208,9 +208,9 @@ agent-browser -p kernel wait --text "Success"     # Wait for text
 agent-browser -p kernel wait 2000              # Fixed wait (ms, last resort)
 ```
 
-### URL Patterns
+### url patterns
 
-Document URL patterns for direct navigation:
+document url patterns for direct navigation:
 ```
 # Order history
 https://www.kroger.com/mypurchases
@@ -222,9 +222,9 @@ https://www.kroger.com/mypurchases/pending/{order_id}
 https://www.kroger.com/search?query={search_term}
 ```
 
-## Credential Management
+## credential management
 
-Prompt the user if they want to store credentials in their agent configuration file (e.g., `AGENTS.md`):
+prompt the user if they want to store credentials in their agent configuration file (e.g., `AGENTS.md`):
 
 ```markdown
 ### <Site Name>
@@ -233,68 +233,68 @@ Prompt the user if they want to store credentials in their agent configuration f
 - **Password**: <password>
 ```
 
-Reference credentials from the skill but don't duplicate the actual values in SKILL.md if they're already stored elsewhere.
+reference credentials from the skill but don't duplicate the actual values in SKILL.md if they're already stored elsewhere.
 
-## Common Patterns by Site Type
+## common patterns by site type
 
-### E-commerce Sites (Kroger, Amazon)
-- Login → Account menu → Order history
-- Search → Product page → Add to cart
-- Cart → Checkout flow
-- Pending orders / order modification
+### E-commerce sites (Kroger, Amazon)
+- login → account menu → order history
+- search → product page → add to cart
+- cart → checkout flow
+- pending orders / order modification
 
-### Portal/Dashboard Sites (Veracross, YNAB)
-- Login (often OAuth-based)
-- Navigation sidebar/menu
-- Data tables with pagination
-- Modal dialogs for details
+### portal/dashboard sites (Veracross, YNAB)
+- login (often OAuth-based)
+- navigation sidebar/menu
+- data tables with pagination
+- modal dialogs for details
 
-### Bill Payment Sites
-- Login (may use modal)
-- Invoice/amount form
-- Stored payment methods
-- Confirmation/receipt capture
+### bill payment sites
+- login (may use modal)
+- invoice/amount form
+- stored payment methods
+- confirmation/receipt capture
 
-## Testing and Iteration
+## testing and iteration
 
-1. **Test each step individually** before combining
-2. **Document element refs** but note they may change
-3. **Add wait times** generously, then optimize
-4. **Capture screenshots** of key states for reference
-5. **Note failures** - document what doesn't work and workarounds
+1. **test each step individually** before combining
+2. **document element refs** but note they may change
+3. **add wait times** generously, then optimize
+4. **capture screenshots** of key states for reference
+5. **note failures** - document what doesn't work and workarounds
 
-## Cleanup
+## cleanup
 
-Always close the browser when done:
+always close the browser when done:
 
 ```bash
 agent-browser -p kernel close
 ```
 
-## Example: Creating a New Site Skill
+## example: creating a new site skill
 
-User request: "Create a skill for example.com to check my account balance"
+user request: "create a skill for example.com to check my account balance"
 
-1. **Create skill folder**: `.claude/skills/example.com/`
+1. **create skill folder**: `.claude/skills/example.com/`
 
-2. **Start browser and explore**:
+2. **start browser and explore**:
    ```bash
    agent-browser -p kernel open https://example.com/login
    agent-browser -p kernel snapshot -i
    ```
 
-3. **Document login flow** (get refs, test credentials)
+3. **document login flow** (get refs, test credentials)
 
-4. **Find account balance page** (navigate, snapshot, document path)
+4. **find account balance page** (navigate, snapshot, document path)
 
-5. **Write SKILL.md** with:
-   - Configuration section
-   - Login workflow with actual element refs
-   - Account balance workflow
-   - Notes on any quirks discovered
+5. **write SKILL.md** with:
+   - configuration section
+   - login workflow with actual element refs
+   - account balance workflow
+   - notes on any quirks discovered
 
-6. **Ask user if they want credentials stored**
+6. **ask user if they want credentials stored**
 
-7. **Test the complete workflow**
+7. **test the complete workflow**
 
-8. **Commit to git**
+8. **commit to git**

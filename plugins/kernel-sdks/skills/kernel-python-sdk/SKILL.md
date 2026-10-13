@@ -1,21 +1,21 @@
 ---
 name: kernel-python-sdk
-description: Build and debug Python browser automation with the Kernel SDK, including browser lifecycle, server-side Playwright, CDP, profiles, proxies, and reliable cleanup.
+description: build and debug Python browser automation with the KERNEL sdk, including browser lifecycle, server-side Playwright, cdp, profiles, proxies, and reliable cleanup.
 context: fork
 ---
 
-## When to Use This Skill
+## when to use this skill
 
-Use this skill to write Python that creates and controls Kernel browser sessions. Prefer it for:
+use this skill to write Python that creates and controls KERNEL browser sessions. prefer it for:
 
-- Server-side Playwright execution in the browser VM
-- Client-side Playwright over CDP
-- Persistent profiles and explicit proxy routing
-- Browser pools or deployed Python actions
+- server-side Playwright execution in the browser vm
+- client-side Playwright over cdp
+- persistent profiles and explicit proxy routing
+- browser pools or deployed Python actions
 
-Use the `kernel-cli` skill for shell commands and quick one-off sessions.
+use the `kernel-cli` skill for shell commands and quick one-off sessions.
 
-## Setup
+## setup
 
 ```bash
 uv pip install -U kernel
@@ -23,13 +23,13 @@ uv pip install -U kernel
 uv pip install playwright
 ```
 
-Set `KERNEL_API_KEY` in the environment; do not put it in source. `Kernel()` and `AsyncKernel()` read it automatically. Use the async client consistently—do not call synchronous SDK methods from an async action.
+set `KERNEL_API_KEY` in the environment; do not put it in source. `Kernel()` and `AsyncKernel()` read it automatically. use the async client consistently—do not call synchronous sdk methods from an async action.
 
-## Choose an Automation Path
+## choose an automation path
 
-### Server-side Playwright (default)
+### server-side Playwright (default)
 
-Run JavaScript/TypeScript next to Chrome. This avoids a local CDP round trip and does not require local Playwright:
+run JavaScript/TypeScript next to Chrome. this avoids a local cdp round trip and does not require local Playwright:
 
 ```python
 from kernel import Kernel
@@ -52,11 +52,11 @@ return { title: await page.title(), url: page.url() };
         client.browsers.delete_by_id(browser.session_id)
 ```
 
-Pass the session ID as the first positional argument. The code receives `page`, `context`, and `browser`. Use `return`; otherwise `response.result` is empty. `timeout_sec` limits remote code execution, while the SDK's `timeout=` option controls the HTTP request.
+pass the session id as the first positional argument. the code receives `page`, `context`, and `browser`. use `return`; otherwise `response.result` is empty. `timeout_sec` limits remote code execution, while the sdk's `timeout=` option controls the http request.
 
-### Client-side Playwright over CDP
+### client-side Playwright over cdp
 
-Use CDP when local Playwright tooling or interactive debugging is required:
+use cdp when local Playwright tooling or interactive debugging is required:
 
 ```python
 import asyncio
@@ -87,19 +87,19 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-Reuse the existing default context so pages see the Kernel session's loaded profile state; a new incognito context does not share that state. The SDK client context closes HTTP connections, but it does **not** replace deleting the remote browser.
+reuse the existing default context so pages see the KERNEL session's loaded profile state; a new incognito context does not share that state. the sdk client context closes http connections, but it does **not** replace deleting the remote browser.
 
-## Browser Lifecycle and Cleanup
+## browser lifecycle and cleanup
 
-- Wrap every created or acquired session in `try/finally` immediately after creation.
-- Delete ordinary sessions with `client.browsers.delete_by_id(session_id)`; use `await` with `AsyncKernel`.
-- Release pool-acquired sessions through the browser-pool release API instead of deleting them.
-- Keep the browser inactivity timeout finite even when cleanup exists. Activity can extend that timeout, so it is not a substitute for explicit cleanup.
-- Delete throwaway profiles and proxies only after all sessions using them have ended. Keep intentional persistent profiles.
+- wrap every created or acquired session in `try/finally` immediately after creation.
+- delete ordinary sessions with `client.browsers.delete_by_id(session_id)`; use `await` with `AsyncKernel`.
+- release pool-acquired sessions through the browser-pool release api instead of deleting them.
+- keep the browser inactivity timeout finite even when cleanup exists. activity can extend that timeout, so it is not a substitute for explicit cleanup.
+- delete throwaway profiles and proxies only after all sessions using them have ended. keep intentional persistent profiles.
 
-## Profiles
+## profiles
 
-Create profiles before attaching them. Set `save_changes=True` when cookies and local state must persist back to the profile:
+create profiles before attaching them. set `save_changes=True` when cookies and local state must persist back to the profile:
 
 ```python
 profile = client.profiles.create(name="checkout-login")
@@ -114,9 +114,9 @@ finally:
     client.browsers.delete_by_id(browser.session_id)
 ```
 
-Deleting the browser ends the session and allows profile changes to finalize. Do not delete the profile first. Use either `{"id": ...}` or `{"name": ...}`, not both.
+deleting the browser ends the session and allows profile changes to finalize. do not delete the profile first. use either `{"id": ...}` or `{"name": ...}`, not both.
 
-The Python SDK can request either archive format and rename profiles natively:
+the Python sdk can request either archive format and rename profiles natively:
 
 ```python
 archive = client.profiles.download(profile.id, format="tar")
@@ -124,11 +124,11 @@ archive.write_to_file("profile.tar")
 client.profiles.update(profile.id, name="checkout-login-v2")
 ```
 
-The SDK writes an archive for both `tar.zst` and `tar`; it never extracts the contents. Use `kernel profiles download <id-or-name> --to ./profile` when the archive must be unpacked into a directory.
+the sdk writes an archive for both `tar.zst` and `tar`; it never extracts the contents. use `kernel profiles download <id-or-name> --to ./profile` when the archive must be unpacked into a directory.
 
-## Proxies and Default Stealth Proxy
+## proxies and default stealth proxy
 
-Attach an explicit proxy at creation with `proxy_id`:
+attach an explicit proxy at creation with `proxy_id`:
 
 ```python
 proxy = client.proxies.create(
@@ -147,25 +147,25 @@ finally:
     client.proxies.delete(proxy.id)  # Only if this proxy was created for this run.
 ```
 
-A target-specific proxy check validates that public HTTP/HTTPS URL. For residential and mobile proxies, it does not guarantee the later browser uses the same exit node; with a custom URL, the check also does not update general proxy health status.
+a target-specific proxy check validates that public http/https url. for residential and mobile proxies, it does not guarantee the later browser uses the same exit node; with a custom url, the check also does not update general proxy health status.
 
-Proxy routing can be changed on a running browser:
+proxy routing can be changed on a running browser:
 
 ```python
 client.browsers.update(browser.session_id, proxy_id=another_proxy_id)
 client.browsers.update(browser.session_id, proxy_id="")  # Remove explicit proxy.
 ```
 
-Stealth browsers may use Kernel's default stealth proxy when no explicit proxy is attached. Control it independently:
+stealth browsers may use KERNEL's default stealth proxy when no explicit proxy is attached. control it independently:
 
 ```python
 client.browsers.update(browser.session_id, disable_default_proxy=True)   # Direct connection
 client.browsers.update(browser.session_id, disable_default_proxy=False)  # Re-enable default
 ```
 
-`disable_default_proxy` is an update parameter, not a browser-create parameter. The current SDK does not expose proxy rename; use `kernel proxies update <id> --name <new-name>`. Recreate the proxy to change anything besides its name.
+`disable_default_proxy` is an update parameter, not a browser-create parameter. the current sdk does not expose proxy rename; use `kernel proxies update <id> --name <new-name>`. recreate the proxy to change anything besides its name.
 
-## Deployed Action Pattern
+## deployed action pattern
 
 ```python
 from typing import TypedDict
@@ -198,9 +198,9 @@ async def run(ctx: kernel.KernelContext, payload: TaskInput):
             await client.browsers.delete_by_id(browser.session_id)
 ```
 
-## Binary Results
+## binary results
 
-Server-side screenshots and PDFs can return a Node.js Buffer-shaped result:
+server-side screenshots and pdfs can return a Node.js Buffer-shaped result:
 
 ```python
 response = client.browsers.playwright.execute(
@@ -212,9 +212,9 @@ if response.success and response.result:
         file.write(bytes(response.result["data"]))
 ```
 
-## References
+## references
 
-- [Kernel documentation](https://www.kernel.sh/docs)
-- [Python SDK API reference](https://github.com/kernel/kernel-python-sdk/blob/main/api.md)
-- [Kernel quickstart](https://www.kernel.sh/docs/quickstart)
-- [Additional examples](./examples/examples.md)
+- [KERNEL documentation](https://www.kernel.sh/docs)
+- [Python sdk api reference](https://github.com/kernel/kernel-python-sdk/blob/main/api.md)
+- [KERNEL quickstart](https://www.kernel.sh/docs/quickstart)
+- [additional examples](./examples/examples.md)

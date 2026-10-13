@@ -1,29 +1,29 @@
 ---
 name: kernel-process-execution
-description: Execute and manage processes inside browser VM environments
+description: execute and manage processes inside browser vm environments
 ---
 
-# Process Execution
+# process execution
 
-Run arbitrary commands inside the browser VM for advanced control.
+run arbitrary commands inside the browser vm for advanced control.
 
-## When to Use
+## when to use
 
-Use process execution for:
-- **Custom tooling** - Install specialized tools in the VM (ffmpeg, imagemagick, etc.)
-- **Background services** - Run auxiliary services alongside your browser
-- **Data processing** - Execute scripts for data transformation
-- **System configuration** - Configure the VM environment to your needs
-- **Debugging** - Inspect VM state and processes
-- **Package installation** - Install system packages with apt-get or other package managers
+use process execution for:
+- **custom tooling** - install specialized tools in the vm (ffmpeg, imagemagick, etc.)
+- **background services** - run auxiliary services alongside your browser
+- **data processing** - execute scripts for data transformation
+- **system configuration** - configure the vm environment to your needs
+- **debugging** - inspect vm state and processes
+- **package installation** - install system packages with apt-get or other package managers
 
-> **Info**: The `<session_id>` argument refers to the browser session ID, not invocation IDs returned by other Kernel commands.
+> **info**: the `<session_id>` argument refers to the browser session id, not invocation ids returned by other KERNEL commands.
 
-## Prerequisites
+## prerequisites
 
-Load the `kernel-cli` skill for Kernel CLI installation and authentication.
+load the `kernel-cli` skill for KERNEL cli installation and authentication.
 
-## Execute Command (Synchronous)
+## execute command (synchronous)
 
 ```bash
 # Execute and wait for completion
@@ -46,7 +46,7 @@ kernel browsers process exec <session_id> \
   --env REGION=us-east --env MODE=debug -- printenv REGION MODE
 ```
 
-## Spawn Background Process (Asynchronous)
+## spawn background process (asynchronous)
 
 ```bash
 # Start long-running process
@@ -63,41 +63,41 @@ kernel browsers process spawn <session_id> --env PORT=8080 -- \
 kernel browsers process spawn <session_id> --allocate-tty --cols 120 --rows 40 -- /bin/bash
 ```
 
-Repeat `--env KEY=VALUE` as needed. `--cols` and `--rows` are valid only with `--allocate-tty`.
+repeat `--env KEY=VALUE` as needed. `--cols` and `--rows` are valid only with `--allocate-tty`.
 
-## Additional Process Commands
+## additional process commands
 
-### Check Process Status
+### check process status
 
 ```bash
 # Get process status
 kernel browsers process status <session_id> <process-id>
 ```
 
-Returns process state, CPU usage, memory usage, and exit code.
+returns process state, cpu usage, memory usage, and exit code.
 
-### Stream Process Output
+### stream process output
 
 ```bash
 # Stream stdout and stderr from a running process
 kernel browsers process stdout-stream <session_id> <process-id>
 ```
 
-This will continuously stream output until the process exits.
+this will continuously stream output until the process exits.
 
-### Write to Process stdin
+### write to process stdin
 
 ```bash
 # Send base64-encoded data to process stdin
 echo "input data" | base64 | xargs -I {} kernel browsers process stdin <session_id> <process-id> --data-b64 {}
 ```
-Base64 payload to write is required.
+base64 payload to write is required.
 
-## Kill Process
+## kill process
 
 ```bash
 # Kill with TERM signal (graceful, default)
 kernel browsers process kill <session_id> <process-id>
 kernel browsers process kill <session_id> <process-id> --signal TERM
 ```
-Available signals: (TERM, KILL, INT, HUP; default: TERM).
+available signals: (TERM, KILL, INT, HUP; default: TERM).

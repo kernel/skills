@@ -1,9 +1,9 @@
 {
   "name": "generate-video",
   "version": "1.0.0",
-  "description": "Generate crisp, perfectly smooth MP4 videos from web pages and animated visualizations using deterministic CDP frame-stepping and ffmpeg",
+  "description": "generate crisp, perfectly smooth mp4 videos from web pages and animated visualizations using deterministic cdp frame-stepping and ffmpeg",
   "author": {
-    "name": "Kernel",
+    "name": "KERNEL",
     "url": "www.kernel.sh"
   },
   "repository": "https://github.com/kernel/skills",

@@ -1,12 +1,12 @@
-# Kernel Python SDK - Examples
+# KERNEL python sdk - examples
 
-Concise patterns extracted from production templates showing how to integrate the Kernel SDK with popular libraries and frameworks.
+concise patterns extracted from production templates showing how to integrate the KERNEL sdk with popular libraries and frameworks.
 
 ---
 
-## Browser-Use Library Integration
+## browser-use library integration
 
-Connect the `browser-use` library to Kernel browsers for AI-powered browser automation.
+connect the `browser-use` library to KERNEL browsers for ai-powered browser automation.
 
 ```python
 import kernel
@@ -41,9 +41,9 @@ finally:
 
 ---
 
-## Reusable Async Context Manager
+## reusable async context manager
 
-Create a reusable context manager for browser lifecycle with optional replay recording.
+create a reusable context manager for browser lifecycle with optional replay recording.
 
 ```python
 import kernel
@@ -104,7 +104,7 @@ class KernelBrowserSession:
         return self._kernel
 ```
 
-**Usage:**
+**usage:**
 
 ```python
 async with KernelBrowserSession(record_replay=True) as session:
@@ -118,9 +118,9 @@ async with KernelBrowserSession(record_replay=True) as session:
 
 ---
 
-## Auto-CAPTCHA with CDP Connection
+## auto-captcha with cdp connection
 
-Use CDP connection with stealth mode to leverage Kernel's automatic CAPTCHA solving.
+use cdp connection with stealth mode to leverage KERNEL's automatic captcha solving.
 
 ```python
 import kernel
@@ -161,9 +161,9 @@ finally:
 
 ---
 
-## Server-Side Execution as LLM Tool
+## server-side execution as llm tool
 
-Wrap `playwright.execute` as a callable tool for LLM agent frameworks.
+wrap `playwright.execute` as a callable tool for llm agent frameworks.
 
 ```python
 import kernel
@@ -217,7 +217,7 @@ def create_playwright_tool(session_id: str):
     return execute_playwright
 ```
 
-**Usage with Claude Agent SDK:**
+**usage with Claude Agent SDK:**
 
 ```python
 from claude_agent_sdk import tool, create_sdk_mcp_server
@@ -237,9 +237,9 @@ server = create_sdk_mcp_server(
 
 ---
 
-## Managed Auth - Hosted UI Flow
+## managed auth - hosted ui flow
 
-Create authenticated browser profiles via Kernel's hosted login page.
+create authenticated browser profiles via KERNEL's hosted login page.
 
 ```python
 from kernel import Kernel
@@ -276,9 +276,9 @@ if state.status == "AUTHENTICATED":
 
 ---
 
-## Managed Auth - Programmatic Flow
+## managed auth - programmatic flow
 
-Submit credentials programmatically instead of using the hosted page.
+submit credentials programmatically instead of using the hosted page.
 
 ```python
 from kernel import Kernel
@@ -330,9 +330,9 @@ while state.flow_status == "IN_PROGRESS":
 
 ---
 
-## Managed Auth - SSE Streaming
+## managed auth - sse streaming
 
-Stream login flow events in real time instead of polling.
+stream login flow events in real time instead of polling.
 
 ```python
 from kernel import Kernel
@@ -360,9 +360,9 @@ for evt in stream:
 
 ---
 
-## Managed Auth - 1Password Credential Provider
+## managed auth - 1Password credential provider
 
-Use 1Password as an external credential source.
+use 1Password as an external credential source.
 
 ```python
 from kernel import Kernel

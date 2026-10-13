@@ -1,7 +1,7 @@
 {
   "name": "kernel",
   "version": "1.1.0",
-  "description": "cloud browsers for grok. KERNEL launches stealth chromium sessions in <30ms through our hosted mcp server. drive them with playwright, a persistent browser repl, or computer-use actions, reuse logged-in profiles and managed auth, and record replays.",
+  "description": "cloud browsers for grok. KERNEL launches stealth Chromium sessions in <30ms through our hosted mcp server. drive them with Playwright, a persistent browser repl, or computer-use actions, reuse logged-in profiles and managed auth, and record replays.",
   "author": {
     "name": "KERNEL",
     "url": "https://kernel.sh"

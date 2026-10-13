@@ -1,31 +1,31 @@
 ---
 name: kernel-browser-pools
-description: Manage pre-warmed browser pools for fast acquisition and release of browser instances
+description: manage pre-warmed browser pools for fast acquisition and release of browser instances
 ---
 
-# Browser Pools
+# browser pools
 
-Pre-warmed browser instances for fast acquisition. Ideal for high-throughput automation.
+pre-warmed browser instances for fast acquisition. ideal for high-throughput automation.
 
-> **Note:** Unless otherwise noted, `id` arguments refer to the browser session ID, not invocation IDs returned by Kernel commands.
+> **note:** unless otherwise noted, `id` arguments refer to the browser session id, not invocation ids returned by KERNEL commands.
 
-## When to Use
+## when to use
 
-Browser pools are ideal when you need to:
+browser pools are ideal when you need to:
 
-- **Minimize latency** for browser acquisition with complex configurations (profiles, proxies, extensions)
-- **Run many short-lived browser tasks** in parallel with consistent startup times
-- **Maintain consistent browser configuration** across multiple sessions
-- **High-throughput automation** where browser creation overhead impacts performance
-- **Parallel scraping** of many pages with identical browser settings
+- **minimize latency** for browser acquisition with complex configurations (profiles, proxies, extensions)
+- **run many short-lived browser tasks** in parallel with consistent startup times
+- **maintain consistent browser configuration** across multiple sessions
+- **high-throughput automation** where browser creation overhead impacts performance
+- **parallel scraping** of many pages with identical browser settings
 
-For one-off or long-running browser sessions, creating browsers directly with `kernel browsers create` may be simpler.
+for one-off or long-running browser sessions, creating browsers directly with `kernel browsers create` may be simpler.
 
-## Prerequisites
+## prerequisites
 
-Load the `kernel-cli` skill for Kernel CLI installation and authentication.
+load the `kernel-cli` skill for KERNEL cli installation and authentication.
 
-## Create Pool
+## create pool
 
 ```bash
 # Basic pool
@@ -35,49 +35,49 @@ kernel browser-pools create --name my-pool --size 5 -o json
 kernel browser-pools create --name my-pool --size 10 --stealth --headless -o json
 ```
 
-## Manage Pools
+## manage pools
 
-### List Pools
+### list pools
 
 ```bash
 kernel browser-pools list -o json
 ```
 
-### Get Pool Details
+### get pool details
 
 ```bash
 kernel browser-pools get my-pool -o json
 ```
 
-### Update Pool Size
+### update pool size
 
 ```bash
 kernel browser-pools update my-pool --size 10 -o json
 ```
 
-### Delete Pool
+### delete pool
 
 ```bash
 kernel browser-pools delete my-pool --force
 ```
 
-## Acquire and Release
+## acquire and release
 
-### Acquire a Browser from Pool
+### acquire a browser from pool
 
 ```bash
 kernel browser-pools acquire my-pool -o json
 ```
 
-This returns a browser session from the pool instantly.
+this returns a browser session from the pool instantly.
 
-### Release Browser Back to Pool
+### release browser back to pool
 
 ```bash
 kernel browser-pools release my-pool --session-id <id>
 ```
 
-## Use Case: High-Volume Scraping
+## use case: high-volume scraping
 
 ```bash
 # Create pool with 20 browsers

@@ -1,8 +1,8 @@
-# Kernel Skills
+# KERNEL skills
 
-Official AI agent skills from the Kernel for installing useful skills for our CLI and SDKs that you can load into popular coding agents.
+official ai agent skills from the KERNEL for installing useful skills for our cli and sdks that you can load into popular coding agents.
 
-## Installation
+## installation
 
 ### Claude Code
 
@@ -32,28 +32,28 @@ codex plugin add kernel-sdks@kernel
 codex plugin add generate-video@kernel
 ```
 
-You can also install them from the Plugins Directory in the ChatGPT desktop app. Restart the app after adding the marketplace, open **Plugins** in Codex, and find the Kernel plugins under **Public**.
+you can also install them from the Plugins Directory in the ChatGPT desktop app. restart the app after adding the marketplace, open **plugins** in Codex, and find the KERNEL plugins under **public**.
 
 ### Cursor
 
-The Kernel plugin for Cursor lives in [kernel/cursor-plugin](https://github.com/kernel/cursor-plugin). It bundles Kernel's hosted MCP server with a skill for using its tools. See that repo's README for install steps.
+the KERNEL plugin for Cursor lives in [kernel/cursor-plugin](https://github.com/kernel/cursor-plugin). it bundles KERNEL's hosted mcp server with a skill for using its tools. see that repo's README for install steps.
 
 ### Grok Build
 
-Install from the Grok Build plugin marketplace:
+install from the Grok Build plugin marketplace:
 
 ```bash
 /plugin  # search "kernel" and install
 ```
 
-The Grok plugin lives in [`grok/`](grok) and bundles Kernel's hosted MCP server with a skill for using its tools.
+the Grok plugin lives in [`grok/`](grok) and bundles KERNEL's hosted mcp server with a skill for using its tools.
 
-### Any Agent
+### any agent
 ```bash
 npx skills add kernel/skills
 ```
 
-### Manual Installation
+### manual installation
 
 ```bash
 git clone https://github.com/kernel/skills.git
@@ -62,66 +62,66 @@ cp -r skills/plugins/kernel-sdks ~/.claude/skills/
 cp -r skills/plugins/generate-video ~/.claude/skills/
 ```
 
-## Prerequisites
+## prerequisites
 
-Before using these skills, ensure you have:
+before using these skills, ensure you have:
 
-1. **Kernel CLI installed**:
+1. **KERNEL cli installed**:
    ```bash
    brew install kernel/tap/kernel
    ```
 
-2. **Authenticated with Kernel**:
+2. **authenticated with KERNEL**:
    ```bash
    export KERNEL_API_KEY=<api-key> or
    kernel login
    ```
 
-Once installed, your coding agent will automatically know how to use Kernel.
+once installed, your coding agent will automatically know how to use KERNEL.
 
-## Available Skills
+## available skills
 
 ### kernel-cli
 
-Command-line interface skills for using Kernel CLI commands.
+command-line interface skills for using KERNEL cli commands.
 
-| Skill | Description |
+| skill | description |
 |-------|-------------|
-| **kernel-cli** | Complete guide to Kernel CLI - cloud browser platform with automation, deployment, and management |
-| **kernel-agent-browser** | Best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
-| **create-agent-site-skill** | Build a new site-specific automation skill backed by a Kernel cloud browser, using Kernel's own CLI primitives by default |
+| **kernel-cli** | complete guide to KERNEL cli - cloud browser platform with automation, deployment, and management |
+| **kernel-agent-browser** | best practices for `agent-browser -p kernel` automation, bot detection handling, iframes, login persistence |
+| **create-agent-site-skill** | build a new site-specific automation skill backed by a KERNEL cloud browser, using KERNEL's own cli primitives by default |
 | **kernel-auth** | setup and manage KERNEL authentication connections for any website with safety checks and reauthentication support, plus per-user vault credentials through KERNEL-hosted collection or 1Password brokered approval |
-| **profile-website-bot-detection** | Profile a website for bot detection vendors using stealth vs non-stealth Kernel browsers; compare effectiveness and identify vendor products |
-| **debug-browser-session** | Systematically debug a Kernel browser session — VM issues, network errors, Chrome crashes, page-load failures, and live-view problems — using the Kernel CLI |
+| **profile-website-bot-detection** | profile a website for bot detection vendors using stealth vs non-stealth KERNEL browsers; compare effectiveness and identify vendor products |
+| **debug-browser-session** | systematically debug a KERNEL browser session — vm issues, network errors, Chrome crashes, page-load failures, and live-view problems — using the KERNEL cli |
 
 ### kernel-sdks
 
-SDK skills for building browser automation with TypeScript and Python.
+sdk skills for building browser automation with TypeScript and Python.
 
-| Skill | Description |
+| skill | description |
 |-------|-------------|
-| **typescript-sdk** | Build automation with Kernel's Typescript SDK |
-| **python-sdk** | Build automation with kernel's Python SDK |
+| **typescript-sdk** | build automation with KERNEL's TypeScript sdk |
+| **python-sdk** | build automation with KERNEL's Python sdk |
 
 ### generate-video
 
-Render smooth, deterministic MP4s from web scenes. No Kernel account required — just Chromium, Node, and ffmpeg.
+render smooth, deterministic mp4s from web scenes. no KERNEL account required — just Chromium, Node, and ffmpeg.
 
-| Skill | Description |
+| skill | description |
 |-------|-------------|
-| **generate-video** | Generate judder-free MP4 videos from web pages and animated visualizations: drive headless Chromium over CDP with an injected virtual clock, capture exact per-frame PNGs, encode with ffmpeg |
+| **generate-video** | generate judder-free mp4 videos from web pages and animated visualizations: drive headless Chromium over cdp with an injected virtual clock, capture exact per-frame pngs, encode with ffmpeg |
 
-## Documentation
+## documentation
 
-- [Kernel Documentation](https://www.kernel.sh/docs)
-- [CLI Reference](https://www.kernel.sh/docs/reference/cli)
-- [API Reference](https://www.kernel.sh/docs/api-reference)
-- [Quickstart Guide](https://www.kernel.sh/docs/quickstart)
+- [KERNEL documentation](https://www.kernel.sh/docs)
+- [cli reference](https://www.kernel.sh/docs/reference/cli)
+- [api reference](https://www.kernel.sh/docs/api-reference)
+- [quickstart guide](https://www.kernel.sh/docs/quickstart)
 
-## Support
+## support
 
-- [Discord Community](https://discord.gg/FBrveQRcud)
-- [GitHub Issues](https://github.com/kernel/skills/issues)
+- [Discord community](https://discord.gg/FBrveQRcud)
+- [GitHub issues](https://github.com/kernel/skills/issues)
 
-## License
+## license
 MIT
