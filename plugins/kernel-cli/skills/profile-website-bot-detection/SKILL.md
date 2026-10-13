@@ -73,6 +73,11 @@ KERNEL_BROWSER_ID="$NORMAL_ID" TARGET_URL="$TARGET_URL" BROWSER_MODE=normal npm 
 
 Each analyzer run disconnects its local CDP client after writing the report; it leaves the Kernel session active for comparison and cleanup.
 
+Two optional variables narrow what a run does:
+
+- `HOMEPAGE_ONLY=1` skips login-page discovery, so every run loads exactly the same page.
+- `USER_AGENT_MODE=selenium` rewrites the session's own `Chrome/<version>` product token to `HeadlessChrome/<same version>` before navigating. Only the user-agent string changes; platform, language, and client-hint metadata stay as the browser reports them. The override is applied over the same CDP connection the run navigates with, because it ends when that connection detaches — setting it from a separate `kernel browsers playwright execute` call would leave the run on the normal user agent. Check `metadata.userAgent.effective` in the report to confirm it took.
+
 ### Step 4: Compare Results
 
 Compare the newest report from each mode rather than concatenating multiple JSON documents:
@@ -230,8 +235,10 @@ The JSON report includes:
 - `vendorDetections`: Map of detected vendors with products, URLs, cookies, headers
 - `blockDetections`: Detailed block analysis for each page
 - `vendorScriptsDetected`: URLs of detected vendor scripts (not saved to disk)
-- `networkRequests/networkResponses`: All requests with vendor matching
+- `networkRequests/networkResponses`: All requests with vendor matching, each carrying `resourceType`, `isNavigationRequest`, and `isMainFrame` so main-frame traffic can be told apart from subresources
 - `cookies`: All cookies with vendor attribution
+- `document`: The loaded page — final URL, main-frame status, title, visible text, and full HTML. The status comes from the navigation response rather than `goto`, so it survives the `networkidle` timeout a block page usually causes
+- `metadata.userAgent`: The requested `mode` plus the `original` and `effective` user agent
 
 ## Vendor-Specific Detection Notes
 
