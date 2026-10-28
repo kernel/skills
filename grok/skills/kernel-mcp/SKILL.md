@@ -7,7 +7,7 @@ description: use KERNEL cloud browsers through the KERNEL mcp server. create ste
 
 the KERNEL mcp server gives you hosted chromium sessions. nothing runs on the user's machine. every browser is a cloud vm that you create, drive, and delete through mcp tools.
 
-on first use, grok opens a browser window so the user can sign in to KERNEL over oauth. during authorization the user can grant org-wide access or limit it to one KERNEL project.
+on first use, the user signs in to KERNEL over oauth in their browser. during authorization they can grant org-wide access or limit it to one KERNEL project.
 
 ## tools
 
