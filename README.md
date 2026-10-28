@@ -46,7 +46,7 @@ Install from the Grok Build plugin marketplace:
 /plugin  # search "kernel" and install
 ```
 
-The Grok plugin lives in [`grok/`](grok) and bundles Kernel's hosted MCP server with a skill for using its tools.
+The Grok plugin lives in [`grok/`](grok) and bundles Kernel's hosted MCP server with the [`kernel-mcp`](skills/kernel-mcp) skill for using its tools.
 
 ### Any Agent
 ```bash

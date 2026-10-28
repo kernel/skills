@@ -25,6 +25,13 @@
       ]
     },
     {
+      "title": "Kernel MCP",
+      "description": "Use Kernel cloud browsers through the hosted MCP server.",
+      "skills": [
+        "kernel-mcp"
+      ]
+    },
+    {
       "title": "Video",
       "description": "Render smooth MP4 videos from web pages.",
       "skills": [

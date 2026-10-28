@@ -1,13 +1,13 @@
 ---
 name: kernel-mcp
-description: use KERNEL cloud browsers through the KERNEL mcp server. create stealth browser sessions, automate pages with playwright, the browser repl, or computer-use actions, reuse logged-in profiles and managed auth connections, and record replays. use whenever a task needs a real browser, a site that blocks bots, a logged-in session, or screenshots of a live page.
+description: use KERNEL cloud browsers through the KERNEL mcp server. create cloud browser sessions, automate pages with playwright, the browser repl, or computer-use actions, reuse logged-in profiles and managed auth connections, and record replays. use whenever a task needs a real browser, a site that rejects ordinary automated clients, a logged-in session, or screenshots of a live page.
 ---
 
 # KERNEL mcp
 
 the KERNEL mcp server gives you hosted chromium sessions. nothing runs on the user's machine. every browser is a cloud vm that you create, drive, and delete through mcp tools.
 
-on first use, grok opens a browser window so the user can sign in to KERNEL over oauth. during authorization the user can grant org-wide access or limit it to one KERNEL project.
+on first use, the user signs in to KERNEL over oauth in their browser. during authorization they can grant org-wide access or limit it to one KERNEL project.
 
 ## tools
 
@@ -36,8 +36,8 @@ on first use, grok opens a browser window so the user can sign in to KERNEL over
 
 ## workflows
 
-### browse or scrape a page
-1. `manage_browsers` `create` with `stealth: true` if the site has bot detection.
+### browse a page and extract data
+1. `manage_browsers` `create`. set `stealth: true` to apply site-compatibility settings, only on sites the user is authorized to access.
 2. `execute_playwright_code` to navigate and extract:
    ```typescript
    await page.goto("https://news.ycombinator.com");
