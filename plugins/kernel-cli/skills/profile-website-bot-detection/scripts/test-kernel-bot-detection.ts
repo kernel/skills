@@ -8,6 +8,10 @@
  *   KERNEL_BROWSER_ID=<session_id> npm run analyze
  *   KERNEL_BROWSER_ID=<session_id> TARGET_URL=https://example.com npm run analyze
  *
+ * Optional:
+ *   USER_AGENT_MODE=selenium  Rewrite the Chrome product token to HeadlessChrome before navigating
+ *   HOMEPAGE_ONLY=1           Skip login page discovery
+ *
  * The script:
  * 1. Connects to an existing browser session via CDP
  * 2. Monitors network requests, responses, and cookies
@@ -27,6 +31,8 @@ interface Config {
   targetUrl: string;
   timeout: number;
   outputDir: string;
+  userAgentMode: 'unmodified' | 'selenium';
+  homepageOnly: boolean;
 }
 
 /**
@@ -78,6 +84,8 @@ const CONFIG: Config = {
   targetUrl: targetUrl,
   timeout: parseInt(process.env.TIMEOUT || '60000'),
   outputDir: outputDir,
+  userAgentMode: process.env.USER_AGENT_MODE === 'selenium' ? 'selenium' : 'unmodified',
+  homepageOnly: process.env.HOMEPAGE_ONLY === '1',
 };
 
 // Ensure output directory exists
@@ -111,6 +119,8 @@ interface NetworkRequestEntry {
   method: string;
   url: string;
   resourceType: string;
+  isNavigationRequest: boolean;
+  isMainFrame: boolean;
   headers: Record<string, string>;
   vendorMatch: VendorProduct | null;
 }
@@ -119,6 +129,9 @@ interface NetworkResponseEntry {
   timestamp: string;
   url: string;
   status: number;
+  resourceType: string;
+  isNavigationRequest: boolean;
+  isMainFrame: boolean;
   headers: Record<string, string>;
   vendorMatch: VendorProduct | null;
 }
@@ -175,6 +188,13 @@ interface CollectedData {
   errors: ErrorEntry[];
   screenshots: string[];
   metadata: Record<string, unknown>;
+  document: {
+    url: string;
+    status: number | null;
+    title: string;
+    text: string;
+    html: string;
+  } | null;
 }
 
 const collectedData: CollectedData = {
@@ -191,6 +211,7 @@ const collectedData: CollectedData = {
   errors: [],
   screenshots: [],
   metadata: {},
+  document: null,
 };
 
 /**
@@ -1198,6 +1219,16 @@ async function runTest(): Promise<void> {
       page = await context.newPage();
     }
 
+    // The override lives only as long as this CDP session, so it is applied on
+    // the same connection that navigates rather than in a separate call.
+    const originalUserAgent = await page.evaluate(() => navigator.userAgent);
+    if (CONFIG.userAgentMode === 'selenium') {
+      const cdp = await context.newCDPSession(page);
+      await cdp.send('Network.setUserAgentOverride', {
+        userAgent: originalUserAgent.replace(/(?:Headless)?Chrome\//, 'HeadlessChrome/'),
+      });
+    }
+
     // Monitor network requests for vendor detection
     page.on('request', (request: Request) => {
       const url = request.url();
@@ -1211,6 +1242,8 @@ async function runTest(): Promise<void> {
         method: request.method(),
         url: url,
         resourceType: request.resourceType(),
+        isNavigationRequest: request.isNavigationRequest(),
+        isMainFrame: request.frame() === page.mainFrame(),
         headers: headers,
         vendorMatch,
       };
@@ -1237,6 +1270,9 @@ async function runTest(): Promise<void> {
         timestamp: new Date().toISOString(),
         url: url,
         status: status,
+        resourceType: response.request().resourceType(),
+        isNavigationRequest: response.request().isNavigationRequest(),
+        isMainFrame: response.frame() === page.mainFrame(),
         headers: headers,
         vendorMatch,
       };
@@ -1309,6 +1345,13 @@ async function runTest(): Promise<void> {
 
     // Navigate to target
     log(`Navigating to ${CONFIG.targetUrl}...`);
+    // Block pages often never reach networkidle, so goto's own response can be lost.
+    let mainFrameStatus: number | null = null;
+    page.on('response', (response) => {
+      if (response.request().isNavigationRequest() && response.frame() === page.mainFrame()) {
+        mainFrameStatus = response.status();
+      }
+    });
     try {
       await page.goto(CONFIG.targetUrl, {
         waitUntil: 'networkidle',
@@ -1332,6 +1375,27 @@ async function runTest(): Promise<void> {
     collectedData.screenshots.push(homepageScreenshotPath);
     log(`Homepage screenshot saved to: ${homepageScreenshotPath}`);
 
+    const snapshot = await page.evaluate(() => ({
+      url: window.location.href,
+      title: document.title,
+      text: document.body?.innerText ?? '',
+      html: document.documentElement?.outerHTML ?? '',
+      userAgent: navigator.userAgent,
+    }));
+    collectedData.document = {
+      url: snapshot.url,
+      status: mainFrameStatus,
+      title: snapshot.title,
+      text: snapshot.text,
+      html: snapshot.html,
+    };
+    collectedData.metadata.userAgent = {
+      mode: CONFIG.userAgentMode,
+      original: originalUserAgent,
+      effective: snapshot.userAgent,
+    };
+    log(`User agent (${CONFIG.userAgentMode}): ${snapshot.userAgent}`);
+
     // Check if homepage is blocked
     log('Checking homepage for block page...');
     const homepageBlockStatus = await detectBlockPage(page);
@@ -1352,8 +1416,13 @@ async function runTest(): Promise<void> {
     }
 
     // Try to find and navigate to login page
-    log('\nLooking for login page...');
-    const loginUrl = await findLoginPage(page, CONFIG.targetUrl);
+    let loginUrl: string | null = null;
+    if (CONFIG.homepageOnly) {
+      log('\nHOMEPAGE_ONLY set, skipping login page discovery');
+    } else {
+      log('\nLooking for login page...');
+      loginUrl = await findLoginPage(page, CONFIG.targetUrl);
+    }
     
     if (loginUrl) {
       log(`Found login page: ${loginUrl}`);
@@ -1397,7 +1466,7 @@ async function runTest(): Promise<void> {
       } catch (e) {
         log(`Login page navigation completed with: ${(e as Error).message}`, 'WARN');
       }
-    } else {
+    } else if (!CONFIG.homepageOnly) {
       log('No login page found, continuing with homepage analysis only');
     }
 
