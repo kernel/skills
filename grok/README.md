@@ -15,7 +15,7 @@ grok plugin install kernel --trust
 | component | path | purpose |
 |---|---|---|
 | mcp server | `.mcp.json` | our hosted mcp server at `https://mcp.onkernel.com/mcp` (streamable http) |
-| skill | `skills/kernel-mcp/SKILL.md` | when and how grok should use the KERNEL mcp tools |
+| skill | `skills/kernel-mcp/SKILL.md` | when and how grok should use the KERNEL mcp tools. copied from the repo's top-level [`skills/kernel-mcp`](../skills/kernel-mcp); edit it there and run `scripts/sync-plugin-skills.sh` |
 
 ## auth and network access
 
