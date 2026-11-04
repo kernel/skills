@@ -34,6 +34,56 @@ Prefer **server-side Playwright** with `kernel.browsers.playwright.execute()` fo
 
 Use a **CDP connection** when a local library must control Playwright directly or when debugging interactively. Connect with `browser.cdp_ws_url` and reuse the browser's existing context.
 
+## Choose a Browser Config for a Site
+
+Before creating the first browser for a site, look up a configuration Kernel has already tested there. `lookup` is read-only: it does not visit the site or start any work. When there is no tested configuration yet, start an analysis with `resolve` and keep the stealth default for now. The analysis takes minutes, and its result answers the next lookup for that site.
+
+```typescript
+import { createHash } from "node:crypto";
+import { Kernel, NotFoundError } from "@onkernel/sdk";
+
+const kernel = new Kernel();
+
+// A managed recipe is a create payload. Create each recipe once under a stable name and reuse it.
+async function registryProxy(create: Kernel.ProxyCreateParams) {
+  const name = `registry-${createHash("sha256").update(JSON.stringify(create)).digest("hex").slice(0, 12)}`;
+  try {
+    return await kernel.proxies.retrieve(name);
+  } catch (err) {
+    if (!(err instanceof NotFoundError)) throw err;
+    return kernel.proxies.create({ ...create, name });
+  }
+}
+
+async function browserConfigFor(url: string, intent: string): Promise<Kernel.BrowserCreateParams> {
+  const { recommendation } = await kernel.configRegistry.lookup({ url });
+  if (recommendation?.type === "recommendation") {
+    const proxy =
+      recommendation.proxy.mode === "managed"
+        ? { id: (await registryProxy(recommendation.proxy.create)).id }
+        : { mode: "direct" as const };
+    return { ...recommendation.browser, proxy };
+  }
+  // No tested config yet: start an analysis without waiting. It takes minutes,
+  // and its result answers the next lookup for this site.
+  await kernel.configRegistry.resolve({ url, intent });
+  return { stealth: true };
+}
+
+const config = await browserConfigFor(
+  "https://www.example.com/",
+  "search for a product and open the first result",
+);
+const session = await kernel.browsers.create({ ...config, timeout_seconds: 300 });
+// Automate, then delete the session in `finally` as shown below.
+```
+
+- Look up once per site and reuse the config for that site's sessions; there is no need to look up before every action.
+- Never create a proxy per session. The stable name lets later runs reuse the proxy the first run created.
+- `intent` describes the workflow in plain language. The analysis attempts it and returns `guidance` on what got in the way; `lookup` returns the same `guidance` when it has some, even without a recommendation.
+- Pass `allowed_proxy_countries` to `lookup` and `resolve` when traffic must exit from specific countries.
+- The config registry needs a Hobbyist plan or higher. Without it, `lookup` returns 403; keep `{ stealth: true }`.
+
 ## Server-Side Playwright Lifecycle
 
 Always delete a created session in `finally`. The idle timeout is a safety net, not the normal cleanup path.

@@ -1,6 +1,6 @@
 ---
 name: kernel-proxies
-description: Create and manage datacenter, ISP, residential, mobile, and custom proxies for browsers
+description: Create and manage ISP, residential, mobile, and custom proxies for browsers
 ---
 
 # Proxies
@@ -17,23 +17,12 @@ Load the `kernel-cli` skill for Kernel CLI installation and authentication.
 
 ## Proxy Types
 
-1. **Datacenter** - Traffic routed through commercial data centers (fastest speed)
-2. **ISP** - Traffic routed through data centers, using residential IP addresses leased from ISPs (balance between speed and detection)
-3. **Residential** - Traffic routed through real residential IP addresses (least detectable)
-4. **Mobile** - Traffic routed through mobile carrier networks
-5. **Custom** - Your own proxy servers
+1. **ISP** - Traffic routed through data centers, using residential IP addresses leased from ISPs (balance between speed and detection)
+2. **Residential** - Traffic routed through real residential IP addresses (least detectable)
+3. **Mobile** - Traffic routed through mobile carrier networks
+4. **Custom** - Your own proxy servers
 
 ## Create Proxies
-
-### Datacenter Proxy
-
-```bash
-# Create datacenter proxy
-kernel proxies create --type datacenter --country US --name "US DC"
-
-# With protocol specification
-kernel proxies create --type datacenter --country US --protocol https
-```
 
 ### ISP Proxy
 
