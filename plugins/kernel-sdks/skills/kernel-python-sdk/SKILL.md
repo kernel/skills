@@ -89,6 +89,55 @@ asyncio.run(main())
 
 Reuse the existing default context so pages see the Kernel session's loaded profile state; a new incognito context does not share that state. The SDK client context closes HTTP connections, but it does **not** replace deleting the remote browser.
 
+## Choose a Browser Config for a Site
+
+Before creating the first browser for a site, look up a configuration Kernel has already tested there. `lookup` is read-only: it does not visit the site or start any work. When there is no tested configuration yet, start an analysis with `resolve` and keep the stealth default for now. The analysis takes minutes, and its result answers the next lookup for that site.
+
+```python
+import hashlib
+import json
+
+from kernel import Kernel, NotFoundError
+
+
+def registry_proxy_id(client: Kernel, create) -> str:
+    # A managed recipe is a create payload. Create each recipe once under a stable name and reuse it.
+    payload = create.model_dump(exclude_none=True)
+    name = "registry-" + hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:12]
+    try:
+        return client.proxies.retrieve(name).id
+    except NotFoundError:
+        return client.proxies.create(**{**payload, "name": name}).id
+
+
+def browser_config_for(client: Kernel, url: str, intent: str) -> dict:
+    recommendation = client.config_registry.lookup(url=url).recommendation
+    if recommendation and recommendation.type == "recommendation":
+        if recommendation.proxy.mode == "managed":
+            proxy = {"id": registry_proxy_id(client, recommendation.proxy.create)}
+        else:
+            proxy = {"mode": "direct"}
+        return {**recommendation.browser.model_dump(exclude_none=True), "proxy": proxy}
+    # No tested config yet: start an analysis without waiting. It takes minutes,
+    # and its result answers the next lookup for this site.
+    client.config_registry.resolve(url=url, intent=intent)
+    return {"stealth": True}
+
+
+with Kernel() as client:
+    config = browser_config_for(
+        client, "https://www.example.com/", "search for a product and open the first result"
+    )
+    browser = client.browsers.create(**config, timeout_seconds=300)
+    # Automate, then delete the browser in `finally` as shown below.
+```
+
+- Look up once per site and reuse the config for that site's sessions; there is no need to look up before every action.
+- Never create a proxy per session. The stable name lets later runs reuse the proxy the first run created.
+- `intent` describes the workflow in plain language. The analysis attempts it and returns `guidance` on what got in the way; `lookup` returns the same `guidance` when it has some, even without a recommendation.
+- Pass `allowed_proxy_countries` to `lookup` and `resolve` when traffic must exit from specific countries.
+- The config registry needs a Hobbyist plan or higher. Without it, `lookup` returns 403; keep `{"stealth": True}`.
+
 ## Browser Lifecycle and Cleanup
 
 - Wrap every created or acquired session in `try/finally` immediately after creation.
@@ -132,7 +181,7 @@ Attach an explicit proxy at creation with `proxy_id`:
 
 ```python
 proxy = client.proxies.create(
-    type="datacenter",
+    type="isp",
     config={"country": "US"},
     name="automation-us",
 )

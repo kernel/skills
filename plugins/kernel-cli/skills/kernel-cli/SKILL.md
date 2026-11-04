@@ -41,6 +41,29 @@ kernel browsers computer screenshot <session_id> --to screenshot.png
 kernel browsers delete <session_id>
 ```
 
+## Choose a Browser Config for a Site
+
+Before creating the first browser for a site, look up a configuration Kernel has already tested there. The CLI has no config registry command, so call the API with `KERNEL_API_KEY`. `lookup` is read-only.
+
+```bash
+TARGET_URL='https://www.example.com/'
+curl -sS -X POST https://api.onkernel.com/config-registry/lookup \
+  -H "Authorization: Bearer $KERNEL_API_KEY" -H "Content-Type: application/json" \
+  -d "$(jq -n --arg url "$TARGET_URL" '{url: $url}')" | jq '{recommendation, guidance}'
+```
+
+Map a recommendation to `kernel browsers create` flags: `browser.stealth` to `--stealth`, `browser.headless` to `--headless`, `browser.gpu` to `--gpu`, and `browser.viewport` to `--viewport WIDTHxHEIGHT@RATE` (omit `@RATE` when there is no `refresh_rate`). For `proxy.mode: "managed"`, create the proxy from `proxy.create` once, for example `kernel proxies create --type isp --country US`, and pass its ID with `--proxy-id` on every browser. For `proxy.mode: "direct"`, pass `--proxy-mode direct`.
+
+When `recommendation` is null or its `type` is `no_recommendation`, start an analysis and create the browser with `--stealth` for now. The analysis takes minutes, and its result answers the next lookup:
+
+```bash
+curl -sS -X POST https://api.onkernel.com/config-registry/resolve \
+  -H "Authorization: Bearer $KERNEL_API_KEY" -H "Content-Type: application/json" \
+  -d "$(jq -n --arg url "$TARGET_URL" --arg intent 'search for a product and open the first result' '{url: $url, intent: $intent}')" | jq '.analysis'
+```
+
+The config registry needs a Hobbyist plan or higher.
+
 ## Safe Operation
 
 - Prefer `-o json` plus `jq` for scripts; deploy and invoke emit JSONL rather than one JSON object.
@@ -76,7 +99,7 @@ Rotate an API key interactively with `kernel api-keys rotate <id>`. Use `--days-
 - [Process Execution](./references/process-execution.md) - Execute and manage processes in browser VMs
 - [Profiles](./references/profiles.md) - Manage persistent browser profiles
 - [Managed Auth](./references/managed-auth.md) - Auth connections, login sessions, credential providers, auto re-authentication
-- [Proxies](./references/proxies.md) - Create and manage datacenter, ISP, residential, and mobile proxies
+- [Proxies](./references/proxies.md) - Create and manage ISP, residential, mobile, and custom proxies
 - [Browser Pools](./references/browser-pools.md) - Manage pre-warmed browser pools
 - [Extensions](./references/extensions.md) - Upload and manage Chrome extensions
 - [Replays](./references/replays.md) - Record and download video replays

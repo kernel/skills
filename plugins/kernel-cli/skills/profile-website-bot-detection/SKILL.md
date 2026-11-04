@@ -1,16 +1,16 @@
 ---
 name: profile-website-bot-detection
-description: Profile a website for bot detection vendors using stealth vs non-stealth Kernel browsers. Use when analyzing bot detection on a website, comparing stealth effectiveness, identifying anti-bot vendors and products, or detecting challenge types.
+description: Profile a website for bot detection vendors using stealth vs non-stealth Kernel browsers, and check Kernel's config registry for a tested configuration. Use when analyzing bot detection on a website, comparing stealth effectiveness, identifying anti-bot vendors and products, detecting challenge types, or finding a browser configuration that gets through.
 ---
 
 # Profile Website for Bot Detection Vendors
 
-Analyzes a target website to identify bot detection vendors, their specific products, and challenge types. Supports comparative analysis between stealth and non-stealth browser modes.
+Analyzes a target website to identify bot detection vendors, their specific products, and challenge types. Supports comparative analysis between stealth and non-stealth browser modes. Checks Kernel's config registry for a configuration already tested on the site, and starts an analysis when there isn't one.
 
 ## Prerequisites
 
 - Kernel CLI installed and authenticated
-- Bash, Node.js 22+, and `jq` installed
+- Bash, Node.js 22+, `curl`, and `jq` installed
 - `KERNEL_API_KEY` exported for the analysis script; never print it or ask the user to paste it into chat
 
 ## Comparative Workflow (Recommended)
@@ -26,7 +26,15 @@ cd scripts
 npm install  # first run only
 export TARGET_URL='https://example.com'
 test -n "${KERNEL_API_KEY:-}" || { echo "KERNEL_API_KEY is not set" >&2; exit 1; }
+
+# Check the config registry for a configuration Kernel has already tested on this site.
+REGISTRY_JSON=$(curl -sS -X POST https://api.onkernel.com/config-registry/lookup \
+  -H "Authorization: Bearer $KERNEL_API_KEY" -H "Content-Type: application/json" \
+  -d "$(jq -n --arg url "$TARGET_URL" '{url: $url}')")
+echo "$REGISTRY_JSON" | jq '{recommendation: (.recommendation | if .type == "recommendation" then {browser, proxy, evidence: (.evidence | {success_rate, run_count, last_observed_at})} else . end), guidance}'
 ```
+
+`lookup` is read-only and needs a Hobbyist plan or higher. Keep `REGISTRY_JSON` for Step 6.
 
 ### Step 2: Create Both Browser Types and Arm Cleanup
 
@@ -112,6 +120,19 @@ echo "=== NORMAL VENDORS ===" && jq '.summary.vendorNames' "$NORMAL_REPORT"
 
 After running the comparative analysis, state the network design explicitly. Claim stealth effectiveness only when both sessions used the same network class.
 
+If the registry had no recommendation and either browser was blocked, start an analysis so a tested configuration exists for the next run. It takes minutes; report the analysis ID and rerun the Step 1 lookup later:
+
+```bash
+NO_RECOMMENDATION=$(echo "$REGISTRY_JSON" | jq '.recommendation.type != "recommendation"')
+ANY_BLOCKED=$(jq -s 'any(.[]; .summary.isBlocked)' "$STEALTH_REPORT" "$NORMAL_REPORT")
+if [[ "$NO_RECOMMENDATION" == true && "$ANY_BLOCKED" == true ]]; then
+  curl -sS -X POST https://api.onkernel.com/config-registry/resolve \
+    -H "Authorization: Bearer $KERNEL_API_KEY" -H "Content-Type: application/json" \
+    -d "$(jq -n --arg url "$TARGET_URL" --arg intent 'load the homepage and the login page' '{url: $url, intent: $intent}')" \
+    | jq '.analysis | {id, status}'
+fi
+```
+
 **Summary Report Template:**
 
 ```
@@ -134,10 +155,14 @@ After running the comparative analysis, state the network design explicitly. Cla
 |--------|---------|--------|----------|
 | [vendor] | ✓/✗ | ✓/✗ | [product list] |
 
+### Recommended Configuration
+- **Config Registry**: [recommended browser and proxy, with run count, success rate, and last observed date; or "none yet"]
+- **Analysis Started**: [analysis ID, or "not needed"]
+
 ### Analysis
 - [Explain what the results mean]
 - [Note any differences between stealth and normal]
-- [Recommend next steps if blocked]
+- [Recommend next steps if blocked: the registry configuration, or the Step 1 lookup once the analysis finishes]
 
 ### Key Findings
 1. [Finding 1]
