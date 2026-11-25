@@ -1,11 +1,11 @@
 ---
 name: profile-website-bot-detection
-description: Profile a website for bot detection vendors using stealth vs non-stealth Kernel browsers, and check Kernel's config registry for a tested configuration. Use when analyzing bot detection on a website, comparing stealth effectiveness, identifying anti-bot vendors and products, detecting challenge types, or finding a browser configuration that gets through.
+description: Identify which protection system a website runs and what kind of checks it serves, by comparing two KERNEL browser configurations against it, then check KERNEL's config registry for settings that have worked on that site. Use when diagnosing why a page won't load for an agent, identifying the protection system and challenge type on a site, or finding a tested configuration before you build against it.
 ---
 
-# Profile Website for Bot Detection Vendors
+# Profile a website's protection system
 
-Analyzes a target website to identify bot detection vendors, their specific products, and challenge types. Supports comparative analysis between stealth and non-stealth browser modes. Checks Kernel's config registry for a configuration already tested on the site, and starts an analysis when there isn't one.
+Identifies the protection system a site runs, the specific product, and the kind of check it serves. Compares two browser configurations against the same site so you can see which one the site serves normally. This is diagnosis: it reports what the site does, it doesn't work around it. Checks Kernel's config registry for a configuration already tested on the site, and starts an analysis when there isn't one.
 
 ## Prerequisites
 
